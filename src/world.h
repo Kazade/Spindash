@@ -27,4 +27,6 @@ private:
     std::vector<Triangle> triangles_;
 };
 
+extern World* get_world_by_id(KPuint world);
+
 #endif

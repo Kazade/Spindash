@@ -1,4 +1,5 @@
 #include <map>
+#include <GL/gl.h>
 #include <boost/shared_ptr.hpp>
 
 #include "world.h"
@@ -20,7 +21,7 @@ void World::get_gravity(float& x, float& y) {
 }
 
 void World::debug_render() {
-    float colours [] = {
+    float colours [10][3] = {
         { 1.0f, 0.0f, 0.0f},
         { 0.0f, 1.0f, 0.0f},
         { 0.0f, 0.0f, 1.0f},
@@ -35,6 +36,9 @@ void World::debug_render() {
 
     int colour_counter = 0;
 
+    glPushAttrib(~0);
+    glDisable(GL_TEXTURE_2D);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPushMatrix();
         glBegin(GL_TRIANGLES);
         for(unsigned int i = 0; i < triangles_.size(); ++i) {
@@ -47,6 +51,7 @@ void World::debug_render() {
         }
         glEnd();
     glPopMatrix();
+    glPopAttrib();
 }
 
 void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
@@ -122,7 +127,7 @@ void kpWorldAddTriangle(KPuint world_id, KPvec2* points) {
     world->add_triangle(kpTokm(points[0]), kpTokm(points[1]), kpTokm(points[2]));
 }
 
-void kpWorldDebugRenderGL(KPuint world) {
+void kpWorldDebugRenderGL(KPuint world_id) {
     World* world = get_world_by_id(world_id);
     if(!world) {
         //Log error

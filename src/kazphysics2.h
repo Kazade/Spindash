@@ -19,8 +19,9 @@ typedef enum KPenum {
     KP_ENTITY_MAX_SPEED,
     KP_ENTITY_MIN_SPEED,
     KP_ENTITY_VELOCITY,
-    KP_COLLISION_RAY_TYPE,
-    KP_COLLISION_SPHERE_TYPE
+    KP_COLLISION_CHARACTER_RAY_TYPE, //Sonic/Mario style character
+    KP_COLLISION_CIRCLE_TYPE, //Sonic ring style object
+    KP_COLLISION_BOX_TYPE //
 } KPenum;
 
 KPuint kpCreateWorld();
