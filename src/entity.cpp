@@ -1,6 +1,9 @@
+#include <map>
+#include <boost/shared_ptr.hpp>
 #include "entity.h"
 #include "world.h"
 
+KPuint Entity::entity_id_counter_ = 0;
 static std::map<KPuint, boost::shared_ptr<Entity> > entities_;
 
 KPuint kpCreateEntity(KPuint world_id) {
