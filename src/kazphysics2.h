@@ -33,9 +33,9 @@ void kpWorldParameterfv(KPuint world, KPenum pname, KPfloat* param);
 void kpDestroyWorld(KPuint world);
 
 KPuint kpCreateEntity(KPuint world);
-void kpEntityParameterfv(KPuint entity, KPenum pname, KPfloat* param);
-void kpEntityParameteru(KPuint entity, KPenum pname, KPenum param);
-
+void kpBindEntity(KPuint entity_id);
+void kpEntityParameterfv(KPenum pname, KPfloat* param);
+void kpEntityParameteru(KPenum pname, KPenum param);
 void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut);
 
 void kpDestroyEntity(KPuint entity);

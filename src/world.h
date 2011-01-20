@@ -18,6 +18,7 @@ public:
     void get_gravity(float& x, float& y);
 
     void add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3);
+    void add_entity(KPuint entity_id) { entities_.push_back(entity_id); }
 
     void debug_render();
 private:
@@ -25,6 +26,7 @@ private:
     kmVec2 gravity_;
 
     std::vector<Triangle> triangles_;
+    std::vector<KPuint> entities_;
 };
 
 extern World* get_world_by_id(KPuint world);

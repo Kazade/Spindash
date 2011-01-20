@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
                           {10.0f, 0.0f},
                           {0.0f, -5.0f} };
 
-    KPvec2 size[2] = { 0.5f, 1.0f };
-    KPvec2 ent_gravity[2] { 0.0f, -1.0f };
+    KPvec2 size = { 0.5f, 1.0f };
+    KPvec2 ent_gravity = { 0.0f, -1.0f };
 
     kpWorldAddTriangle(world, points);
 
