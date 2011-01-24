@@ -21,6 +21,11 @@ public:
     void add_entity(KPuint entity_id) { entities_.push_back(entity_id); }
 
     void debug_render();
+
+    void update(float step);
+
+    KPuint get_triangle_count() const { return triangles_.size(); }
+    Triangle* get_triangle_at(KPuint i) { return &triangles_[i]; }
 private:
     KPuint id_;
     kmVec2 gravity_;

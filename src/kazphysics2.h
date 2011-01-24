@@ -21,7 +21,9 @@ typedef enum KPenum {
     KP_ENTITY_VELOCITY,
     KP_COLLISION_CHARACTER_RAY_TYPE, //Sonic/Mario style character
     KP_COLLISION_CIRCLE_TYPE, //Sonic ring style object
-    KP_COLLISION_BOX_TYPE //
+    KP_COLLISION_BOX_TYPE,
+    KP_ENTITY_COLLISION_RAY_A,
+    KP_ENTITY_COLLISION_RAY_B
 } KPenum;
 
 KPuint kpCreateWorld();
@@ -37,7 +39,6 @@ void kpBindEntity(KPuint entity_id);
 void kpEntityParameterfv(KPenum pname, KPfloat* param);
 void kpEntityParameteru(KPenum pname, KPenum param);
 void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut);
-
 void kpDestroyEntity(KPuint entity);
 
 /*

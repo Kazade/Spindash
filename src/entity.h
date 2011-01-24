@@ -1,11 +1,20 @@
 #ifndef ENTITY_H_INCLUDED
 #define ENTITY_H_INCLUDED
 
+#include <vector>
 #include <kazmath/kazmath.h>
 
 #include "kazphysics2.h"
 
 class World;
+
+struct CollisionInfo {
+    kmVec2 intersection;
+    kmVec2 surface_normal;
+    double distance;
+    char identifier;
+    kmRay2 ray;
+};
 
 class Entity {
 public:
@@ -34,19 +43,36 @@ public:
         return (*it).second;
     }
 
+    kmVec2 get_position() const { return position_; }
+    void set_position(float x, float y) {
+        position_.x = x;
+        position_.y = y;
+    }
+
+    kmRay2 get_ray_a() const { return ra_; }
+    kmRay2 get_ray_b() const { return rb_; }
+
 private:
+    kmRay2 ra_, rb_;
+
+    void clear_collisions();
+    void process_collisions();
+    void collide_with_world();
+    void apply_gravity(double step);
+
     World* world_;
 
-    float acc_;
-    float dec_;
     float frc_;
     float angle_;
+    float gsp_;
 
     kmVec2 position_;
     kmVec2 speed_;
     kmVec2 size_;
 
     std::map<KPuint, bool> flags_;
+
+    std::vector<CollisionInfo> collisions_;
 };
 
 #endif // ENTITY_H_INCLUDED

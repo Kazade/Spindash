@@ -1,7 +1,7 @@
 #include <map>
 #include <GL/gl.h>
 #include <boost/shared_ptr.hpp>
-
+#include "kp_private.h"
 #include "world.h"
 
 KPuint World::world_id_counter_ = 0;
@@ -51,7 +51,38 @@ void World::debug_render() {
         }
         glEnd();
     glPopMatrix();
+
+    for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
+        glPushMatrix();
+            kpBindEntity((*it));
+            float pos[2];
+            kpEntityGetFloatfv(KP_ENTITY_POSITION, pos);
+            glBegin(GL_POINTS);
+                glVertex2f(pos[0], pos[1]);
+            glEnd();
+
+            float ray[4];
+            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_A, ray);
+            glBegin(GL_LINES);
+                glVertex2f(ray[0], ray[1]);
+                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
+            glEnd();
+
+            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_B, ray);
+            glBegin(GL_LINES);
+                glVertex2f(ray[0], ray[1]);
+                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
+            glEnd();
+        glPopMatrix();
+    }
     glPopAttrib();
+}
+
+void World::update(float step) {
+    for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
+        kpBindEntity((*it));
+        kpEntityUpdate(step);
+    }
 }
 
 void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
@@ -125,6 +156,16 @@ void kpWorldAddTriangle(KPuint world_id, KPvec2* points) {
     }
 
     world->add_triangle(kpTokm(points[0]), kpTokm(points[1]), kpTokm(points[2]));
+}
+
+void kpWorldStep(KPuint world_id, KPfloat dt) {
+    World* world = get_world_by_id(world_id);
+    if(!world) {
+        //Log error
+        return;
+    }
+
+    world->update(dt);
 }
 
 void kpWorldDebugRenderGL(KPuint world_id) {

@@ -32,14 +32,16 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Linker>
-			<Add library="Kazmath" />
+			<Add library="kazmath" />
 			<Add library="SDL" />
 			<Add library="GL" />
 			<Add library="GLU" />
+			<Add library="kaztimer" />
 		</Linker>
 		<Unit filename="../src/entity.cpp" />
 		<Unit filename="../src/entity.h" />
 		<Unit filename="../src/kazphysics2.h" />
+		<Unit filename="../src/kp_private.h" />
 		<Unit filename="../src/main.c">
 			<Option compilerVar="CPP" />
 		</Unit>
