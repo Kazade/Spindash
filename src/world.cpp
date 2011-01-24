@@ -115,11 +115,24 @@ World* get_world_by_id(KPuint world) {
     return worlds_[world].get();
 }
 
+/**
+    @brief Creates a new physical world
+
+    This function creates an empty world ready to start accepting
+    new entities and polygons.
+*/
 KPuint kpCreateWorld() {
     KPuint new_id = ++World::world_id_counter_;
     worlds_[new_id].reset(new World(new_id));
     return new_id;
 }
+
+/** \brief Destroys a world
+ *
+ * \param world - The world to destroy
+ *
+ * Destroys a world and its contents (polygons, entities etc.)
+ */
 
 void kpDestroyWorld(KPuint world) {
     if(worlds_.find(world) == worlds_.end()) {

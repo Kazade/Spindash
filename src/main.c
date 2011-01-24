@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     KTIuint timer;
     ktiGenTimers(1, &timer);
     ktiBindTimer(timer);
-    ktiStartFixedStepTimer(60);
+    ktiStartGameTimer();
 
     KPuint world = kpCreateWorld();
     kpWorldParameterfv(world, KP_WORLD_GRAVITY, gravity);
@@ -78,9 +78,7 @@ int main(int argc, char** argv) {
         glLoadIdentity();
         glTranslatef(0.0f, 0.0f, -20.0f);
 
-        while(ktiTimerCanUpdate()) {
-            kpWorldStep(world, ktiGetDeltaTime());
-        }
+        kpWorldStep(world, 0.0001f);
         kpWorldDebugRenderGL(world);
 
         SDL_GL_SwapBuffers();

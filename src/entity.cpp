@@ -28,7 +28,8 @@ Entity* get_bound_entity() {
 
 Entity::Entity():
     frc_(DEFAULT_FRC),
-    angle_(0.0f) {
+    angle_(0.0f),
+    gsp_(0.0f) {
 
     kmVec2Fill(&position_, 0.0f, 0.0f);
     kmVec2Fill(&speed_, 0.0f, 0.0f);
@@ -44,6 +45,7 @@ void Entity::collide_with_world() {
 
     kmVec2 ra_pos, ra_dir;
     kmVec2 rb_pos, rb_dir;
+    kmVec2 rz_pos, rz_dir;
 
     kmMat3 rot_matrix;
     kmMat3RotationZ(&rot_matrix, kmDegreesToRadians(angle_));
@@ -54,11 +56,17 @@ void Entity::collide_with_world() {
     kmVec2Fill(&rb_pos, x_ray_offset, 0.0f);
     kmVec2Fill(&rb_dir, 0.0f, -size_.y / 2.0f);
 
+    kmVec2Fill(&rz_pos, 0.0f, 0.0f); //Directly down
+    kmVec2Fill(&rz_dir, 0.0f, -size_.y / 2.0f);
+
     kmVec2Transform(&ra_pos, &ra_pos, &rot_matrix);
     kmVec2Transform(&ra_dir, &ra_dir, &rot_matrix);
 
     kmVec2Transform(&rb_pos, &rb_pos, &rot_matrix);
     kmVec2Transform(&rb_dir, &rb_dir, &rot_matrix);
+
+    kmVec2Transform(&rz_pos, &rz_pos, &rot_matrix);
+    kmVec2Transform(&rz_dir, &rz_dir, &rot_matrix);
 
     ra_.start = ra_pos;
     kmVec2Add(&ra_.start, &ra_.start, &position_);
@@ -134,6 +142,46 @@ void Entity::collide_with_world() {
         */
 }
 
+void Entity::calculate_angle() {
+    using namespace boost::lambda;
+    /*
+        We calculate the angle as follows:
+
+        1. Look for downwards collisions, if there is one use that
+        2. If there are two, use the one with highest intersection (greatest Y)
+        3. Only change the angle if the difference > 10 degrees
+    */
+
+    std::vector<CollisionInfo> down_collisions;
+
+    for(KPuint i = 0; i < collisions_.size(); ++i) {
+        //Store all downward collisions
+        if(collisions_[i].identifier == 'A' || collisions_[i].identifier == 'B') {
+            down_collisions.push_back(collisions_[i]);
+        }
+    }
+
+    if(!down_collisions.empty()){
+        CollisionInfo* highest;
+        float max_y = -10000.0f;
+
+        for(KPuint i = 0; i < down_collisions.size(); ++i) {
+            if(down_collisions[i].intersection.y > max_y) {
+                highest = &down_collisions[i];
+                max_y = highest->intersection.y;
+            }
+        }
+
+        kmVec2 up = { 0.0f, 1.0f };
+        float new_angle = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &highest->surface_normal)));
+        if(fabs(new_angle - angle_) >= 10.0f) {
+            angle_ = new_angle;
+        }
+    } else {
+        angle_ = 0.0f;
+    }
+}
+
 void Entity::process_collisions() {
     using namespace boost::lambda;
 
@@ -158,13 +206,12 @@ void Entity::process_collisions() {
 
         CollisionInfo& info = down_collisions[0]; //Get the closest collision
         kmVec2 offset_vector;
-        float offset_length = kmVec2Length(&info.ray.dir) - info.distance;
+        float offset_length = (kmVec2Length(&info.ray.dir) - info.distance);
         kmVec2Scale(&offset_vector, &info.surface_normal, offset_length);
         kmVec2Add(&position_, &position_, &offset_vector);
-
-        kmVec2 up = { 0.0f, 1.0f };
-        angle_ = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &info.surface_normal)));
     }
+
+    calculate_angle();
 }
 
 void Entity::apply_gravity(double step) {
@@ -187,9 +234,9 @@ void Entity::update(double step) {
     collide_with_world();
     process_collisions();
 
-    gsp_ += DEFAULT_SLP * step * sin(kmDegreesToRadians(angle_));
-
     if(get_flag(ON_GROUND)) {
+        gsp_ += DEFAULT_SLP * sin(kmDegreesToRadians(angle_)) * step;
+
         //Apply ground friction
         gsp_ = gsp_ - std::min(fabs(gsp_), DEFAULT_FRC * step) * sign(gsp_);
     }
