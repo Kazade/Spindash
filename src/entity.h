@@ -59,7 +59,7 @@ private:
     void process_collisions();
     void collide_with_world();
     void apply_gravity(double step);
-    void calculate_angle();
+    void calculate_angle(CollisionInfo* a, CollisionInfo* b);
 
     World* world_;
 

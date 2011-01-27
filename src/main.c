@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         glLoadIdentity();
         glTranslatef(0.0f, 0.0f, -20.0f);
 
-        kpWorldStep(world, 0.0001f);
+        kpWorldStep(world, 0.008f);
         kpWorldDebugRenderGL(world);
 
         SDL_GL_SwapBuffers();

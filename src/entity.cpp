@@ -45,28 +45,21 @@ void Entity::collide_with_world() {
 
     kmVec2 ra_pos, ra_dir;
     kmVec2 rb_pos, rb_dir;
-    kmVec2 rz_pos, rz_dir;
 
     kmMat3 rot_matrix;
     kmMat3RotationZ(&rot_matrix, kmDegreesToRadians(angle_));
 
     kmVec2Fill(&ra_pos, -x_ray_offset, 0.0f);
-    kmVec2Fill(&ra_dir, 0.0f, -size_.y / 2.0f);
+    kmVec2Fill(&ra_dir, 0.0f, -size_.y * 0.9f);
 
     kmVec2Fill(&rb_pos, x_ray_offset, 0.0f);
-    kmVec2Fill(&rb_dir, 0.0f, -size_.y / 2.0f);
-
-    kmVec2Fill(&rz_pos, 0.0f, 0.0f); //Directly down
-    kmVec2Fill(&rz_dir, 0.0f, -size_.y / 2.0f);
+    kmVec2Fill(&rb_dir, 0.0f, -size_.y * 0.9f);
 
     kmVec2Transform(&ra_pos, &ra_pos, &rot_matrix);
     kmVec2Transform(&ra_dir, &ra_dir, &rot_matrix);
 
     kmVec2Transform(&rb_pos, &rb_pos, &rot_matrix);
     kmVec2Transform(&rb_dir, &rb_dir, &rot_matrix);
-
-    kmVec2Transform(&rz_pos, &rz_pos, &rot_matrix);
-    kmVec2Transform(&rz_dir, &rz_dir, &rot_matrix);
 
     ra_.start = ra_pos;
     kmVec2Add(&ra_.start, &ra_.start, &position_);
@@ -142,8 +135,33 @@ void Entity::collide_with_world() {
         */
 }
 
-void Entity::calculate_angle() {
+void Entity::calculate_angle(CollisionInfo* a, CollisionInfo* b) {
     using namespace boost::lambda;
+
+    float new_angle = 0.0f;
+    if(a && b) {
+        kmMat3 rot;
+        kmMat3RotationZ(&rot, kmDegreesToRadians(-90.0f));
+        kmVec2 dir;
+        kmVec2Subtract(&dir, &b->intersection, &a->intersection);
+        kmVec2Transform(&dir, &dir, &rot);
+        kmVec2Normalize(&dir, &dir);
+
+        kmVec2 up = { 0.0f, 1.0f };
+        new_angle = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &dir)));
+
+    } else if (a || b) {
+        CollisionInfo* t = (a) ? a : b;
+
+        kmVec2 up = { 0.0f, 1.0f };
+        new_angle = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &t->surface_normal)));
+
+    }
+
+    angle_ = new_angle;
+
+    return;
+
     /*
         We calculate the angle as follows:
 
@@ -185,33 +203,74 @@ void Entity::calculate_angle() {
 void Entity::process_collisions() {
     using namespace boost::lambda;
 
-    std::vector<CollisionInfo> down_collisions;
+    std::vector<CollisionInfo> a_collisions, b_collisions;
 
     for(KPuint i = 0; i < collisions_.size(); ++i) {
         //Store all downward collisions
-        if(collisions_[i].identifier == 'A' || collisions_[i].identifier == 'B') {
-            down_collisions.push_back(collisions_[i]);
+        if(collisions_[i].identifier == 'A') {
+            a_collisions.push_back(collisions_[i]);
+        } else if(collisions_[i].identifier == 'B') {
+            b_collisions.push_back(collisions_[i]);
         }
     }
 
     //Sort them by distance
-    std::sort(down_collisions.begin(), down_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(a_collisions.begin(), a_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(b_collisions.begin(), b_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
 
-    if(down_collisions.empty()) {
-        //If there weren't any, we're not on the ground
-        set_flag(ON_GROUND, false);
-    } else {
+    set_flag(ON_GROUND, false);
+
+    if(!a_collisions.empty() || !b_collisions.empty()) {
         //Otherwise, we are, and we should process the nearest collision
-        set_flag(ON_GROUND, true);
+        CollisionInfo *a = (a_collisions.empty()) ? NULL : &a_collisions[0];
+        CollisionInfo *b = (b_collisions.empty()) ? NULL : &b_collisions[0];
 
-        CollisionInfo& info = down_collisions[0]; //Get the closest collision
-        kmVec2 offset_vector;
-        float offset_length = (kmVec2Length(&info.ray.dir) - info.distance);
-        kmVec2Scale(&offset_vector, &info.surface_normal, offset_length);
-        kmVec2Add(&position_, &position_, &offset_vector);
+        if(a && b) {
+            //1. Move out by -ray_dir * greatest distance
+            //2. Find the vector b - a;
+            //3. Use it to calculate angle
+            CollisionInfo* smallest = (a->distance < b->distance)? a : b;
+            if(kmAlmostEqual(a->distance, b->distance)) {
+                //If they are the same, always prefer A (stops jittering)
+                smallest = a;
+            }
+
+            if(smallest->distance < (size_.y / 2.0f) + kmEpsilon) {
+                set_flag(ON_GROUND, true);
+            }
+
+            float offset_length = (size_.y / 2.0f) - smallest->distance;
+
+            if(offset_length > kmEpsilon) {
+                kmVec2 offset_vector;
+                kmVec2Scale(&offset_vector, &smallest->surface_normal, offset_length);
+                kmVec2Add(&position_, &position_, &offset_vector);
+            }
+        } else {
+            CollisionInfo* t = (a) ? a : b;
+            //1. Move out by -ray_dir * distance
+            //2. Find the normal of the collision
+            //3. Use it to calculate the angle
+
+            if(t->distance < (size_.y / 2.0f) + kmEpsilon) {
+                set_flag(ON_GROUND, true);
+            }
+
+            float offset_length = (size_.y / 2.0f) - t->distance;
+            if(offset_length > kmEpsilon) {
+                kmVec2 offset_vector;
+                float offset_length = (t->distance - (size_.y / 2.0f));
+                kmVec2Scale(&offset_vector, &t->surface_normal, -offset_length);
+                kmVec2Add(&position_, &position_, &offset_vector);
+            }
+        }
+
+        calculate_angle(a, b);
+    } else {
+        angle_ = 0.0f;
     }
 
-    calculate_angle();
+
 }
 
 void Entity::apply_gravity(double step) {
@@ -236,7 +295,6 @@ void Entity::update(double step) {
 
     if(get_flag(ON_GROUND)) {
         gsp_ += DEFAULT_SLP * sin(kmDegreesToRadians(angle_)) * step;
-
         //Apply ground friction
         gsp_ = gsp_ - std::min(fabs(gsp_), DEFAULT_FRC * step) * sign(gsp_);
     }
