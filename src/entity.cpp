@@ -98,41 +98,6 @@ void Entity::collide_with_world() {
             collisions_.push_back(info);
         }
     }
-
-/*
-        kmVec2 offset_vector;
-        kmVec2 up = { 0.0f, 1.0f };
-
-        if(a_collided && b_collided) {
-            if(info_a.distance < info_b.distance) {
-                //If a was the closer collision, we need to move out using its normal
-                float offset_length = kmVec2Length(&ra_.dir) - info_a.distance;
-                kmVec2Scale(&offset_vector, &info_a.surface_normal, offset_length);
-                kmVec2Add(&position_, &position_, &offset_vector);
-                angle_ = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &info_a.surface_normal)));
-            } else {
-                float offset_length = kmVec2Length(&rb_.dir) - info_b.distance;
-                kmVec2Scale(&offset_vector, &info_b.surface_normal, offset_length);
-                kmVec2Add(&position_, &position_, &offset_vector);
-                angle_ = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &info_b.surface_normal)));
-            }
-        } else if(a_collided) {
-            float offset_length = kmVec2Length(&ra_.dir) - info_a.distance;
-            kmVec2Scale(&offset_vector, &info_a.surface_normal, offset_length);
-            kmVec2Add(&position_, &position_, &offset_vector);
-            angle_ = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &info_a.surface_normal)));
-
-        } else if(b_collided) {
-            float offset_length = kmVec2Length(&rb_.dir) - info_b.distance;
-            kmVec2Scale(&offset_vector, &info_b.surface_normal, offset_length);
-            kmVec2Add(&position_, &position_, &offset_vector);
-            angle_ = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &info_b.surface_normal)));
-        }*/
-
-        /*TODO:
-            Get the normal from the intersection, move the character out by the overlap
-            update angle_ to reflect the new ground angle
-        */
 }
 
 void Entity::calculate_angle(CollisionInfo* a, CollisionInfo* b) {
@@ -192,7 +157,7 @@ void Entity::calculate_angle(CollisionInfo* a, CollisionInfo* b) {
 
         kmVec2 up = { 0.0f, 1.0f };
         float new_angle = -kmRadiansToDegrees(acosf(kmVec2Dot(&up, &highest->surface_normal)));
-        if(fabs(new_angle - angle_) >= 10.0f) {
+        if(fabs(new_angle - angle_) >= 20.0f) {
             angle_ = new_angle;
         }
     } else {
@@ -269,8 +234,6 @@ void Entity::process_collisions() {
     } else {
         angle_ = 0.0f;
     }
-
-
 }
 
 void Entity::apply_gravity(double step) {
@@ -301,7 +264,6 @@ void Entity::update(double step) {
 
     speed_.x = gsp_ * cosf(kmDegreesToRadians(angle_)) * step;
     speed_.y = gsp_ * sinf(kmDegreesToRadians(angle_)) * step;
-
     //check_entity_collisions();
 
     apply_gravity(step);
