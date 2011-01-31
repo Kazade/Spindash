@@ -1,6 +1,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #include <kaztimer/kaztimer.h>
+#include <kazmath/kazmath.h>
 
 #include "kazphysics2.h"
 
@@ -23,11 +24,16 @@ int main(int argc, char** argv) {
                           {10.0f, 5.0f},
                           {10.0f, 0.0f} };
 
+    KPvec2 points3[3] = { {-5.0f, 0.0f},
+                          {-5.0f, 1.0f},
+                          {-10.0f, 1.0f} };
+
     KPvec2 size = { 0.5f, 1.0f };
     KPvec2 ent_gravity = { 0.0f, -1.0f };
 
     kpWorldAddTriangle(world, points1);
     kpWorldAddTriangle(world, points2);
+    kpWorldAddTriangle(world, points3);
 
     if(SDL_Init(SDL_INIT_VIDEO) != 0 ) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
@@ -36,7 +42,7 @@ int main(int argc, char** argv) {
 
     KPuint sonic = kpCreateEntity(world);
     kpBindEntity(sonic);
-    float pos[2] = { 0.0f, 5.7f };
+    float pos[2] = { -0.0f, 5.7f };
     kpEntityParameterfv(KP_ENTITY_POSITION, pos);
 
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1);
@@ -67,6 +73,40 @@ int main(int argc, char** argv) {
                 case SDL_QUIT:
                     running = false;
                 break;
+                case SDL_KEYDOWN:
+                {
+                    switch(event.key.keysym.sym) {
+                    case SDLK_LEFT:
+                        kpEntityStartMovingLeft();
+                    break;
+                    case SDLK_RIGHT:
+                        kpEntityStartMovingRight();
+                    break;
+                    case SDLK_SPACE:
+                        kpEntityStartJumping();
+                    break;
+                    default:
+                        break;
+                    }
+                }
+                break;
+                case SDL_KEYUP:
+                {
+                    switch(event.key.keysym.sym) {
+                    case SDLK_LEFT:
+                        kpEntityStopMovingLeft();
+                    break;
+                    case SDLK_RIGHT:
+                        kpEntityStopMovingRight();
+                    break;
+                    case SDLK_SPACE:
+                        kpEntityStopJumping();
+                    break;
+                    default:
+                        break;
+                    }
+                }
+                break;
                 default:
                 break;
             }
@@ -76,7 +116,7 @@ int main(int argc, char** argv) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
-        glTranslatef(0.0f, 0.0f, -20.0f);
+        glTranslatef(0.0f, 0.0f, -10.0f);
 
         while(ktiTimerCanUpdate()) {
             kpWorldStep(world, ktiGetDeltaTime());

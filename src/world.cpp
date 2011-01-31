@@ -42,7 +42,9 @@ void World::debug_render() {
     glPushMatrix();
         glBegin(GL_TRIANGLES);
         for(unsigned int i = 0; i < triangles_.size(); ++i) {
-            float* colour = colours[colour_counter++];
+            float* colour = colours[colour_counter];
+            (colour_counter >= 9) ? colour_counter = 0: colour_counter++;
+
             glColor3f(colour[0], colour[1], colour[2]);
 
             for(unsigned int j = 0; j < 3; ++j) {
@@ -53,6 +55,10 @@ void World::debug_render() {
     glPopMatrix();
 
     for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
+        float* colour = colours[colour_counter];
+        (colour_counter >= 9) ? colour_counter = 0: colour_counter++;
+        glColor3f(colour[0], colour[1], colour[2]);
+
         glPushMatrix();
             kpBindEntity((*it));
             float pos[2];
@@ -69,6 +75,17 @@ void World::debug_render() {
             glEnd();
 
             kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_B, ray);
+            glBegin(GL_LINES);
+                glVertex2f(ray[0], ray[1]);
+                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
+            glEnd();
+
+            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_L, ray);
+            glBegin(GL_LINES);
+                glVertex2f(ray[0], ray[1]);
+                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
+            glEnd();
+            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_R, ray);
             glBegin(GL_LINES);
                 glVertex2f(ray[0], ray[1]);
                 glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);

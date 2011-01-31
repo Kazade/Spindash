@@ -37,6 +37,8 @@
 			<Add library="GL" />
 			<Add library="GLU" />
 			<Add library="kaztimer" />
+			<Add library="kazsprite" />
+			<Add library="SOIL" />
 		</Linker>
 		<Unit filename="../src/entity.cpp" />
 		<Unit filename="../src/entity.h" />

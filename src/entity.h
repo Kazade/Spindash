@@ -21,7 +21,10 @@ public:
     enum Flag {
         ON_GROUND,
         BLOCKED_LEFT,
-        BLOCKED_RIGHT
+        BLOCKED_RIGHT,
+        MOVING_LEFT,
+        MOVING_RIGHT,
+        JUMPING
     };
 
     static KPuint entity_id_counter_;
@@ -49,23 +52,52 @@ public:
         position_.y = y;
     }
 
-    kmRay2 get_ray_a() const { return ra_; }
-    kmRay2 get_ray_b() const { return rb_; }
+    kmRay2 get_ray_a() const { return rays_[RL_A]; }
+    kmRay2 get_ray_b() const { return rays_[RL_B]; }
+    kmRay2 get_ray_l() const { return rays_[RL_L]; }
+    kmRay2 get_ray_r() const { return rays_[RL_R]; }
 
+    float get_angle() const { return angle_; }
+    float get_ground_speed() const { return gsp_; }
+    float get_x_speed() const { return speed_.x; }
+    bool get_is_jumping() const { return is_jumping_; }
 private:
-    kmRay2 ra_, rb_;
+    enum RAY_LOOKUP {
+        RL_A = 0,
+        RL_B,
+        RL_L,
+        RL_R,
+        RL_MAX
+    };
 
+    kmRay2 rays_[RL_MAX];
+    std::map<KPuint, char> ray_ids_;
+
+    void prevent_pass_through();
     void clear_collisions();
     void process_collisions();
     void collide_with_world();
     void apply_gravity(double step);
     void calculate_angle(CollisionInfo* a, CollisionInfo* b);
 
+    void initialize_ray(kmRay2* out, float rel_start_x, float rel_start_y,
+                            float ray_dir_x, float ray_dir_y);
+
+    void respond_to_floor_collisions(std::vector<CollisionInfo>& a_collisions,
+                                     std::vector<CollisionInfo>& b_collisions);
+
+    void respond_to_wall_collisions(std::vector<CollisionInfo>& collisions, Flag blocked_flag);
+
     World* world_;
 
     float frc_;
     float angle_;
     float gsp_;
+
+    bool jumping_last_frame_;
+    bool can_jump_;
+    bool jump_released_;
+    bool is_jumping_;
 
     kmVec2 position_;
     kmVec2 speed_;
