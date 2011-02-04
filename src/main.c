@@ -40,10 +40,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    KPuint sonic = kpCreateEntity(world);
-    kpBindEntity(sonic);
+    KPuint sonic = kpCreateCharacter(world);
+    kpBindCharacter(sonic);
     float pos[2] = { -0.0f, 5.7f };
-    kpEntityParameterfv(KP_ENTITY_POSITION, pos);
+    kpCharacterParameterfv(KP_ENTITY_POSITION, pos);
 
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1);
     SDL_Surface* screen = SDL_SetVideoMode( 640, 480, 16, SDL_OPENGL);
@@ -77,13 +77,13 @@ int main(int argc, char** argv) {
                 {
                     switch(event.key.keysym.sym) {
                     case SDLK_LEFT:
-                        kpEntityStartMovingLeft();
+                        kpCharacterStartMovingLeft();
                     break;
                     case SDLK_RIGHT:
-                        kpEntityStartMovingRight();
+                        kpCharacterStartMovingRight();
                     break;
                     case SDLK_SPACE:
-                        kpEntityStartJumping();
+                        kpCharacterStartJumping();
                     break;
                     default:
                         break;
@@ -94,13 +94,13 @@ int main(int argc, char** argv) {
                 {
                     switch(event.key.keysym.sym) {
                     case SDLK_LEFT:
-                        kpEntityStopMovingLeft();
+                        kpCharacterStopMovingLeft();
                     break;
                     case SDLK_RIGHT:
-                        kpEntityStopMovingRight();
+                        kpCharacterStopMovingRight();
                     break;
                     case SDLK_SPACE:
-                        kpEntityStopJumping();
+                        kpCharacterStopJumping();
                     break;
                     default:
                         break;

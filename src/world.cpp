@@ -60,32 +60,32 @@ void World::debug_render() {
         glColor3f(colour[0], colour[1], colour[2]);
 
         glPushMatrix();
-            kpBindEntity((*it));
+            kpBindCharacter((*it));
             float pos[2];
-            kpEntityGetFloatfv(KP_ENTITY_POSITION, pos);
+            kpCharacterGetFloatfv(KP_ENTITY_POSITION, pos);
             glBegin(GL_POINTS);
                 glVertex2f(pos[0], pos[1]);
             glEnd();
 
             float ray[4];
-            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_A, ray);
+            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_A, ray);
             glBegin(GL_LINES);
                 glVertex2f(ray[0], ray[1]);
                 glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
             glEnd();
 
-            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_B, ray);
+            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_B, ray);
             glBegin(GL_LINES);
                 glVertex2f(ray[0], ray[1]);
                 glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
             glEnd();
 
-            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_L, ray);
+            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_L, ray);
             glBegin(GL_LINES);
                 glVertex2f(ray[0], ray[1]);
                 glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
             glEnd();
-            kpEntityGetFloatfv(KP_ENTITY_COLLISION_RAY_R, ray);
+            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_R, ray);
             glBegin(GL_LINES);
                 glVertex2f(ray[0], ray[1]);
                 glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
@@ -97,8 +97,8 @@ void World::debug_render() {
 
 void World::update(float step) {
     for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
-        kpBindEntity((*it));
-        kpEntityUpdate(step);
+        kpBindCharacter((*it));
+        kpCharacterUpdate(step);
     }
 }
 

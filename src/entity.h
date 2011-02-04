@@ -6,6 +6,17 @@
 
 #include "kazphysics2.h"
 
+#define DEFAULT_HEIGHT 1.0f
+#define DEFAULT_WIDTH (DEFAULT_HEIGHT / 2.0f)
+#define DEFAULT_ACC ((0.046875f * 60.0f) / 40.0f)
+#define DEFAULT_DEC ((0.5f * 60.0f) / 40.0f)
+#define DEFAULT_FRC ((0.046875f * 60.0f) / 40.0f)
+#define DEFAULT_GRV ((0.21875f * 60.0f) / 40.0f)
+#define DEFAULT_SLP ((0.125f * 60.0f) / 40.0f)
+#define DEFAULT_JMP (6.5f / 40.0f)
+#define DEFAULT_JMP_CAP (4.0f / 40.0f)
+#define DEFAULT_MAX (6.0f / 40.0f)
+
 class World;
 
 struct CollisionInfo {
@@ -25,6 +36,31 @@ public:
         MOVING_LEFT,
         MOVING_RIGHT,
         JUMPING
+    };
+
+    struct CharacterProperties {
+        float acc;
+        float dec;
+        float frc;
+        float slp;
+        float jmp;
+        float jmp_cap;
+        float max;
+        float width;
+        float height;
+
+        CharacterProperties():
+            acc(DEFAULT_ACC),
+            dec(DEFAULT_DEC),
+            frc(DEFAULT_FRC),
+            slp(DEFAULT_SLP),
+            jmp(DEFAULT_JMP),
+            jmp_cap(DEFAULT_JMP_CAP),
+            max(DEFAULT_MAX),
+            width(DEFAULT_WIDTH),
+            height(DEFAULT_HEIGHT) {
+
+        }
     };
 
     static KPuint entity_id_counter_;
@@ -59,8 +95,13 @@ public:
 
     float get_angle() const { return angle_; }
     float get_ground_speed() const { return gsp_; }
+
     float get_x_speed() const { return speed_.x; }
+    float get_y_speed() const { return speed_.y; }
+
     bool get_is_jumping() const { return is_jumping_; }
+
+    void set_mode(const std::string& mode);
 private:
     enum RAY_LOOKUP {
         RL_A = 0,
@@ -90,7 +131,6 @@ private:
 
     World* world_;
 
-    float frc_;
     float angle_;
     float gsp_;
 
@@ -106,6 +146,10 @@ private:
     std::map<KPuint, bool> flags_;
 
     std::vector<CollisionInfo> collisions_;
+    std::map<std::string, CharacterProperties> properties_;
+    std::string current_props_;
+
+    const CharacterProperties& get_props() { return properties_[current_props_]; }
 };
 
 #endif // ENTITY_H_INCLUDED

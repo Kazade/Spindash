@@ -16,20 +16,17 @@ typedef enum KPenum {
     KP_ENTITY_COLLISION_TYPE,
     KP_ENTITY_SIZE,
     KP_ENTITY_FRICTION,
-    KP_ENTITY_MAX_SPEED,
-    KP_ENTITY_MIN_SPEED,
+    KP_ENTITY_MAX_ABS_X_SPEED,
+    KP_ENTITY_MAX_ABS_Y_SPEED,
     KP_ENTITY_VELOCITY,
-    KP_COLLISION_CHARACTER_RAY_TYPE, //Sonic/Mario style character
-    KP_COLLISION_CIRCLE_TYPE, //Sonic ring style object
-    KP_COLLISION_BOX_TYPE,
-    KP_ENTITY_COLLISION_RAY_A,
-    KP_ENTITY_COLLISION_RAY_B,
-    KP_ENTITY_COLLISION_RAY_L,
-    KP_ENTITY_COLLISION_RAY_R,
     KP_ENTITY_ROTATION,
-    KP_ENTITY_GROUND_SPEED,
-    KP_ENTITY_X_SPEED,
-    KP_ENTITY_IS_JUMPING
+    KP_ENTITY_SPEED,
+    KP_CHARACTER_COLLISION_RAY_A,
+    KP_CHARACTER_COLLISION_RAY_B,
+    KP_CHARACTER_COLLISION_RAY_L,
+    KP_CHARACTER_COLLISION_RAY_R,
+    KP_CHARACTER_GROUND_SPEED,
+    KP_CHARACTER_IS_JUMPING
 } KPenum;
 
 KPuint kpCreateWorld();
@@ -40,19 +37,21 @@ void kpWorldDebugRenderGL(KPuint world);
 void kpWorldParameterfv(KPuint world, KPenum pname, KPfloat* param);
 void kpDestroyWorld(KPuint world);
 
-KPuint kpCreateEntity(KPuint world);
-void kpBindEntity(KPuint entity_id);
-void kpEntityParameterfv(KPenum pname, KPfloat* param);
-void kpEntityParameteru(KPenum pname, KPenum param);
-void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut);
-void kpDestroyEntity(KPuint entity);
+KPuint kpCreateCharacter(KPuint world);
+void kpBindCharacter(KPuint entity_id);
+void kpCharacterCreateMode(const char* new_mode_name);
+void kpCharacterSetMode(const char* new_mode_name);
+void kpCharacterParameterfv(KPenum pname, KPfloat* param);
+void kpCharacterParameteru(KPenum pname, KPenum param);
+void kpCharacterGetFloatfv(KPenum pname, KPfloat* pOut);
+void kpDestroyCharacter(KPuint entity);
 
-void kpEntityStartMovingLeft();
-void kpEntityStopMovingLeft();
-void kpEntityStartMovingRight();
-void kpEntityStopMovingRight();
-void kpEntityStartJumping();
-void kpEntityStopJumping();
+void kpCharacterStartMovingLeft();
+void kpCharacterStopMovingLeft();
+void kpCharacterStartMovingRight();
+void kpCharacterStopMovingRight();
+void kpCharacterStartJumping();
+void kpCharacterStopJumping();
 
 /*
     USAGE:

@@ -11,18 +11,6 @@ static KPuint bound_entity = 0;
 
 static std::map<KPuint, boost::shared_ptr<Entity> > entities_;
 
-const float DEFAULT_HEIGHT = 1.0f;
-const float DEFAULT_WIDTH = DEFAULT_HEIGHT / 2.0f;
-
-const float DEFAULT_ACC = (0.046875f * 60.0f) / 40.0f;
-const float DEFAULT_DEC = (0.5f * 60.0f) / 40.0f;
-const float DEFAULT_FRC = (0.046875f * 60.0f) / 40.0f;
-const float DEFAULT_GRV = (0.21875f * 60.0f) / 40.0f;
-const float DEFAULT_SLP = (0.125f * 60.0f) / 40.0f;
-const float DEFAULT_JMP = 6.5f / 40.0f;
-const float DEFAULT_JMP_CAP = 4.0f  / 40.0f;
-const float DEFAULT_MAX = 6.0f / 40.0f;
-
 Entity* get_bound_entity() {
     if(bound_entity == 0) {
         return NULL;
@@ -31,20 +19,28 @@ Entity* get_bound_entity() {
 }
 
 Entity::Entity():
-    frc_(DEFAULT_FRC),
     angle_(0.0f),
     gsp_(0.0f),
     jumping_last_frame_(false),
-    can_jump_(true) {
+    can_jump_(true),
+    current_props_("normal") {
+
+    properties_["normal"] = CharacterProperties();
 
     kmVec2Fill(&position_, 0.0f, 0.0f);
     kmVec2Fill(&speed_, 0.0f, 0.0f);
-    kmVec2Fill(&size_, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    set_mode("normal");
 
     ray_ids_[RL_A] = 'A';
     ray_ids_[RL_B] = 'B';
     ray_ids_[RL_L] = 'L';
     ray_ids_[RL_R] = 'R';
+}
+
+void Entity::set_mode(const std::string& mode) {
+    //TODO: check mode exists
+    current_props_ = mode;
+    kmVec2Fill(&size_, properties_[mode].width, properties_[mode].height);
 }
 
 void Entity::clear_collisions() {
@@ -399,7 +395,7 @@ void Entity::update(double step) {
     position_.y += speed_.y;
 }
 
-KPuint kpCreateEntity(KPuint world_id) {
+KPuint kpCreateCharacter(KPuint world_id) {
     World* world = get_world_by_id(world_id);
 
     if(!world) {
@@ -415,7 +411,7 @@ KPuint kpCreateEntity(KPuint world_id) {
     return new_id;
 }
 
-void kpBindEntity(KPuint entity_id) {
+void kpBindCharacter(KPuint entity_id) {
     if(entities_.find(entity_id) == entities_.end()) {
         return;
     }
@@ -423,7 +419,7 @@ void kpBindEntity(KPuint entity_id) {
     bound_entity = entity_id;
 }
 
-void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
+void kpCharacterGetFloatfv(KPenum pname, KPfloat* pOut) {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -437,7 +433,7 @@ void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
             pOut[1] = position.y;
         }
         break;
-        case KP_ENTITY_COLLISION_RAY_A: {
+        case KP_CHARACTER_COLLISION_RAY_A: {
             kmRay2 ray = ent->get_ray_a();
             pOut[0] = ray.start.x;
             pOut[1] = ray.start.y;
@@ -445,7 +441,7 @@ void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
             pOut[3] = ray.dir.y;
         }
         break;
-        case KP_ENTITY_COLLISION_RAY_B: {
+        case KP_CHARACTER_COLLISION_RAY_B: {
             kmRay2 ray = ent->get_ray_b();
             pOut[0] = ray.start.x;
             pOut[1] = ray.start.y;
@@ -453,7 +449,7 @@ void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
             pOut[3] = ray.dir.y;
         }
         break;
-        case KP_ENTITY_COLLISION_RAY_L: {
+        case KP_CHARACTER_COLLISION_RAY_L: {
             kmRay2 ray = ent->get_ray_l();
             pOut[0] = ray.start.x;
             pOut[1] = ray.start.y;
@@ -461,7 +457,7 @@ void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
             pOut[3] = ray.dir.y;
         }
         break;
-        case KP_ENTITY_COLLISION_RAY_R: {
+        case KP_CHARACTER_COLLISION_RAY_R: {
             kmRay2 ray = ent->get_ray_r();
             pOut[0] = ray.start.x;
             pOut[1] = ray.start.y;
@@ -473,16 +469,17 @@ void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
             *pOut = ent->get_angle();
         }
         break;
-        case KP_ENTITY_GROUND_SPEED: {
+        case KP_CHARACTER_GROUND_SPEED: {
             *pOut = ent->get_ground_speed();
         }
         break;
-        case KP_ENTITY_X_SPEED: {
-            *pOut = ent->get_x_speed();
+        case KP_ENTITY_SPEED: {
+            pOut[0] = ent->get_x_speed();
+            pOut[1] = ent->get_y_speed();
         }
         break;
         //FIXME: Shouldn't be here
-        case KP_ENTITY_IS_JUMPING:
+        case KP_CHARACTER_IS_JUMPING:
             *pOut = (ent->get_is_jumping())? 1 : 0;
         break;
         default:
@@ -492,7 +489,7 @@ void kpEntityGetFloatfv(KPenum pname, KPfloat* pOut) {
     }
 }
 
-void kpEntityParameterfv(KPenum pname, KPfloat* param) {
+void kpCharacterParameterfv(KPenum pname, KPfloat* param) {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -510,7 +507,7 @@ void kpEntityParameterfv(KPenum pname, KPfloat* param) {
     }
 }
 
-void kpEntityUpdate(double step) {
+void kpCharacterUpdate(double step) {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -520,7 +517,7 @@ void kpEntityUpdate(double step) {
     ent->update(step);
 }
 
-void kpEntityStartMovingLeft() {
+void kpCharacterStartMovingLeft() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -530,7 +527,7 @@ void kpEntityStartMovingLeft() {
     ent->set_flag(Entity::MOVING_LEFT, true);
 }
 
-void kpEntityStopMovingLeft() {
+void kpCharacterStopMovingLeft() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -539,7 +536,7 @@ void kpEntityStopMovingLeft() {
     ent->set_flag(Entity::MOVING_LEFT, false);
 }
 
-void kpEntityStartMovingRight() {
+void kpCharacterStartMovingRight() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -549,7 +546,7 @@ void kpEntityStartMovingRight() {
     ent->set_flag(Entity::MOVING_RIGHT, true);
 }
 
-void kpEntityStopMovingRight() {
+void kpCharacterStopMovingRight() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -558,7 +555,7 @@ void kpEntityStopMovingRight() {
     ent->set_flag(Entity::MOVING_RIGHT, false);
 }
 
-void kpEntityStartJumping() {
+void kpCharacterStartJumping() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -567,7 +564,7 @@ void kpEntityStartJumping() {
     ent->set_flag(Entity::JUMPING, true);
 }
 
-void kpEntityStopJumping() {
+void kpCharacterStopJumping() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
