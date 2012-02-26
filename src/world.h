@@ -2,7 +2,7 @@
 #define KP_WORLD_H
 
 #include <vector>
-#include <kazmath/kazmath.h>
+#include "kazmath/kazmath.h"
 #include "kazphysics2.h"
 
 struct Triangle {

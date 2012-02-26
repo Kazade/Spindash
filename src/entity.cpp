@@ -75,7 +75,7 @@ void Entity::prevent_pass_through() {
         }
     }
 
-    std::sort(speed_collisions.begin(), speed_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(speed_collisions.begin(), speed_collisions.end());//, bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
     CollisionInfo* speed_hit = (speed_collisions.empty()) ? NULL : &speed_collisions[0];
     if(speed_hit) {
         kmVec2 to_move;
@@ -276,10 +276,10 @@ void Entity::process_collisions() {
     }
 
     //Sort them by distance
-    std::sort(a_collisions.begin(), a_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
-    std::sort(b_collisions.begin(), b_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
-    std::sort(l_collisions.begin(), l_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
-    std::sort(r_collisions.begin(), r_collisions.end(), bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(a_collisions.begin(), a_collisions.end());//, bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(b_collisions.begin(), b_collisions.end());//, bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(l_collisions.begin(), l_collisions.end());//, bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
+    std::sort(r_collisions.begin(), r_collisions.end());//, bind(&CollisionInfo::distance, _1) < bind(&CollisionInfo::distance, _2));
 
     set_flag(ON_GROUND, false);
 

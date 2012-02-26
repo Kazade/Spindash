@@ -1,0 +1,6 @@
+[submodule "kazmath"]
+	path = kazmath
+	url = git://github.com/Kazade/kazmath.git
+[submodule "kaztimer"]
+	path = kaztimer
+	url = git://github.com/Kazade/Kaztimer.git

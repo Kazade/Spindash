@@ -2,7 +2,7 @@
 #define ENTITY_H_INCLUDED
 
 #include <vector>
-#include <kazmath/kazmath.h>
+#include "kazmath/kazmath.h"
 
 #include "kazphysics2.h"
 
@@ -25,6 +25,10 @@ struct CollisionInfo {
     double distance;
     char identifier;
     kmRay2 ray;
+
+    bool operator<(const CollisionInfo& rhs) const {
+        return distance < rhs.distance;
+    }
 };
 
 class Entity {

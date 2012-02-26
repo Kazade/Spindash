@@ -1,7 +1,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
-#include <kaztimer/kaztimer.h>
-#include <kazmath/kazmath.h>
+#include "kaztimer.h"
+#include "kazmath/kazmath.h"
 
 #include "kazphysics2.h"
 
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
-        glTranslatef(0.0f, 0.0f, -10.0f);
+        glTranslatef(0.0f, 0.0f, -20.0f);
 
         while(ktiTimerCanUpdate()) {
             kpWorldStep(world, ktiGetDeltaTime());
