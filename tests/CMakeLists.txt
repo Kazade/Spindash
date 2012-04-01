@@ -1,0 +1,5 @@
+
+FILE(GLOB_RECURSE TEST_FILES *.cpp)
+
+ADD_EXECUTABLE(spindash_tests ${TEST_FILES})
+

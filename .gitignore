@@ -1,3 +1,4 @@
 codeblocks/bin/*
 *.depend
 codeblocks/obj*
+*~

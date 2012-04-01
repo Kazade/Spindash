@@ -1,57 +1,35 @@
 #ifndef KAZPHYSICS2_H_INCLUDED
 #define KAZPHYSICS2_H_INCLUDED
 
+#include <cstdint>
+
+#include "kazmath/vec2.h"
+
 typedef unsigned int KPuint;
 typedef float KPfloat;
 
-typedef struct KPvec2 {
-    float x;
-    float y;
-} KPvec2;
-
-typedef enum KPenum {
-    KP_WORLD_GRAVITY,
-    KP_ENTITY_GRAVITY,
-    KP_ENTITY_POSITION,
-    KP_ENTITY_COLLISION_TYPE,
-    KP_ENTITY_SIZE,
-    KP_ENTITY_FRICTION,
-    KP_ENTITY_MAX_ABS_X_SPEED,
-    KP_ENTITY_MAX_ABS_Y_SPEED,
-    KP_ENTITY_VELOCITY,
-    KP_ENTITY_ROTATION,
-    KP_ENTITY_SPEED,
-    KP_CHARACTER_COLLISION_RAY_A,
-    KP_CHARACTER_COLLISION_RAY_B,
-    KP_CHARACTER_COLLISION_RAY_L,
-    KP_CHARACTER_COLLISION_RAY_R,
-    KP_CHARACTER_GROUND_SPEED,
-    KP_CHARACTER_IS_JUMPING
-} KPenum;
-
 KPuint kpCreateWorld();
-void kpWorldAddTriangle(KPuint world, KPvec2* points);
-void kpWorldAddMesh(KPuint world, KPuint num_triangles, KPuint points);
+void kpWorldAddTriangle(KPuint world, kmVec2* points);
+void kpWorldAddMesh(KPuint world, KPuint num_triangles, kmVec2* points);
 void kpWorldStep(KPuint world, KPfloat dt);
 void kpWorldDebugRenderGL(KPuint world);
-void kpWorldParameterfv(KPuint world, KPenum pname, KPfloat* param);
 void kpDestroyWorld(KPuint world);
 
+void kpObjectSetPosition(KPuint object, float x, float y);
+KPfloat kpObjectGetSpeedX(KPuint object);
+KPfloat kpObjectGetSpeedY(KPuint object);
+void kpObjectSetSpeedX(KPuint object, KPfloat x);
+void kpObjectSetSpeedY(KPuint object, KPfloat y);
+
 KPuint kpCreateCharacter(KPuint world);
-void kpBindCharacter(KPuint entity_id);
-void kpCharacterCreateMode(const char* new_mode_name);
-void kpCharacterSetMode(const char* new_mode_name);
-void kpCharacterParameterfv(KPenum pname, KPfloat* param);
-void kpCharacterParameteru(KPenum pname, KPenum param);
-void kpCharacterGetFloatfv(KPenum pname, KPfloat* pOut);
 void kpDestroyCharacter(KPuint entity);
 
-void kpCharacterStartMovingLeft();
-void kpCharacterStopMovingLeft();
-void kpCharacterStartMovingRight();
-void kpCharacterStopMovingRight();
-void kpCharacterStartJumping();
-void kpCharacterStopJumping();
+void kpCharacterStartMovingLeft(KPuint character);
+void kpCharacterStopMovingLeft(KPuint character);
+void kpCharacterStartMovingRight(KPuint character);
+void kpCharacterStopMovingRight(KPuint character);
+void kpCharacterStartJumping(KPuint character);
+void kpCharacterStopJumping(KPuint character);
 
 /*
     USAGE:

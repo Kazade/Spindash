@@ -9,7 +9,9 @@ KPuint World::world_id_counter_ = 0;
 World::World(KPuint id):
     id_(id) {
     set_gravity(0.0f, -7.0f);
+    
 }
+
 
 void World::set_gravity(float x, float y) {
     kmVec2Fill(&gravity_, x, y);
@@ -53,16 +55,15 @@ void World::debug_render() {
         }
         glEnd();
     glPopMatrix();
-
+ 
     for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
         float* colour = colours[colour_counter];
         (colour_counter >= 9) ? colour_counter = 0: colour_counter++;
         glColor3f(colour[0], colour[1], colour[2]);
 
         glPushMatrix();
-            kpBindCharacter((*it));
-            float pos[2];
-            kpCharacterGetFloatfv(KP_ENTITY_POSITION, pos);
+            kmVec2 pos = kmObjectGetPosition((*it));
+            
             glBegin(GL_POINTS);
                 glVertex2f(pos[0], pos[1]);
             glEnd();
@@ -112,15 +113,13 @@ void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
     triangles_.push_back(new_tri);
 }
 
-//=============================================================
-
-kmVec2 kpTokm(const KPvec2& v) {
-    kmVec2 v2;
-    v2.x = v.x;
-    v2.y = v.y;
-
-    return v2;
+ObjectID World::new_character() {
+    Character::ptr new_character(new Character());    
+    objects_.push_back(new_character);
+    return new_character->id();
 }
+
+//=============================================================
 
 static std::map<KPuint, boost::shared_ptr<World> > worlds_;
 
@@ -178,7 +177,7 @@ void kpWorldParameterfv(KPuint world_id, KPenum pname, KPfloat* param) {
     }
 }
 
-void kpWorldAddTriangle(KPuint world_id, KPvec2* points) {
+void kpWorldAddTriangle(KPuint world_id, kmVec2* points) {
     World* world = get_world_by_id(world_id);
     if(!world) {
         //Log error
