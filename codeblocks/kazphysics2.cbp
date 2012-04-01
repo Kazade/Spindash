@@ -30,14 +30,65 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="../kazmath" />
+			<Add directory="../kaztimer/src" />
 		</Compiler>
 		<Linker>
-			<Add library="kazmath" />
 			<Add library="SDL" />
 			<Add library="GL" />
 			<Add library="GLU" />
-			<Add library="kaztimer" />
 		</Linker>
+		<Unit filename="../kazmath/kazmath/GL/mat4stack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/GL/mat4stack.h" />
+		<Unit filename="../kazmath/kazmath/GL/matrix.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/GL/matrix.h" />
+		<Unit filename="../kazmath/kazmath/aabb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/aabb.h" />
+		<Unit filename="../kazmath/kazmath/kazmath.h" />
+		<Unit filename="../kazmath/kazmath/mat3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/mat3.h" />
+		<Unit filename="../kazmath/kazmath/mat4.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/mat4.h" />
+		<Unit filename="../kazmath/kazmath/plane.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/plane.h" />
+		<Unit filename="../kazmath/kazmath/quaternion.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/quaternion.h" />
+		<Unit filename="../kazmath/kazmath/ray2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/ray2.h" />
+		<Unit filename="../kazmath/kazmath/utility.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/utility.h" />
+		<Unit filename="../kazmath/kazmath/vec2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/vec2.h" />
+		<Unit filename="../kazmath/kazmath/vec3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/vec3.h" />
+		<Unit filename="../kazmath/kazmath/vec4.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../kazmath/kazmath/vec4.h" />
+		<Unit filename="../kaztimer/src/kaztimer.cpp" />
+		<Unit filename="../kaztimer/src/kaztimer.h" />
 		<Unit filename="../src/entity.cpp" />
 		<Unit filename="../src/entity.h" />
 		<Unit filename="../src/kazphysics2.h" />

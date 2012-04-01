@@ -3,10 +3,22 @@ PROJECT(Spindash)
 
 FIND_PACKAGE(PkgConfig)
 
+SET(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED filesystem system thread)
+
+
 ADD_DEFINITIONS("-Wall -std=c++0x -g")
+
+PKG_CHECK_MODULES(GL REQUIRED gl) #FIXME: SHouldn't depend on GL
 
 INCLUDE_DIRECTORIES(
     kazmath
+    ${Boost_INCLUDE_DIRS}
+    ${GL_INCLUDE_DIRS}
+)
+LINK_LIBRARIES(
+    ${Boost_LIBRARIES}
+    ${GL_LIBRARIES}
 )
 
 ADD_SUBDIRECTORY(src)
@@ -14,7 +26,7 @@ ADD_SUBDIRECTORY(src)
 PKG_CHECK_MODULES(UNITTEST REQUIRED unittest++)
 INCLUDE_DIRECTORIES(
     src 
-    ${UNITTEST_INCLUDE_DIRS}    
+    ${UNITTEST_INCLUDE_DIRS}
 )
 
 LINK_LIBRARIES(

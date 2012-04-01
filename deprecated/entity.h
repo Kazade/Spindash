@@ -67,7 +67,7 @@ public:
         }
     };
 
-    static KPuint entity_id_counter_;
+    static SDuint entity_id_counter_;
 
     Entity();
 
@@ -78,7 +78,7 @@ public:
     void set_flag(Flag f, bool value) { flags_[f] = value; }
 
     bool get_flag(Flag f) const {
-        std::map<KPuint, bool>::const_iterator it = flags_.find(f);
+        std::map<SDuint, bool>::const_iterator it = flags_.find(f);
         if(it == flags_.end()) {
             return false;
         }
@@ -116,7 +116,7 @@ private:
     };
 
     kmRay2 rays_[RL_MAX];
-    std::map<KPuint, char> ray_ids_;
+    std::map<SDuint, char> ray_ids_;
 
     void prevent_pass_through();
     void clear_collisions();
@@ -147,7 +147,7 @@ private:
     kmVec2 speed_;
     kmVec2 size_;
 
-    std::map<KPuint, bool> flags_;
+    std::map<SDuint, bool> flags_;
 
     std::vector<CollisionInfo> collisions_;
     std::map<std::string, CharacterProperties> properties_;

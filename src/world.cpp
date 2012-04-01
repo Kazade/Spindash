@@ -1,12 +1,15 @@
 #include <map>
 #include <GL/gl.h>
 #include <boost/shared_ptr.hpp>
-#include "kp_private.h"
+
+#include "kazmath/vec2.h"
 #include "world.h"
+#include "character.h"
+#include "spindash.h"
 
-KPuint World::world_id_counter_ = 0;
+SDuint World::world_id_counter_ = 0;
 
-World::World(KPuint id):
+World::World(SDuint id):
     id_(id) {
     set_gravity(0.0f, -7.0f);
     
@@ -56,53 +59,53 @@ void World::debug_render() {
         glEnd();
     glPopMatrix();
  
-    for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
+    for(std::vector<Object::ptr>::const_iterator it = objects_.begin(); it != objects_.end(); ++it) {
         float* colour = colours[colour_counter];
         (colour_counter >= 9) ? colour_counter = 0: colour_counter++;
         glColor3f(colour[0], colour[1], colour[2]);
 
         glPushMatrix();
-            kmVec2 pos = kmObjectGetPosition((*it));
+            kmVec2 pos = sdObjectGetPosition((*it)->id());
             
             glBegin(GL_POINTS);
-                glVertex2f(pos[0], pos[1]);
+                glVertex2f(pos.x, pos.y);
             glEnd();
 
-            float ray[4];
-            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_A, ray);
-            glBegin(GL_LINES);
-                glVertex2f(ray[0], ray[1]);
-                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
-            glEnd();
-
-            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_B, ray);
-            glBegin(GL_LINES);
-                glVertex2f(ray[0], ray[1]);
-                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
-            glEnd();
-
-            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_L, ray);
-            glBegin(GL_LINES);
-                glVertex2f(ray[0], ray[1]);
-                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
-            glEnd();
-            kpCharacterGetFloatfv(KP_CHARACTER_COLLISION_RAY_R, ray);
-            glBegin(GL_LINES);
-                glVertex2f(ray[0], ray[1]);
-                glVertex2f(ray[0] + ray[2], ray[1] + ray[3]);
-            glEnd();
+            if(Character* c = dynamic_cast<Character*>((*it).get())) {
+                kmRay2 ray;
+                for(char ray_id: {'A', 'B', 'L', 'R'}) {
+                    ray = c->ray(ray_id);
+                    glBegin(GL_LINES);
+                        glVertex2f(ray.start.x, ray.start.y);
+                        glVertex2f(ray.start.x + ray.dir.x, ray.start.y + ray.dir.y);
+                    glEnd();
+                }
+            }
         glPopMatrix();
     }
     glPopAttrib();
 }
 
 void World::update(float step) {
-    for(std::vector<KPuint>::iterator it = entities_.begin(); it != entities_.end(); ++it) {
-        kpBindCharacter((*it));
-        kpCharacterUpdate(step);
+    for(std::vector<Object::ptr>::iterator it = objects_.begin(); it != objects_.end(); ++it) {
+        (*it)->update(step);
     }
 }
 
+void World::destroy_object(ObjectID object_id) {
+    struct PointerCompare {
+        PointerCompare(Object* ptr): ptr_(ptr) {}
+        bool operator()(Object::ptr rhs) { return rhs.get() == ptr_; }
+    
+        Object* ptr_;
+    };
+
+    assert(Object::exists(object_id));
+    Object* obj = Object::by_id(object_id);
+    objects_.erase(std::remove_if(objects_.begin(), objects_.end(), PointerCompare(obj)), objects_.end());
+    assert(!Object::exists(object_id));
+}
+    
 void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
     Triangle new_tri;
 
@@ -114,16 +117,16 @@ void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
 }
 
 ObjectID World::new_character() {
-    Character::ptr new_character(new Character());    
+    Character::ptr new_character(new Character(this));    
     objects_.push_back(new_character);
     return new_character->id();
 }
 
 //=============================================================
 
-static std::map<KPuint, boost::shared_ptr<World> > worlds_;
+static std::map<SDuint, boost::shared_ptr<World> > worlds_;
 
-World* get_world_by_id(KPuint world) {
+World* get_world_by_id(SDuint world) {
     if(worlds_.find(world) == worlds_.end()) {
         return NULL;
     }
@@ -137,8 +140,8 @@ World* get_world_by_id(KPuint world) {
     This function creates an empty world ready to start accepting
     new entities and polygons.
 */
-KPuint kpCreateWorld() {
-    KPuint new_id = ++World::world_id_counter_;
+SDuint sdCreateWorld() {
+    SDuint new_id = ++World::world_id_counter_;
     worlds_[new_id].reset(new World(new_id));
     return new_id;
 }
@@ -150,7 +153,7 @@ KPuint kpCreateWorld() {
  * Destroys a world and its contents (polygons, entities etc.)
  */
 
-void kpDestroyWorld(KPuint world) {
+void sdDestroyWorld(SDuint world) {
     if(worlds_.find(world) == worlds_.end()) {
         //TODO: log error
         return;
@@ -159,35 +162,27 @@ void kpDestroyWorld(KPuint world) {
     worlds_.erase(world);
 }
 
-void kpWorldParameterfv(KPuint world_id, KPenum pname, KPfloat* param) {
-    World* world = get_world_by_id(world_id);
-
-    if(!world) {
-        //Log error
-        return;
-    }
-
-    switch(pname) {
-        case KP_WORLD_GRAVITY:
-            world->set_gravity(param[0], param[1]);
-        break;
-        default:
-            //Log error
-            return;
-    }
-}
-
-void kpWorldAddTriangle(KPuint world_id, kmVec2* points) {
+void sdWorldAddTriangle(SDuint world_id, kmVec2* points) {
     World* world = get_world_by_id(world_id);
     if(!world) {
         //Log error
         return;
     }
 
-    world->add_triangle(kpTokm(points[0]), kpTokm(points[1]), kpTokm(points[2]));
+    world->add_triangle(points[0], points[1], points[2]);
 }
 
-void kpWorldStep(KPuint world_id, KPfloat dt) {
+void sdWorldAddMesh(SDuint world_id, SDuint num_triangles, kmVec2* points) {
+    for(SDuint i = 0; i < num_triangles; ++i) {
+        kmVec2 tri[3];
+        kmVec2Assign(&tri[0], &points[i * 3]);
+        kmVec2Assign(&tri[1], &points[(i * 3) + 1]);        
+        kmVec2Assign(&tri[2], &points[(i * 3) + 2]);
+        sdWorldAddTriangle(world_id, tri);
+    }
+}
+
+void sdWorldStep(SDuint world_id, SDfloat dt) {
     World* world = get_world_by_id(world_id);
     if(!world) {
         //Log error
@@ -197,7 +192,7 @@ void kpWorldStep(KPuint world_id, KPfloat dt) {
     world->update(dt);
 }
 
-void kpWorldDebugRenderGL(KPuint world_id) {
+void sdWorldDebugRenderGL(SDuint world_id) {
     World* world = get_world_by_id(world_id);
     if(!world) {
         //Log error

@@ -6,10 +6,10 @@
 #include "entity.h"
 #include "world.h"
 
-KPuint Entity::entity_id_counter_ = 0;
-static KPuint bound_entity = 0;
+SDuint Entity::entity_id_counter_ = 0;
+static SDuint bound_entity = 0;
 
-static std::map<KPuint, boost::shared_ptr<Entity> > entities_;
+static std::map<SDuint, boost::shared_ptr<Entity> > entities_;
 
 Entity* get_bound_entity() {
     if(bound_entity == 0) {
@@ -55,12 +55,12 @@ void Entity::prevent_pass_through() {
 
     std::vector<CollisionInfo> speed_collisions;
 
-    for(KPuint i = 0; i < world_->get_triangle_count(); ++i) {
+    for(SDuint i = 0; i < world_->get_triangle_count(); ++i) {
         Triangle* tri = world_->get_triangle_at(i);
 
         kmVec2 intersection, normal;
 
-        for(KPuint i = 0; i < RL_MAX; ++i) {
+        for(SDuint i = 0; i < RL_MAX; ++i) {
             if(kmRay2IntersectTriangle(&speed_ray, &tri->points[0], &tri->points[1], &tri->points[2], &intersection, &normal)) {
                 CollisionInfo info;
                 info.intersection = intersection;
@@ -118,12 +118,12 @@ void Entity::collide_with_world() {
     initialize_ray(&rays_[RL_L], 0.0f, -size_.y * 0.1f, -((size_.x / 2.0f)), 0.0f);
     initialize_ray(&rays_[RL_R], 0.0f, -size_.y * 0.1f, ((size_.x / 2.0f)), 0.0f);
 
-    for(KPuint i = 0; i < world_->get_triangle_count(); ++i) {
+    for(SDuint i = 0; i < world_->get_triangle_count(); ++i) {
         Triangle* tri = world_->get_triangle_at(i);
 
         kmVec2 intersection, normal;
 
-        for(KPuint i = 0; i < RL_MAX; ++i) {
+        for(SDuint i = 0; i < RL_MAX; ++i) {
             if(kmRay2IntersectTriangle(&rays_[i], &tri->points[0], &tri->points[1], &tri->points[2], &intersection, &normal)) {
                 CollisionInfo info;
                 info.intersection = intersection;
@@ -256,7 +256,7 @@ void Entity::process_collisions() {
 
     std::vector<CollisionInfo> a_collisions, b_collisions, l_collisions, r_collisions;
 
-    for(KPuint i = 0; i < collisions_.size(); ++i) {
+    for(SDuint i = 0; i < collisions_.size(); ++i) {
         switch(collisions_[i].identifier) {
             case 'A':
                 a_collisions.push_back(collisions_[i]);
@@ -395,7 +395,7 @@ void Entity::update(double step) {
     position_.y += speed_.y;
 }
 
-KPuint kpCreateCharacter(KPuint world_id) {
+SDuint sdCreateCharacter(SDuint world_id) {
     World* world = get_world_by_id(world_id);
 
     if(!world) {
@@ -403,7 +403,7 @@ KPuint kpCreateCharacter(KPuint world_id) {
         return 0;
     }
 
-    KPuint new_id = ++Entity::entity_id_counter_;
+    SDuint new_id = ++Entity::entity_id_counter_;
     entities_[new_id].reset(new Entity());
     entities_[new_id]->set_world(world);
 
@@ -411,7 +411,7 @@ KPuint kpCreateCharacter(KPuint world_id) {
     return new_id;
 }
 
-void kpBindCharacter(KPuint entity_id) {
+void sdBindCharacter(SDuint entity_id) {
     if(entities_.find(entity_id) == entities_.end()) {
         return;
     }
@@ -419,7 +419,7 @@ void kpBindCharacter(KPuint entity_id) {
     bound_entity = entity_id;
 }
 
-void kpCharacterGetFloatfv(KPenum pname, KPfloat* pOut) {
+void sdCharacterGetFloatfv(SDenum pname, SDfloat* pOut) {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -489,7 +489,7 @@ void kpCharacterGetFloatfv(KPenum pname, KPfloat* pOut) {
     }
 }
 
-void kpCharacterParameterfv(KPenum pname, KPfloat* param) {
+void sdCharacterParameterfv(SDenum pname, SDfloat* param) {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -507,7 +507,7 @@ void kpCharacterParameterfv(KPenum pname, KPfloat* param) {
     }
 }
 
-void kpCharacterUpdate(double step) {
+void sdCharacterUpdate(double step) {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -517,7 +517,7 @@ void kpCharacterUpdate(double step) {
     ent->update(step);
 }
 
-void kpCharacterStartMovingLeft() {
+void sdCharacterStartMovingLeft() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -527,7 +527,7 @@ void kpCharacterStartMovingLeft() {
     ent->set_flag(Entity::MOVING_LEFT, true);
 }
 
-void kpCharacterStopMovingLeft() {
+void sdCharacterStopMovingLeft() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -536,7 +536,7 @@ void kpCharacterStopMovingLeft() {
     ent->set_flag(Entity::MOVING_LEFT, false);
 }
 
-void kpCharacterStartMovingRight() {
+void sdCharacterStartMovingRight() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -546,7 +546,7 @@ void kpCharacterStartMovingRight() {
     ent->set_flag(Entity::MOVING_RIGHT, true);
 }
 
-void kpCharacterStopMovingRight() {
+void sdCharacterStopMovingRight() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -555,7 +555,7 @@ void kpCharacterStopMovingRight() {
     ent->set_flag(Entity::MOVING_RIGHT, false);
 }
 
-void kpCharacterStartJumping() {
+void sdCharacterStartJumping() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error
@@ -564,7 +564,7 @@ void kpCharacterStartJumping() {
     ent->set_flag(Entity::JUMPING, true);
 }
 
-void kpCharacterStopJumping() {
+void sdCharacterStopJumping() {
     Entity* ent = get_bound_entity();
     if(!ent) {
         //Log error

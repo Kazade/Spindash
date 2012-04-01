@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "kazmath/kazmath.h"
-#include "kazphysics2.h"
+#include "spindash.h"
 #include "object.h"
 
 struct Triangle {
@@ -12,9 +12,9 @@ struct Triangle {
 
 class World {
 public:
-    static KPuint world_id_counter_;
+    static SDuint world_id_counter_;
 
-    World(KPuint id);
+    World(SDuint id);
     void set_gravity(float x, float y);
     void get_gravity(float& x, float& y);
 
@@ -22,22 +22,23 @@ public:
     ObjectID new_sphere();
     ObjectID new_box();
     ObjectID new_character();
+    void destroy_object(ObjectID object_id);
     
     void debug_render();
 
     void update(float step);
 
-    KPuint get_triangle_count() const { return triangles_.size(); }
-    Triangle* get_triangle_at(KPuint i) { return &triangles_[i]; }
+    SDuint get_triangle_count() const { return triangles_.size(); }
+    Triangle* get_triangle_at(SDuint i) { return &triangles_[i]; }
     
 private:
-    KPuint id_;
+    SDuint id_;
     kmVec2 gravity_;
 
     std::vector<Triangle> triangles_;
     std::vector<Object::ptr> objects_;
 };
 
-extern World* get_world_by_id(KPuint world);
+extern World* get_world_by_id(SDuint world);
 
 #endif
