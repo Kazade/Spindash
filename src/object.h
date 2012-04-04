@@ -17,6 +17,7 @@ private:
     kmVec2 position_;
     kmVec2 speed_;
     kmVec2 acceleration_;
+    float rotation_;
 
     static std::map<ObjectID, Object*> objects_;
 
@@ -46,6 +47,8 @@ public:
     const kmVec2& speed() const { return speed_; }
     const kmVec2& position() const { return position_; }
     const kmVec2& acceleration() const { return acceleration_; }
+    float rotation() const { return rotation_; }
+    
     void update(float dt);
     
     SDuint id() const { return id_; }

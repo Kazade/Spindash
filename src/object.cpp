@@ -10,7 +10,8 @@ static SDuint generate_id() {
 }
 
 Object::Object(World* world):
-    id_(generate_id()) {
+    id_(generate_id()),
+    rotation_(0.0f) {
     
     register_object(this);
     
@@ -94,6 +95,16 @@ kmVec2 sdObjectGetPosition(SDuint object) {
     return obj->position();
 }
 
+SDfloat sdObjectGetPositionX(SDuint object) {
+    Object* obj = Object::by_id(object);        
+    return obj->position().x;
+}
+
+SDfloat sdObjectGetPositionY(SDuint object) {
+    Object* obj = Object::by_id(object);        
+    return obj->position().y;
+}
+
 SDfloat sdObjectGetSpeedX(SDuint object) {
     Object* obj = Object::by_id(object);
     return obj->speed().x;
@@ -115,3 +126,9 @@ void sdObjectSetSpeedY(SDuint object, SDfloat y) {
     
     obj->set_speed(obj->speed().x, y);
 }
+
+SDfloat sdObjectGetRotation(SDuint object) {
+    Object* obj = Object::by_id(object);
+    return obj->rotation();
+}
+

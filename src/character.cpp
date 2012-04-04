@@ -89,3 +89,9 @@ void sdCharacterStopMovingRight(SDuint character) {
     Character* c = get_character(character);
     c->stop_moving_right();
 }
+
+SDbool sdCharacterIsGrounded(SDuint character) {
+    Character* c = get_character(character);
+    return c->is_grounded();
+}
+

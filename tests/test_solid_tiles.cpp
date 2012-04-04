@@ -2,14 +2,14 @@
 
 #include "spindash.h"
 
-const float EPSILON = 1.0f / 256.0f;
+static const float EPSILON = 1.0f / 256.0f;
 
 //Sonic runs at 60 fps on NTSC 
-float frame_time = 1.0f / 60.0f;
+static float frame_time = 1.0f / 60.0f;
 
 //Sonic is 40 pixels tall, we use this to scale the world so 
 //that he is one unit high
-float world_scale = 1.0f / 40.0f;
+static float world_scale = 1.0f / 40.0f;
 
 TEST(test_horizontal_sensors) {
     SDuint world = sdCreateWorld();
@@ -21,7 +21,7 @@ TEST(test_horizontal_sensors) {
     kmVec2Fill(&floor_triangle[1], 0.0f, -1.0f);
     kmVec2Fill(&floor_triangle[2], 1000, 1.0f);
     
-    sdWorldAddTriangle(world, floor_trangle);
+    sdWorldAddTriangle(world, floor_triangle);
     
     float wall_x = 10.0f;
     
@@ -65,7 +65,25 @@ TEST(test_vertical_up_sensors_with_pass_thru) {
 }
 
 TEST(test_vertical_down_sensors) {
-
+    SDuint world = sdCreateWorld();
+    SDuint character = sdCharacterCreate(world);
+    
+    //Add a floor and a single wall to the right
+    kmVec2 floor_triangle[3];
+    kmVec2Fill(&floor_triangle[0], -1000.0f, 0.0f);
+    kmVec2Fill(&floor_triangle[1], 0.0f, -10.0f);
+    kmVec2Fill(&floor_triangle[2], 0.0f, 0.0f);
+    
+    sdWorldAddTriangle(world, floor_triangle);
+    
+    sdObjectSetPosition(character, -10.0f * world_scale, 0.0f);
+    CHECK(sdCharacterIsGrounded(character));
+    sdObjectSetPosition(character, 0.0f, 0.0f);
+    CHECK(sdCharacterIsGrounded(character));
+    sdObjectSetPosition(character, 10.0f * world_scale, 0.0f);
+    CHECK(!sdCharacterIsGrounded(character));
+    
+    CHECK_CLOSE(0.0f, sdObjectGetRotation(character), EPSILON);
 }
 
 TEST(test_low_ceiling_prevents_jump) {
