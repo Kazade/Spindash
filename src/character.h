@@ -5,14 +5,15 @@
 
 #include "object.h"
 #include "kazmath/ray2.h"
+#include "collision/ray_box.h"
 
 class Character : public Object {
 public:
     Character(World* world):
-        Object(world),
+        Object(world, CollisionPrimitive::ptr(new RayBox(0.5f, 1.0f))),
         moving_left_(false),
         moving_right_(false),
-        is_grounded_(false) {
+        is_grounded_(false) {        
     }
     
     const kmRay2& ray(const char id) { return rays_[id]; }
@@ -35,8 +36,7 @@ private:
     //override
     void post_speed_update(float dt);
     
-    bool acc_applied_this_frame_;
-    
+    bool acc_applied_this_frame_;     
 };
 
 #endif

@@ -1,7 +1,12 @@
+#include <cassert>
 #include <map>
 #include <GL/gl.h>
-#include <boost/shared_ptr.hpp>
+#include <functional>
+#include <algorithm>
+#include <tr1/functional>
+#include <tr1/memory>
 
+#include "collision/collide.h"
 #include "kazmath/vec2.h"
 #include "world.h"
 #include "character.h"
@@ -14,7 +19,6 @@ World::World(SDuint id):
     set_gravity(0.0f, -7.0f);
     
 }
-
 
 void World::set_gravity(float x, float y) {
     kmVec2Fill(&gravity_, x, y);
@@ -87,9 +91,68 @@ void World::debug_render() {
 }
 
 void World::update(float step) {
-    for(std::vector<Object::ptr>::iterator it = objects_.begin(); it != objects_.end(); ++it) {
-        (*it)->update(step);
+    /*
+        How should collisions be processed? Collision detection and respons
+        is recursive, and also, we need to do some sweeping tests
+        during collision. So, to collide we need to have something like
+        
+        update_but_dont_move(objects)       
+        
+        for i in xrange(len(objects)):
+            lhs = objects[i]
+            
+            first_loop = True
+            collisions = []
+            
+            while collisions or first_loop:
+                first_loop = False
+                
+                for triangle in world:
+                    collisions.extend(lhs.collide_with(triangle))
+                
+                for j in xrange(start=i+1, stop=len(objects)):                
+                    rhs = objects[j]                
+                    collisions.append(lhs.coilide_with(rhs)
+
+                if collisions:                    
+                    lhs.respond_to(collisions.sort_by(distance))
+    */                                
+    
+    //Call update on each object, this shouldn't change the objects position, but just velocity etc.
+    std::for_each(objects_.begin(), objects_.end(), std::tr1::bind(&Object::prepare, std::tr1::placeholders::_1, step));
+
+    for(uint32_t i = 0; i < objects_.size(); ++i) {
+        Object& lhs = *objects_.at(i);
+        bool first_loop = true;
+        std::vector<Collision> collisions;
+        while(!collisions.empty() || first_loop) {
+            first_loop = false;
+            
+            for(uint32_t j = 0; j < get_triangle_count(); ++j) {
+                Triangle& triangle = triangles_.at(j);
+                
+                std::vector<Collision> new_collisions = collide(&lhs.geom(), &triangle);
+                if(!new_collisions.empty()) {
+                    collisions.insert(new_collisions.begin(), new_collisions.end(), collisions.end());
+                }
+            }
+            
+            for(uint32_t j = i + 1; j < objects_.size(); ++j) {
+                Object& rhs = *objects_.at(j);                
+                std::vector<Collision> new_collisions = collide(&lhs.geom(), &rhs.geom());
+                if(!new_collisions.empty()) {
+                    collisions.insert(new_collisions.begin(), new_collisions.end(), collisions.end());
+                }                
+            }   
+            
+            if(!collisions.empty()) {
+                lhs.respond_to(collisions);
+            } else {
+                lhs.update(step); //Move without responding to collisions
+            }            
+        }
     }
+    
 }
 
 void World::destroy_object(ObjectID object_id) {
@@ -124,7 +187,7 @@ ObjectID World::new_character() {
 
 //=============================================================
 
-static std::map<SDuint, boost::shared_ptr<World> > worlds_;
+static std::map<SDuint, std::tr1::shared_ptr<World> > worlds_;
 
 World* get_world_by_id(SDuint world) {
     if(worlds_.find(world) == worlds_.end()) {
@@ -140,7 +203,7 @@ World* get_world_by_id(SDuint world) {
     This function creates an empty world ready to start accepting
     new entities and polygons.
 */
-SDuint sdCreateWorld() {
+SDuint sdWorldCreate() {
     SDuint new_id = ++World::world_id_counter_;
     worlds_[new_id].reset(new World(new_id));
     return new_id;
@@ -153,7 +216,7 @@ SDuint sdCreateWorld() {
  * Destroys a world and its contents (polygons, entities etc.)
  */
 
-void sdDestroyWorld(SDuint world) {
+void sdWorldDestroy(SDuint world) {
     if(worlds_.find(world) == worlds_.end()) {
         //TODO: log error
         return;
@@ -180,6 +243,12 @@ void sdWorldAddMesh(SDuint world_id, SDuint num_triangles, kmVec2* points) {
         kmVec2Assign(&tri[2], &points[(i * 3) + 2]);
         sdWorldAddTriangle(world_id, tri);
     }
+}
+
+void sdWorldRemoveTriangles(SDuint world_id) {
+    World* world = get_world_by_id(world_id);
+    assert(world);
+    world->remove_all_triangles();
 }
 
 void sdWorldStep(SDuint world_id, SDfloat dt) {

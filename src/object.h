@@ -7,6 +7,7 @@
 
 #include "typedefs.h"
 #include "kazmath/vec2.h"
+#include "collision/collision_primitive.h"
 
 typedef uint32_t ObjectID;
 
@@ -14,6 +15,8 @@ class World;
 
 class Object {
 private:
+    SDuint id_;
+    
     kmVec2 position_;
     kmVec2 speed_;
     kmVec2 acceleration_;
@@ -21,18 +24,19 @@ private:
 
     static std::map<ObjectID, Object*> objects_;
 
-    World* world_;
+    World* world_;       
     
-    SDuint id_;
-    
+    virtual void pre_prepare(float dt) {}
+    virtual void post_prepare(float dt) {}
     virtual void pre_update(float dt) {}
     virtual void post_update(float dt) {}
-    virtual void post_speed_update(float dt) {}
+    
+    CollisionPrimitive::ptr shape_;
     
 public:
     typedef std::tr1::shared_ptr<Object> ptr;
 
-    Object(World* world);
+    Object(World* world, CollisionPrimitive::ptr shape);
     virtual ~Object();
 
     static void register_object(Object* obj);
@@ -49,11 +53,16 @@ public:
     const kmVec2& acceleration() const { return acceleration_; }
     float rotation() const { return rotation_; }
     
+    void prepare(float dt);
     void update(float dt);
+    
+    virtual void respond_to(std::vector<Collision>& collisions) {}
     
     SDuint id() const { return id_; }
     
     World* world() { return world_; }
+    
+    CollisionPrimitive& geom() { return *shape_; }
 };
 
 #endif

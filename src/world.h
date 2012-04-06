@@ -6,9 +6,7 @@
 #include "spindash.h"
 #include "object.h"
 
-struct Triangle {
-    kmVec2 points[3];
-};
+#include "collision/triangle.h"
 
 class World {
 public:
@@ -19,6 +17,8 @@ public:
     void get_gravity(float& x, float& y);
 
     void add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3);
+    void remove_all_triangles() { triangles_.clear(); }
+    
     ObjectID new_sphere();
     ObjectID new_box();
     ObjectID new_character();

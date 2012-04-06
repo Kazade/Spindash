@@ -12,7 +12,7 @@ static float frame_time = 1.0f / 60.0f;
 static float world_scale = 1.0f / 40.0f;
 
 TEST(test_horizontal_sensors) {
-    SDuint world = sdCreateWorld();
+    SDuint world = sdWorldCreate();
     SDuint character = sdCharacterCreate(world);
     
     //Add a floor and a single wall to the right
@@ -54,6 +54,8 @@ TEST(test_horizontal_sensors) {
     //Should be back where we were
     CHECK_CLOSE(wall_x - character_width, sdObjectGetPositionX(character), EPSILON);
     CHECK_CLOSE(0.0f, sdObjectGetSpeedX(character), EPSILON); //No speed
+    
+    sdWorldDestroy(world);
 }
 
 TEST(test_vertical_up_sensors) {
@@ -65,7 +67,7 @@ TEST(test_vertical_up_sensors_with_pass_thru) {
 }
 
 TEST(test_vertical_down_sensors) {
-    SDuint world = sdCreateWorld();
+    SDuint world = sdWorldCreate();
     SDuint character = sdCharacterCreate(world);
     
     //Add a floor and a single wall to the right
@@ -84,6 +86,27 @@ TEST(test_vertical_down_sensors) {
     CHECK(!sdCharacterIsGrounded(character));
     
     CHECK_CLOSE(0.0f, sdObjectGetRotation(character), EPSILON);
+    
+    sdWorldRemoveTriangles(world); //Clear the world
+        
+    //Add a 45 degree slope
+    kmVec2Fill(&floor_triangle[0], 0.0f, 0.0f);
+    kmVec2Fill(&floor_triangle[1], 100.0f, 0.0f);
+    kmVec2Fill(&floor_triangle[2], 100.0f, 100.0f);
+    sdWorldAddTriangle(world, floor_triangle);
+    
+    //Move the character above the slope
+    sdObjectSetPosition(character, 50.0f, 50.0f);
+    
+    //Run 5 seconds of gameplay
+    for(uint32_t i = 0; i < 5; ++i) sdWorldStep(world, 1.0f);
+    
+    //Now the character should have fallen, and be stood on the slope 
+    //with a rotation of -45.0 (or 360.0f - 45.0f)
+    CHECK(sdCharacterIsGrounded(character));
+    CHECK_CLOSE(360.0f - 45.0f, sdObjectGetRotation(character), EPSILON);    
+    
+    sdWorldDestroy(world);
 }
 
 TEST(test_low_ceiling_prevents_jump) {

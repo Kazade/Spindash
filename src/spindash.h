@@ -6,12 +6,13 @@
 #include "kazmath/vec2.h"
 #include "typedefs.h"
 
-SDuint sdCreateWorld();
+SDuint sdWorldCreate();
 void sdWorldAddTriangle(SDuint world, kmVec2* points);
 void sdWorldAddMesh(SDuint world, SDuint num_triangles, kmVec2* points);
+void sdWorldRemoveTriangles(SDuint world);
 void sdWorldStep(SDuint world, SDfloat dt);
 void sdWorldDebugRenderGL(SDuint world);
-void sdDestroyWorld(SDuint world);
+void sdWorldDestroy(SDuint world);
 
 void sdObjectDestroy(SDuint object);
 

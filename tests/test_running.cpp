@@ -26,7 +26,7 @@ void create_floor_plane(SDuint world) {
 }
     
 TEST(test_acceleration) {
-    SDuint world = sdCreateWorld();
+    SDuint world = sdWorldCreate();
     SDuint character = sdCharacterCreate(world);
     
     //Character by default should be 1.0f units high
@@ -63,10 +63,12 @@ TEST(test_acceleration) {
     sdWorldStep(world, frame_time * 2); //Move two steps
     CHECK_CLOSE(-expected * 3, sdObjectGetSpeedX(character), EPSILON); //Now should be negative
     CHECK_CLOSE(0.0f, sdObjectGetSpeedY(character), EPSILON);                       
+    
+    sdWorldDestroy(world);
 }
 
 TEST(test_deceleration) {
-    SDuint world = sdCreateWorld();
+    SDuint world = sdWorldCreate();
     SDuint character = sdCharacterCreate(world);
     
     //Character by default should be 1.0f units high
@@ -103,10 +105,12 @@ TEST(test_deceleration) {
     sdWorldStep(world, frame_time);
     //Emulate weird anomoly (see SPG Running - Deceleration)
     CHECK_CLOSE(-0.5 * world_scale, sdObjectGetSpeedX(character), EPSILON);
+    
+    sdWorldDestroy(world);
 }
 
 TEST(test_friction) {
-    SDuint world = sdCreateWorld();
+    SDuint world = sdWorldCreate();
     SDuint character = sdCharacterCreate(world);
     
     //Character by default should be 1.0f units high
@@ -127,10 +131,12 @@ TEST(test_friction) {
     sdObjectSetSpeedX(character, 0.01 * world_scale);   
     sdWorldStep(world, frame_time);
     CHECK_CLOSE(0.0f, sdObjectGetSpeedX(character), EPSILON);
+    
+    sdWorldDestroy(world);
 }
 
 TEST(test_top_speed) {
-    SDuint world = sdCreateWorld();
+    SDuint world = sdWorldCreate();
     SDuint character = sdCharacterCreate(world);
     
     //Character by default should be 1.0f units high
@@ -150,4 +156,6 @@ TEST(test_top_speed) {
     sdWorldStep(world, frame_time);
     //No acceleration should have been added
     CHECK_CLOSE(7.0f * world_scale, sdObjectGetSpeedX(character), EPSILON);
+    
+    sdWorldDestroy(world);
 }

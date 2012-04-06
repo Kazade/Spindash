@@ -9,9 +9,10 @@ static SDuint generate_id() {
     return ++id;
 }
 
-Object::Object(World* world):
+Object::Object(World* world, CollisionPrimitive::ptr shape):
     id_(generate_id()),
-    rotation_(0.0f) {
+    rotation_(0.0f),
+    shape_(shape) {
     
     register_object(this);
     
@@ -24,14 +25,20 @@ Object::~Object() {
     unregister_object(this);
 }
 
-void Object::update(float dt) {
-    pre_update(dt);
+void Object::prepare(float dt) {
+    pre_prepare(dt);
     
     speed_.x += acceleration_.x * dt;
     speed_.y += acceleration_.y * dt;
     
-    post_speed_update(dt);
+    post_prepare(dt);
 
+
+}
+
+void Object::update(float dt) {
+    pre_update(dt);
+    
     position_.x += speed_.x;
     position_.y += speed_.y;
     
