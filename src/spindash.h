@@ -38,6 +38,8 @@ void sdCharacterStartMovingRight(SDuint character);
 void sdCharacterStopMovingRight(SDuint character);
 void sdCharacterStartJumping(SDuint character);
 void sdCharacterStopJumping(SDuint character);
+void sdCharacterStartLookingDown(SDuint character);
+void sdCharacterStopLookingDown(SDuint character);
 
 SDuint sdBoxCreate(SDuint world);
 SDuint sdCircleCreate(SDuint world);

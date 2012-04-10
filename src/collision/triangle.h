@@ -6,6 +6,9 @@
 class Triangle : public CollisionPrimitive {
 public:
     kmVec2 points[3];    
+    
+    void set_position(float x, float y) {} //Triangles are absolute
+    void set_rotation(float degrees) {}
 };
 
 #endif

@@ -57,7 +57,7 @@ void World::debug_render() {
             glColor3f(colour[0], colour[1], colour[2]);
 
             for(unsigned int j = 0; j < 3; ++j) {
-                glVertex3f(triangles_[i].points[j].x, triangles_[i].points[j].y, 0.0f);
+                glVertex2f(triangles_[i].points[j].x, triangles_[i].points[j].y);
             }
         }
         glEnd();
@@ -76,9 +76,9 @@ void World::debug_render() {
             glEnd();
 
             if(Character* c = dynamic_cast<Character*>((*it).get())) {
-                kmRay2 ray;
-                for(char ray_id: {'A', 'B', 'L', 'R'}) {
-                    ray = c->ray(ray_id);
+                RayBox* box = dynamic_cast<RayBox*>(&c->geom());
+                for(char ray_id: {'A', 'B', 'C', 'D', 'L', 'R'}) {
+                    kmRay2& ray = box->ray(ray_id);
                     glBegin(GL_LINES);
                         glVertex2f(ray.start.x, ray.start.y);
                         glVertex2f(ray.start.x + ray.dir.x, ray.start.y + ray.dir.y);
@@ -133,7 +133,7 @@ void World::update(float step) {
                 
                 std::vector<Collision> new_collisions = collide(&lhs.geom(), &triangle);
                 if(!new_collisions.empty()) {
-                    collisions.insert(new_collisions.begin(), new_collisions.end(), collisions.end());
+                    collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
                 }
             }
             
@@ -141,16 +141,17 @@ void World::update(float step) {
                 Object& rhs = *objects_.at(j);                
                 std::vector<Collision> new_collisions = collide(&lhs.geom(), &rhs.geom());
                 if(!new_collisions.empty()) {
-                    collisions.insert(new_collisions.begin(), new_collisions.end(), collisions.end());
+                    collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
                 }                
             }   
             
             if(!collisions.empty()) {
                 lhs.respond_to(collisions);
-            } else {
-                lhs.update(step); //Move without responding to collisions
-            }            
+                collisions.clear();
+            }
         }
+        
+        lhs.update(step); //Move without responding to collisions
     }
     
 }

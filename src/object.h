@@ -14,7 +14,7 @@ typedef uint32_t ObjectID;
 class World;
 
 class Object {
-private:
+protected:
     SDuint id_;
     
     kmVec2 position_;
@@ -22,13 +22,14 @@ private:
     kmVec2 acceleration_;
     float rotation_;
 
+private:
     static std::map<ObjectID, Object*> objects_;
 
     World* world_;       
     
     virtual void pre_prepare(float dt) {}
     virtual void post_prepare(float dt) {}
-    virtual void pre_update(float dt) {}
+    virtual bool pre_update(float dt) { return true; }
     virtual void post_update(float dt) {}
     
     CollisionPrimitive::ptr shape_;
@@ -45,18 +46,19 @@ public:
     static bool exists(SDuint object_id);
     
     void set_position(float x, float y);
-    void set_speed(float x, float y);
+    virtual void set_speed(float x, float y);
     void set_acceleration(float x, float y);
+    void set_rotation(float degrees);
 
     const kmVec2& speed() const { return speed_; }
     const kmVec2& position() const { return position_; }
     const kmVec2& acceleration() const { return acceleration_; }
     float rotation() const { return rotation_; }
     
-    void prepare(float dt);
-    void update(float dt);
+    virtual void prepare(float dt);
+    virtual void update(float dt);
     
-    virtual void respond_to(std::vector<Collision>& collisions) {}
+    virtual void respond_to(const std::vector<Collision>& collisions) {}
     
     SDuint id() const { return id_; }
     
@@ -64,5 +66,9 @@ public:
     
     CollisionPrimitive& geom() { return *shape_; }
 };
+
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0)) || 1;
+}
 
 #endif

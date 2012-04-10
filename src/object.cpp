@@ -32,16 +32,13 @@ void Object::prepare(float dt) {
     speed_.y += acceleration_.y * dt;
     
     post_prepare(dt);
-
-
 }
 
 void Object::update(float dt) {
-    pre_update(dt);
-    
-    position_.x += speed_.x;
-    position_.y += speed_.y;
-    
+    if(pre_update(dt)) {
+        set_position(position().x + speed_.x, position().y + speed_.y);
+    }
+
     post_update(dt);
 }
 
@@ -68,6 +65,13 @@ bool Object::exists(SDuint object_id) {
 void Object::set_position(float x, float y) {
     position_.x = x;
     position_.y = y;
+    
+    geom().set_position(x, y);
+}
+
+void Object::set_rotation(float degrees) {
+    rotation_ = degrees;
+    geom().set_rotation(degrees);
 }
 
 void Object::set_speed(float x, float y) {

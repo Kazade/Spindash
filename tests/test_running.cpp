@@ -44,6 +44,7 @@ TEST(test_acceleration) {
     //Sonic physics guide: Running   
     float expected = 0.046875f * world_scale;
     CHECK_CLOSE(expected, sdObjectGetSpeedX(character), EPSILON);
+    CHECK(sdCharacterIsGrounded(character));
     CHECK_CLOSE(0.0f, sdObjectGetSpeedY(character), EPSILON);   
     
     sdWorldStep(world, frame_time);
@@ -117,10 +118,13 @@ TEST(test_friction) {
     sdObjectSetPosition(character, 0.0f, 0.5f);    
     create_floor_plane(world);    
     
-    //We've been accelerating for 1 second
-    float initial = 0.046875f * world_scale * 60;
-    sdObjectSetSpeedX(character, initial);
+    //Accelerate for 1 second
+    sdCharacterStartMovingRight(character);
+    for(uint32_t i = 0; i < 60; ++i) { sdWorldStep(world, frame_time); }
+    sdCharacterStopMovingRight(character);
      
+    float initial = sdObjectGetSpeedX(character);
+    
     for(uint32_t i = 0; i < 60; ++i) {
         sdWorldStep(world, frame_time); //No buttons are being pressed
         CHECK_CLOSE(initial - (i * (0.046875 * world_scale)), sdObjectGetSpeedX(character), EPSILON);        

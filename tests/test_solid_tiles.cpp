@@ -1,4 +1,6 @@
 #include <unittest++/UnitTest++.h>
+#include <cmath>
+#include "kazmath/utility.h"
 
 #include "spindash.h"
 
@@ -35,24 +37,24 @@ TEST(test_horizontal_sensors) {
     float character_width = 20.0f * world_scale;
 
     //Position the character on the floor, next to the wall
-    sdObjectSetPosition(character, wall_x - character_width, 0.5f); 
+    sdObjectSetPosition(character, wall_x - (character_width/2), 0.5f); 
     sdWorldStep(world, frame_time); //Step the world
     
     //Nothing should have changed
-    CHECK_CLOSE(wall_x - character_width, sdObjectGetPositionX(character), EPSILON);
+    CHECK_CLOSE(wall_x - (character_width / 2), sdObjectGetPositionX(character), EPSILON);
     
     sdCharacterStartMovingRight(character);
     sdWorldStep(world, frame_time); //Step the world
     
     //Again nothing should have changed, the wall should've stopped us
-    CHECK_CLOSE(wall_x - character_width, sdObjectGetPositionX(character), EPSILON);
+    CHECK_CLOSE(wall_x - (character_width/2), sdObjectGetPositionX(character), EPSILON);
     
     //Now, make us intersect the wall
-    sdObjectSetPosition(character, (wall_x - character_width) + 0.25f, 0.5f); 
+    sdObjectSetPosition(character, (wall_x - (character_width/2)) + 0.25f, 0.5f); 
     sdWorldStep(world, frame_time);
     
     //Should be back where we were
-    CHECK_CLOSE(wall_x - character_width, sdObjectGetPositionX(character), EPSILON);
+    CHECK_CLOSE(wall_x - (character_width/2), sdObjectGetPositionX(character), EPSILON);
     CHECK_CLOSE(0.0f, sdObjectGetSpeedX(character), EPSILON); //No speed
     
     sdWorldDestroy(world);
@@ -79,10 +81,15 @@ TEST(test_vertical_down_sensors) {
     sdWorldAddTriangle(world, floor_triangle);
     
     sdObjectSetPosition(character, -10.0f * world_scale, 0.0f);
+    sdWorldStep(world, 1.0f);
     CHECK(sdCharacterIsGrounded(character));
+    
     sdObjectSetPosition(character, 0.0f, 0.0f);
+    sdWorldStep(world, 1.0f);
     CHECK(sdCharacterIsGrounded(character));
-    sdObjectSetPosition(character, 10.0f * world_scale, 0.0f);
+    
+    sdObjectSetPosition(character, 10.0f * world_scale, 10.0f);
+    sdWorldStep(world, 0.1f);
     CHECK(!sdCharacterIsGrounded(character));
     
     CHECK_CLOSE(0.0f, sdObjectGetRotation(character), EPSILON);
@@ -105,6 +112,47 @@ TEST(test_vertical_down_sensors) {
     //with a rotation of -45.0 (or 360.0f - 45.0f)
     CHECK(sdCharacterIsGrounded(character));
     CHECK_CLOSE(360.0f - 45.0f, sdObjectGetRotation(character), EPSILON);    
+    
+    sdWorldDestroy(world);
+}
+
+TEST(test_slp_factor) {
+    SDuint world = sdWorldCreate();
+    SDuint character = sdCharacterCreate(world);
+    kmVec2 floor_triangle[3];
+    //Add a 45 degree slope
+    kmVec2Fill(&floor_triangle[0], 0.0f, 0.0f);
+    kmVec2Fill(&floor_triangle[1], 100.0f, 0.0f);
+    kmVec2Fill(&floor_triangle[2], 100.0f, 100.0f);
+    sdWorldAddTriangle(world, floor_triangle);
+    
+    //Move the character above the slope
+    sdObjectSetPosition(character, 50.0f, 50.0f);
+    
+    for(uint32_t i = 0; i < 5; ++i) sdWorldStep(world, 1.0f);
+    CHECK(sdCharacterIsGrounded(character));
+    CHECK_CLOSE(360.0f - 45.0f, sdObjectGetRotation(character), EPSILON);    
+    
+    sdObjectSetSpeedX(character, 0.0f); //Reset gsp
+    sdWorldStep(world, frame_time); //Run a single step
+    
+    float x_speed = sdObjectGetSpeedX(character);
+    CHECK_CLOSE(0.125 * world_scale * sinf(kmDegreesToRadians(315)), x_speed / cosf(kmDegreesToRadians(sdObjectGetRotation(character))), EPSILON);
+    
+    //Move the character above the slope
+    sdObjectSetPosition(character, 50.0f, 50.0f);
+    
+    for(uint32_t i = 0; i < 5; ++i) sdWorldStep(world, 1.0f);
+    CHECK(sdCharacterIsGrounded(character));
+    CHECK_CLOSE(360.0f - 45.0f, sdObjectGetRotation(character), EPSILON);    
+    
+    sdObjectSetSpeedX(character, 0.0f); //Reset gsp
+    sdCharacterStartLookingDown(character);
+    sdWorldStep(world, frame_time); //Run a single step
+
+    //FIXME: Friction is messing this test up!
+    x_speed = sdObjectGetSpeedX(character) / cosf(kmDegreesToRadians(sdObjectGetRotation(character)));
+    CHECK_CLOSE((0.3125f * world_scale * sinf(kmDegreesToRadians(315))), x_speed + (0.046875f * world_scale), EPSILON);
     
     sdWorldDestroy(world);
 }

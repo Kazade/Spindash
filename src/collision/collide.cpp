@@ -9,11 +9,16 @@ std::vector<Collision> do_collide(Triangle* triangle, RayBox* ray_box) {
         
         kmVec2 intersection, normal;
         
-        if(kmRay2IntersectTriangle(ray, const kmVec2* p1, const kmVec2* p2, const kmVec2* p3, intersection, normal_out)) {
+        if(kmRay2IntersectTriangle(&ray, &triangle->points[0], 
+                                         &triangle->points[1], 
+                                         &triangle->points[2], 
+                                         &intersection, &normal)) {
             Collision new_collision;
+            kmVec2Normalize(&normal, &normal);
             new_collision.normal = normal;
             new_collision.point = intersection;
-            collision.push_back(new_collision);
+            new_collision.ray = which;
+            collisions.push_back(new_collision);
         }
     }
 

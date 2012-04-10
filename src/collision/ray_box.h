@@ -37,8 +37,21 @@ public:
     RayBox(float width, float height);    
     kmRay2& ray(char which);    
     
+    void set_position(float x, float y);
+    void set_rotation(float degrees);
+    
+    float height() const { return height_; }
+    float width() const { return width_; }
 private:
+    float x_;
+    float y_;
+    float width_;
+    float height_;
+    float degrees_;
+    
     std::map<char, kmRay2> rays_;    
+    
+    void init();
 };
 
 #endif
