@@ -10,7 +10,7 @@
 class Character : public Object {
 public:
     Character(World* world):
-        Object(world, CollisionPrimitive::ptr(new RayBox(0.5f, 1.0f))),
+        Object(world, CollisionPrimitive::ptr(new RayBox(this, 0.5f, 1.0f))),
         moving_left_(false),
         moving_right_(false),
         looking_down_(false),

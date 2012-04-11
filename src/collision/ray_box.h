@@ -34,7 +34,7 @@ class RayBox : public CollisionPrimitive {
 public:
     typedef std::tr1::shared_ptr<RayBox> ptr;
     
-    RayBox(float width, float height);    
+    RayBox(Object* owner, float width, float height);   
     kmRay2& ray(char which);    
     
     void set_position(float x, float y);

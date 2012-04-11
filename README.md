@@ -12,13 +12,24 @@ portability.
 
 The first step to using the library is to create the physics world. The world
 defines the collidable geometry and contains characters and objects that collide with it
-and each other.
+and each other. The world is scaled in comparison to the Sonic the Hedgehog games, it is
+1/40th of the size (due to using GL units, rather than pixels).
 
 ### Characters
 
-A character is an object that can move, jump and collide.
+A character is an object that can move, jump and collide. It is represented by a "RayBox", a rectangular
+shape defined by 6 rays, 2 up, 2 down, 1 forward and 1 back. Characters are different to other objects
+in that they perform complex logic to determine their motion. 
 
-### Objects
+### Springs
 
-An object is uncontrollable and only has simple physical rules applied (e.g. collision, gravity)
+Springs are rectangular objects that will accelerate an object in a certain direction with a constant
+force if the object collides with their "top" edge. They are represented by a Box. When creating a 
+spring you must specify an angle, and a power.
+
+### Triangle
+
+A triangle is not an object, but is a CollisionPrimitive (like Boxes, Circles and RayBoxes), it cannot be 
+moved, and is defined by 3 points. Triangles are the building blocks of the world geometry. If you are defining
+landscape in your game, you should be using triangles.
 

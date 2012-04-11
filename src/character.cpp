@@ -33,15 +33,16 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
 
     RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
     
-    for(const Collision& c: collisions) {
-        kmRay2& r = ray_box->ray(c.ray);
-
+    for(const Collision& c: collisions) {        
+        char ray = (c.object_a == &this->geom()) ? c.a_ray : c.b_ray;
+    
+        kmRay2& r = ray_box->ray(ray);
         kmVec2 diff;
 
-        hitmask[c.ray] = true;
+        hitmask[ray] = true;
         kmVec2Subtract(&diff, &c.point, &r.start);
-        distance[c.ray] = kmVec2Length(&diff);
-        collision_map[c.ray] = c;
+        distance[ray] = kmVec2Length(&diff);
+        collision_map[ray] = c;
     }
 
     if(hitmask['A'] || hitmask['B']) {
@@ -62,22 +63,26 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
             kmVec2Subtract(&diff, &collision_map['B'].point, &position());
             b_dist = kmVec2Length(&diff);        
             
+            //Get the normal for the other object, but from the hit with ray A (confusing I know :/ )
+            kmVec2 a_normal = (collision_map['A'].object_a == &this->geom()) ? collision_map['A'].b_normal : collision_map['A'].a_normal;
+            kmVec2 b_normal = (collision_map['B'].object_a == &this->geom()) ? collision_map['B'].b_normal : collision_map['B'].a_normal;
+            
             if(fabs(a_dist) < fabs(b_dist) && fabs(a_dist) < (ray_box->height() / 2.0f)) {
-                kmVec2Scale(&to_move, &collision_map['A'].normal, (ray_box->height() / 2.0f) - fabs(a_dist));
+                kmVec2Scale(&to_move, &a_normal, (ray_box->height() / 2.0f) - fabs(a_dist));
                 
-                float dot = kmVec2Dot(&collision_map['A'].normal, &up);
+                float dot = kmVec2Dot(&a_normal, &up);
                 float angle = kmRadiansToDegrees(acosf(dot));
                 angle = -angle;
-                angle = (angle < 0)? 360.0f + angle : angle;
+                angle = (angle < 0) ? 360.0f + angle : angle;
                 set_rotation(angle);                
             }
 
             if(fabs(b_dist) <= fabs(a_dist) && fabs(b_dist) < (ray_box->height() / 2.0f)) {
-                kmVec2Scale(&to_move, &collision_map['B'].normal, (ray_box->height() / 2.0f) - fabs(b_dist));
-                float dot = kmVec2Dot(&collision_map['B'].normal, &up);
+                kmVec2Scale(&to_move, &b_normal, (ray_box->height() / 2.0f) - fabs(b_dist));
+                float dot = kmVec2Dot(&b_normal, &up);
                 float angle = kmRadiansToDegrees(acosf(dot));
                 angle = -angle;
-                angle = (angle < 0)? 360.0f + angle : angle;
+                angle = (angle < 0) ? 360.0f + angle : angle;
                 set_rotation(angle);                                
             }
             
@@ -117,23 +122,27 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
             float to_move_length = (ray_box->height() / 2) - dist_to_intersection;
             kmVec2Scale(&to_move, &new_normal, to_move_length);*/
         } else if(hitmask['A']) {
+            kmVec2& a_normal = (collision_map['A'].object_a == &this->geom()) ? collision_map['A'].b_normal : collision_map['A'].a_normal;
+        
             kmVec2 diff;
             kmVec2Subtract(&diff, &collision_map['A'].point, &position());
             float a_dist = kmVec2Length(&diff);        
-            kmVec2Scale(&to_move, &collision_map['A'].normal, (ray_box->height() / 2.0f) - fabs(a_dist));
+            kmVec2Scale(&to_move, &a_normal, (ray_box->height() / 2.0f) - fabs(a_dist));
             
-            float dot = kmVec2Dot(&collision_map['A'].normal, &up);
+            float dot = kmVec2Dot(&a_normal, &up);
             float angle = kmRadiansToDegrees(acosf(dot));
             angle = -angle;
             angle = (angle < 0)? 360.0f + angle : angle;
             set_rotation(angle);        
         } else {
+            kmVec2& b_normal = (collision_map['B'].object_a == &this->geom()) ? collision_map['B'].b_normal : collision_map['B'].a_normal;
+                    
             kmVec2 diff;
             kmVec2Subtract(&diff, &collision_map['B'].point, &position());
             float b_dist = kmVec2Length(&diff);        
-            kmVec2Scale(&to_move, &collision_map['B'].normal, (ray_box->height() / 2.0f) - fabs(b_dist));
+            kmVec2Scale(&to_move, &b_normal, (ray_box->height() / 2.0f) - fabs(b_dist));
             
-            float dot = kmVec2Dot(&collision_map['B'].normal, &up);
+            float dot = kmVec2Dot(&b_normal, &up);
             float angle = kmRadiansToDegrees(acosf(dot));
             angle = -angle;
             angle = (angle < 0)? 360.0f + angle : angle;
@@ -148,13 +157,15 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
     if (hitmask['L'] || hitmask['R']) {
         kmRay2& ray_hit = (hitmask['L']) ? ray_box->ray('L') : ray_box->ray('R');
         Collision& hitpoint = (hitmask['L']) ? collision_map['L'] : collision_map['R'];
+        kmVec2& hitpoint_normal = (hitpoint.object_a == &this->geom()) ? hitpoint.b_normal : hitpoint.a_normal;
+        
         
         kmVec2 diff;
         kmVec2Subtract(&diff, &hitpoint.point, &position());
         float lr_dist = kmVec2Length(&diff);
         
         kmVec2 to_move;
-        kmVec2Scale(&to_move, &hitpoint.normal, kmVec2Length(&ray_hit.dir) - fabs(lr_dist));
+        kmVec2Scale(&to_move, &hitpoint_normal, kmVec2Length(&ray_hit.dir) - fabs(lr_dist));
 
         kmVec2 pos;
         kmVec2Assign(&pos, &position());
@@ -325,12 +336,14 @@ bool Character::pre_update(float dt) {
 
 void Character::set_speed(float x, float y) {
     /*
-        Characters are special in that the speed is overridden
-        each frame using gsp_. So, we override this method so that
-        any changes to X speed are done to gsp_. Changes to Y-speed are
-        ignored
+        Characters ignore the speed when on the ground
+        and in-fact override it each frame. The best thing
+        we can do here is, if someone sets the speed manually,
+        to make the character not on the ground
     */
-    gsp_ = x;
+    is_grounded_ = false;
+    speed_.x = x;
+    speed_.y = y;
 }
 
 void Character::post_prepare(float dt) {

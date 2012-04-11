@@ -1,30 +1,50 @@
 #include <cassert>
 #include "collide.h"
 
-std::vector<Collision> do_collide(Triangle* triangle, RayBox* ray_box) {
+#include "triangle.h"
+#include "ray_box.h"
+#include "box.h"
+
+std::vector<Collision> do_collide(Triangle* triangle, RayBox* ray_box, bool swap_result=false) {
     std::vector<Collision> collisions;
     
     for(char which: { 'A', 'B', 'C', 'D', 'L', 'R' }) {
         kmRay2& ray = ray_box->ray(which);
         
-        kmVec2 intersection, normal;
+        kmVec2 intersection, a_normal, b_normal, normal;
         
         if(kmRay2IntersectTriangle(&ray, &triangle->points[0], 
                                          &triangle->points[1], 
                                          &triangle->points[2], 
                                          &intersection, &normal)) {
             Collision new_collision;
-            kmVec2Normalize(&normal, &normal);
-            new_collision.normal = normal;
+            kmVec2Normalize(&a_normal, &normal);
+            kmVec2Normalize(&b_normal, &ray.dir);
+            
+            new_collision.object_a = (swap_result) ? (CollisionPrimitive*)ray_box : (CollisionPrimitive*)triangle;
+            new_collision.object_b = (swap_result) ? (CollisionPrimitive*)triangle : (CollisionPrimitive*)ray_box;
+            
+            new_collision.a_normal = (swap_result) ? b_normal : a_normal;
+            new_collision.b_normal = (swap_result) ? a_normal : b_normal;
             new_collision.point = intersection;
-            new_collision.ray = which;
+            
+            if(!swap_result){
+                new_collision.b_ray = which;
+            } else {
+                new_collision.a_ray = which;
+            }
             collisions.push_back(new_collision);
         }
     }
 
     return collisions;
 }
-std::vector<Collision> do_collide(RayBox* ray_box, Triangle* triangle) { return do_collide(triangle, ray_box); }
+std::vector<Collision> do_collide(RayBox* ray_box, Triangle* triangle) { return do_collide(triangle, ray_box, true); }
+
+std::vector<Collision> do_collide(Box* box, RayBox* ray_box, bool swap_result=false) {
+    return std::vector<Collision>();
+}
+std::vector<Collision> do_collide(RayBox* ray_box, Box* box) { return do_collide(box, ray_box, true); }
 
 std::vector<Collision> do_collide(RayBox* a, RayBox* b) {
     return std::vector<Collision>();
@@ -39,6 +59,8 @@ std::vector<Collision> collide(CollisionPrimitive* a, CollisionPrimitive* b) {
         if(RayBox* rhs = dynamic_cast<RayBox*>(b)) {
             return do_collide(lhs, rhs);
         } else if(Triangle* rhs = dynamic_cast<Triangle*>(b)) {
+            return do_collide(lhs, rhs);
+        } else if(Box* rhs = dynamic_cast<Box*>(b)) {
             return do_collide(lhs, rhs);
         } else {
             assert(0 && "Not implemented");

@@ -41,6 +41,8 @@ void sdCharacterStopJumping(SDuint character);
 void sdCharacterStartLookingDown(SDuint character);
 void sdCharacterStopLookingDown(SDuint character);
 
+SDuint sdSpringCreate(SDuint world, SDfloat angle, SDfloat power);
+
 SDuint sdBoxCreate(SDuint world);
 SDuint sdCircleCreate(SDuint world);
 

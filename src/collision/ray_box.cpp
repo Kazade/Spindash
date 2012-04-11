@@ -3,7 +3,8 @@
 #include "kazmath/ray2.h"
 #include "kazmath/mat3.h"
 
-RayBox::RayBox(float width, float height):
+RayBox::RayBox(Object* owner, float width, float height):
+    CollisionPrimitive(owner),
     x_(0.0f),
     y_(0.0f),
     width_(width),
