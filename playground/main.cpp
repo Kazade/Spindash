@@ -4,11 +4,15 @@
 
 #include "spindash.h"
 
+#include "kaztimer/kaztimer.h"
+
 #define WIDTH  640
 #define HEIGHT 480
 
 SDuint world = 0;
 SDuint sonic = 0;
+
+KTIuint timer;
 
 static void repaint() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -143,13 +147,17 @@ static void main_loop()
                 break;
             }
         }
-
-        sdWorldStep(world, 1.0f / 60.0f);
+        
+        while(ktiTimerCanUpdate()) { 
+            sdWorldStep(world, ktiGetDeltaTime());
+        }
 
     /* update the screen */    
         repaint();
     /* Wait 50ms to avoid using up all the CPU time */
         SDL_Delay(1.0f / 60.0f);
+        
+        ktiUpdateFrameTime();
     }
 }
 
@@ -189,6 +197,11 @@ static void build_world() {
 }
 
 int main(int argc, char* argv[]) {
+    ktiGenTimers(1, &timer);
+    ktiBindTimer(timer);
+    ktiStartFixedStepTimer(60);
+    
+
     setup_sdl();
     setup_opengl();
     build_world();

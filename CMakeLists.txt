@@ -13,6 +13,7 @@ PKG_CHECK_MODULES(GL REQUIRED gl) #FIXME: SHouldn't depend on GL
 
 INCLUDE_DIRECTORIES(
     kazmath
+    kaztimer
     ${Boost_INCLUDE_DIRS}
     ${GL_INCLUDE_DIRS}
 )
