@@ -22,6 +22,8 @@ public:
     ObjectID new_sphere();
     ObjectID new_box();
     ObjectID new_character();
+    ObjectID new_spring(float angle, float power);
+    
     void destroy_object(ObjectID object_id);
     
     void debug_render();

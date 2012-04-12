@@ -1,11 +1,23 @@
 
 #include "spring.h"
 #include "spindash.h"
+#include "world.h"
+
+SDuint sdSpringCreate(SDuint world_id, SDfloat angle, SDfloat power) {
+    World* world = get_world_by_id(world_id);
+    return world->new_spring(power, angle);
+}
+
 
 void Spring::respond_to(const std::vector<Collision>& collisions) {
     
     if(collisions.empty()) return;
     
-    Object* other = (collisions[0].object_a == &geom()) ? collisions[0].object_b : collisions[0].object_a;    
-    sdObjectSetSpeedY(other->id(), 16.0f * (1.0f/40.0f));
+    //FIXME: search for collisions where the angle of the normal matches angle
+    Object* other = (collisions[0].object_a == &geom()) ? collisions[0].object_b->owner() : collisions[0].object_a->owner();    
+    
+    //FIXME: should set x, and y using sine/cos
+    sdObjectSetSpeedY(other->id(), power_);
 }
+
+

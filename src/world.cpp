@@ -9,7 +9,10 @@
 #include "collision/collide.h"
 #include "kazmath/vec2.h"
 #include "world.h"
+
 #include "character.h"
+#include "spring.h"
+
 #include "spindash.h"
 
 SDuint World::world_id_counter_ = 0;
@@ -84,6 +87,17 @@ void World::debug_render() {
                         glVertex2f(ray.start.x + ray.dir.x, ray.start.y + ray.dir.y);
                     glEnd();
                 }
+            } else if (Spring* s = dynamic_cast<Spring*>((*it).get())) {
+                Box* box = dynamic_cast<Box*>(&s->geom());
+                
+                for(uint32_t i = 0; i < 4; ++i) {
+                    kmVec2& point = box->point(i);
+                    kmVec2& next_point = box->point((i == 3) ? 0 : i+1);
+                    glBegin(GL_LINES);
+                        glVertex2f(point.x, point.y);
+                        glVertex2f(next_point.x, next_point.y);
+                    glEnd();
+                }                
             }
         glPopMatrix();
     }
@@ -143,10 +157,12 @@ void World::update(float step) {
                 if(!new_collisions.empty()) {
                     collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
                 }                
+                
+                rhs.respond_to(new_collisions);
             }   
             
             if(!collisions.empty()) {
-                lhs.respond_to(collisions);
+                lhs.respond_to(collisions);                
                 collisions.clear();
             }
         }
@@ -184,6 +200,12 @@ ObjectID World::new_character() {
     Character::ptr new_character(new Character(this));    
     objects_.push_back(new_character);
     return new_character->id();
+}
+
+ObjectID World::new_spring(float angle, float power) {
+    Spring::ptr new_spring(new Spring(this, angle, power));    
+    objects_.push_back(new_spring);
+    return new_spring->id();
 }
 
 //=============================================================

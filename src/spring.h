@@ -10,6 +10,8 @@ public:
         Object(world, CollisionPrimitive::ptr(new Box(this, 0.5f, 0.25f))),
         power_(power),
         angle_(angle) {
+        
+        set_collision_flag(NOT_GROUND);
     }
     
     void respond_to(const std::vector<Collision>& collisions);

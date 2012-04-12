@@ -49,7 +49,33 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
         kmVec2 to_move;
         kmVec2Fill(&to_move, 0, 0);
         
-        is_grounded_ = true;
+        //FIXME: should check both rays!
+                
+        Object* other = nullptr;
+        if(hitmask['A']) {
+            if(collision_map['A'].object_a == &this->geom()) {
+                if(collision_map['A'].object_b) {
+                    other = collision_map['A'].object_b->owner();
+                }
+            } else {
+                if(collision_map['A'].object_a) {
+                    other = collision_map['A'].object_a->owner();
+                }        
+            }
+        } else if (hitmask['B']) {
+            if(collision_map['B'].object_a == &this->geom()) {
+                if(collision_map['B'].object_b) {
+                    other = collision_map['B'].object_b->owner();
+                }
+            } else {
+                if(collision_map['B'].object_a) {
+                    other = collision_map['B'].object_a->owner();
+                }        
+            }        
+        }
+
+        //Only mark if grounded if the object doesn't have the NOT_GROUND flag                        
+        is_grounded_ = (other) ? !other->has_collision_flag(NOT_GROUND) : true;
 
         kmVec2 up;
         kmVec2Fill(&up, 0.0f, 1.0f);

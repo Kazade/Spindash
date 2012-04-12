@@ -11,6 +11,12 @@
 
 typedef uint32_t ObjectID;
 
+enum CollisionFlag {
+    IGNORE_DOWNWARD_COLLISION = 1,
+    IGNORE_UPWARD_COLLISION = 2,
+    NOT_GROUND = 4
+};
+
 class World;
 
 class Object {
@@ -34,6 +40,7 @@ private:
     
     CollisionPrimitive::ptr shape_;
     
+    uint32_t collision_flags_;
 public:
     typedef std::tr1::shared_ptr<Object> ptr;
 
@@ -65,6 +72,9 @@ public:
     World* world() { return world_; }
     
     CollisionPrimitive& geom() { return *shape_; }
+    
+    void set_collision_flag(CollisionFlag flag) { collision_flags_ |= flag; }
+    bool has_collision_flag(CollisionFlag flag) const { return (collision_flags_ & flag) == flag; }
 };
 
 template <typename T> int sgn(T val) {
