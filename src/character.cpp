@@ -269,6 +269,8 @@ bool Character::pre_update(float dt) {
     
     if(is_grounded_) {
         gsp_ += slp * sin_rot * dt;
+    } else {
+        set_rotation(0);        
     }
 
     //Done this way so pressing left and right at the same time, does nothing
