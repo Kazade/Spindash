@@ -6,6 +6,18 @@ Spindash is a 2D physics library for platform games that attempts to mimic the
 physics of the original Sonic the Hedgehog games. It's written with C linkage for
 portability.
 
+## Building and testing
+
+* Check out the latest code from Git
+* Create a "build" directory in the root and change to it
+* Run: cmake .. && make
+* Then run ./playground/spindash_playground
+
+Playground is the sample test application for the library. If you find bugs, please
+report them here: https://github.com/Kazade/Spindash/issues
+
+If you fix bugs / add features, please submit a pull request on GitHub! You're awesome if you do!
+
 ## Concepts
 
 ### The World
