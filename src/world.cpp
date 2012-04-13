@@ -139,6 +139,7 @@ void World::update(float step) {
         Object& lhs = *objects_.at(i);
         bool first_loop = true;
         std::vector<Collision> collisions;
+                
         while(!collisions.empty() || first_loop) {
             first_loop = false;
             
@@ -167,7 +168,7 @@ void World::update(float step) {
             }
         }
         
-        lhs.update(step); //Move without responding to collisions
+        lhs.update(step); //Move without responding to collisions        
     }
     
 }

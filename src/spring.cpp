@@ -17,7 +17,8 @@ void Spring::respond_to(const std::vector<Collision>& collisions) {
     Object* other = (collisions[0].object_a == &geom()) ? collisions[0].object_b->owner() : collisions[0].object_a->owner();    
     
     //FIXME: should set x, and y using sine/cos
-    sdObjectSetSpeedY(other->id(), power_);
+    sdObjectSetSpeedX(other->id(), sinf(kmDegreesToRadians(angle_)) * power_);
+    sdObjectSetSpeedY(other->id(), cosf(kmDegreesToRadians(angle_)) * power_);
 }
 
 

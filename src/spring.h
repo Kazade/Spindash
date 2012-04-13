@@ -11,6 +11,7 @@ public:
         power_(power),
         angle_(angle) {
         
+        geom().set_rotation(angle_);
         set_collision_flag(NOT_GROUND);
     }
     

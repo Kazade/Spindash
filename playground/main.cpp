@@ -196,7 +196,7 @@ static void build_world() {
     kmVec2Fill(&wall[2], -20.0f, 0.0f); 
     sdWorldAddTriangle(world, wall);    
     
-    spring = sdSpringCreate(world, -45.0f, 10.0f / 40.0f);
+    spring = sdSpringCreate(world, 45.0f, 10.0f / 40.0f);
     sdObjectSetPosition(spring, 0.0f, 0.125f);
 }
 
