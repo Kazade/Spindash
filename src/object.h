@@ -64,6 +64,7 @@ public:
     
     virtual void prepare(float dt);
     virtual void update(float dt);
+    virtual void update_finished(float dt) {}
     
     virtual void respond_to(const std::vector<Collision>& collisions) {}
     

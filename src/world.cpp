@@ -40,8 +40,8 @@ void World::debug_render() {
         { 1.0f, 1.0f, 0.0f},
         { 1.0f, 0.0f, 1.0f},
         { 0.0f, 1.0f, 1.0f},
-        { 0.5f, 0.5f, 0.5f},
-        { 0.5f, 0.5f, 0.0f},
+        { 0.5f, 1.0f, 0.5f},
+        { 0.5f, 1.0f, 0.0f},
         { 0.5f, 0.0f, 0.5f},
         { 0.0f, 0.5f, 0.5f},
     };
@@ -139,7 +139,9 @@ void World::update(float step) {
         Object& lhs = *objects_.at(i);
         bool first_loop = true;
         std::vector<Collision> collisions;
-                
+        
+        lhs.update(step); //Move without responding to collisions
+
         while(!collisions.empty() || first_loop) {
             first_loop = false;
             
@@ -167,8 +169,7 @@ void World::update(float step) {
                 collisions.clear();
             }
         }
-        
-        lhs.update(step); //Move without responding to collisions        
+        lhs.update_finished(step);
     }
     
 }

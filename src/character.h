@@ -56,7 +56,7 @@ private:
     void pre_prepare(float dt);
     //override
     void post_prepare(float dt);
-    bool pre_update(float dt);
+    void update_finished(float dt);
     void prepare(float dt);
     
     bool acc_applied_this_frame_;     

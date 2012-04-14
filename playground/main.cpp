@@ -180,7 +180,7 @@ static void build_world() {
     world = sdWorldCreate();
     sonic = sdCharacterCreate(world);
     
-    sdObjectSetPosition(sonic, 0.0f, 1.0f);
+    sdObjectSetPosition(sonic, 0.0f, 3.0f);
     create_floor_plane(world);
     
     kmVec2 slope[3];
@@ -192,12 +192,28 @@ static void build_world() {
     kmVec2 wall[3];
     
     kmVec2Fill(&wall[0], -5.0f, 0.0f);
-    kmVec2Fill(&wall[1], -5.0f, 10.0f);
-    kmVec2Fill(&wall[2], -20.0f, 0.0f); 
+    kmVec2Fill(&wall[1], -5.0f, 5.0f);
+    kmVec2Fill(&wall[2], -10.0f, 0.0f); 
+    sdWorldAddTriangle(world, wall);    
+
+    kmVec2Fill(&wall[0], -10.0f, 5.0f);
+    kmVec2Fill(&wall[1], -10.0f, 0.0f); 
+    kmVec2Fill(&wall[2], -5.0f, 5.0f);
     sdWorldAddTriangle(world, wall);    
     
-    spring = sdSpringCreate(world, 45.0f, 10.0f / 40.0f);
-    sdObjectSetPosition(spring, 0.0f, 0.125f);
+    kmVec2 platform[3];
+    kmVec2Fill(&platform[0], 1.0f, 1.5f);
+    kmVec2Fill(&platform[1], 3.0f, 1.5f); 
+    kmVec2Fill(&platform[2], 3.0f, 2.0f);
+    sdWorldAddTriangle(world, platform);        
+
+    kmVec2Fill(&platform[0], 1.0f, 1.5f);
+    kmVec2Fill(&platform[1], 3.0f, 2.0f);
+    kmVec2Fill(&platform[2], 1.0f, 2.0f);
+    sdWorldAddTriangle(world, platform);        
+    
+    spring = sdSpringCreate(world, 0, 10.0f / 40.0f);
+    sdObjectSetPosition(spring, -4.75f, 0.125f);
 }
 
 int main(int argc, char* argv[]) {
@@ -212,3 +228,4 @@ int main(int argc, char* argv[]) {
     main_loop();
     return 0;
 }
+
