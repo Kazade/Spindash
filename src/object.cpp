@@ -84,6 +84,22 @@ void Object::set_acceleration(float x, float y) {
     acceleration_.y = y;
 }
 
+Object* Object::get_other_object_from_collision(Collision& c) {
+    Object* other = nullptr;
+
+    if(c.object_a == &this->geom()) {
+        if(c.object_b) {
+            other = c.object_b->owner();
+        }
+    } else {
+        if(c.object_a) {
+            other = c.object_a->owner();
+        }    
+    }
+    
+    return other;
+}
+
 //========================================================
 
 void sdObjectDestroy(SDuint entity) {

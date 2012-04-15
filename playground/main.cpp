@@ -12,6 +12,7 @@
 SDuint world = 0;
 SDuint sonic = 0;
 SDuint spring = 0;
+SDuint spring2 = 0;
 
 KTIuint timer;
 
@@ -205,15 +206,14 @@ static void build_world() {
     kmVec2Fill(&platform[0], 1.0f, 1.5f);
     kmVec2Fill(&platform[1], 3.0f, 1.5f); 
     kmVec2Fill(&platform[2], 3.0f, 2.0f);
-    sdWorldAddTriangle(world, platform);        
-
-    kmVec2Fill(&platform[0], 1.0f, 1.5f);
-    kmVec2Fill(&platform[1], 3.0f, 2.0f);
-    kmVec2Fill(&platform[2], 1.0f, 2.0f);
-    sdWorldAddTriangle(world, platform);        
+    kmVec2Fill(&platform[3], 1.0f, 2.0f);
+    sdWorldAddBox(world, platform);
     
     spring = sdSpringCreate(world, 0, 10.0f / 40.0f);
     sdObjectSetPosition(spring, -4.75f, 0.125f);
+    
+    spring2 = sdSpringCreate(world, -45.0f, 10.0f/40.0f);
+    sdObjectSetPosition(spring2, 2.0f, 2.25f);
 }
 
 int main(int argc, char* argv[]) {

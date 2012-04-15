@@ -7,6 +7,7 @@
 #include "object.h"
 
 #include "collision/triangle.h"
+#include "collision/box.h"
 
 class World {
 public:
@@ -17,6 +18,7 @@ public:
     void get_gravity(float& x, float& y);
 
     void add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3);
+    void add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const kmVec2& v4);
     void remove_all_triangles() { triangles_.clear(); }
     
     ObjectID new_sphere();
@@ -33,11 +35,14 @@ public:
     SDuint get_triangle_count() const { return triangles_.size(); }
     Triangle* get_triangle_at(SDuint i) { return &triangles_[i]; }
     
+    SDuint get_box_count() const { return boxes_.size(); }
+    Box* get_box_at(SDuint i) { return &boxes_.at(i); }
 private:
     SDuint id_;
     kmVec2 gravity_;
 
     std::vector<Triangle> triangles_;
+    std::vector<Box> boxes_;
     std::vector<Object::ptr> objects_;
 };
 

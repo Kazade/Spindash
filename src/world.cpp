@@ -64,6 +64,19 @@ void World::debug_render() {
             }
         }
         glEnd();
+        glBegin(GL_QUADS);
+        for(unsigned int i = 0; i < boxes_.size(); ++i) {
+            float* colour = colours[colour_counter];
+            (colour_counter >= 9) ? colour_counter = 0: colour_counter++;
+
+            glColor3f(colour[0], colour[1], colour[2]);
+
+            for(unsigned int j = 0; j < 4; ++j) {
+                glVertex2f(boxes_[i].point(j).x, boxes_[i].point(j).y);
+            }
+        }        
+        glEnd();
+        
     glPopMatrix();
  
     for(std::vector<Object::ptr>::const_iterator it = objects_.begin(); it != objects_.end(); ++it) {
@@ -153,6 +166,15 @@ void World::update(float step) {
                     collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
                 }
             }
+
+            for(uint32_t j = 0; j < get_box_count(); ++j) {
+                Box& triangle = boxes_.at(j);
+                
+                std::vector<Collision> new_collisions = collide(&lhs.geom(), &triangle);
+                if(!new_collisions.empty()) {
+                    collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
+                }
+            }
             
             for(uint32_t j = i + 1; j < objects_.size(); ++j) {
                 Object& rhs = *objects_.at(j);                
@@ -196,6 +218,16 @@ void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
     new_tri.points[2] = v3;
 
     triangles_.push_back(new_tri);
+}
+
+void World::add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const kmVec2& v4) {
+    Box new_box;
+    new_box.point(0) = v1;
+    new_box.point(1) = v2;
+    new_box.point(2) = v3;
+    new_box.point(3) = v4;
+    
+    boxes_.push_back(new_box);
 }
 
 ObjectID World::new_character() {
@@ -258,6 +290,16 @@ void sdWorldAddTriangle(SDuint world_id, kmVec2* points) {
     }
 
     world->add_triangle(points[0], points[1], points[2]);
+}
+
+void sdWorldAddBox(SDuint world_id, kmVec2* points) {
+    World* world = get_world_by_id(world_id);
+    if(!world) {
+        //Log error
+        return;
+    }
+
+    world->add_box(points[0], points[1], points[2], points[3]);
 }
 
 void sdWorldAddMesh(SDuint world_id, SDuint num_triangles, kmVec2* points) {

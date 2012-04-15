@@ -76,6 +76,8 @@ public:
     
     void set_collision_flag(CollisionFlag flag) { collision_flags_ |= flag; }
     bool has_collision_flag(CollisionFlag flag) const { return (collision_flags_ & flag) == flag; }
+    
+    Object* get_other_object_from_collision(Collision& c);
 };
 
 template <typename T> int sgn(T val) {

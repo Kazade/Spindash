@@ -8,6 +8,7 @@
 
 SDuint sdWorldCreate();
 void sdWorldAddTriangle(SDuint world, kmVec2* points);
+void sdWorldAddBox(SDuint world, kmVec2* points);
 void sdWorldAddMesh(SDuint world, SDuint num_triangles, kmVec2* points);
 void sdWorldRemoveTriangles(SDuint world);
 void sdWorldStep(SDuint world, SDfloat dt);
@@ -40,6 +41,9 @@ void sdCharacterStartJumping(SDuint character);
 void sdCharacterStopJumping(SDuint character);
 void sdCharacterStartLookingDown(SDuint character);
 void sdCharacterStopLookingDown(SDuint character);
+void sdCharacterStopRolling(SDuint character);
+SDbool sdObjectIsCharacter(SDuint object);
+
 
 SDuint sdSpringCreate(SDuint world, SDfloat angle, SDfloat power);
 

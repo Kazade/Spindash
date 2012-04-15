@@ -48,41 +48,44 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
     }
 
     if(hitmask['A'] || hitmask['B']) {
-        kmVec2 to_move;
-        kmVec2Fill(&to_move, 0, 0);
-        
-        //FIXME: should check both rays!
-                
-        Object* other = nullptr;
-        if(hitmask['A']) {
-            if(collision_map['A'].object_a == &this->geom()) {
-                if(collision_map['A'].object_b) {
-                    other = collision_map['A'].object_b->owner();
-                }
-            } else {
-                if(collision_map['A'].object_a) {
-                    other = collision_map['A'].object_a->owner();
-                }        
+        if(!is_grounded_ && kmVec2Dot(&speed(), &ray_box->ray('A').dir) < 0.0f) {
+            //std::cout << "Ignoring collision as we are moving away from the surface" << std::endl;
+        } else {
+            kmVec2 to_move;
+            kmVec2Fill(&to_move, 0, 0);
+            
+            //FIXME: should check both rays!
+                    
+            Object* other = nullptr;
+            if(hitmask['A']) {
+                other = get_other_object_from_collision(collision_map['A']);
+            } else if (hitmask['B']) {
+                other = get_other_object_from_collision(collision_map['B']);
             }
-        } else if (hitmask['B']) {
-            if(collision_map['B'].object_a == &this->geom()) {
-                if(collision_map['B'].object_b) {
-                    other = collision_map['B'].object_b->owner();
-                }
+
+            //Only mark if grounded if the object doesn't have the NOT_GROUND flag                        
+            is_grounded_ = (other) ? !other->has_collision_flag(NOT_GROUND) : true;
+
+            kmVec2 up;
+            kmVec2Fill(&up, 0.0f, 1.0f);
+
+            Collision a, b;
+            bool same_collision = false;
+            
+            if(hitmask['A'] && hitmask['B']) {
+                a = collision_map['A'];
+                b = collision_map['B'];
+            } else if(hitmask['A']) {
+                a = collision_map['A'];
+                b = collision_map['A'];        
+                same_collision = true;
             } else {
-                if(collision_map['B'].object_a) {
-                    other = collision_map['B'].object_a->owner();
-                }        
-            }        
-        }
-
-        //Only mark if grounded if the object doesn't have the NOT_GROUND flag                        
-        is_grounded_ = (other) ? !other->has_collision_flag(NOT_GROUND) : true;
-
-        kmVec2 up;
-        kmVec2Fill(&up, 0.0f, 1.0f);
+                a = collision_map['B'];
+                b = collision_map['B'];
                 
-        if(hitmask['A'] && hitmask['B']) {
+                same_collision = true;
+            }
+            
             /* Inventive logic follows:
                 In the Sonic game, there were 4 modes if sonic hit a 45.0f
                 angle then we'd go from "floor mode" to "right wall" mode.
@@ -100,29 +103,44 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
                 
                 This should result in smooth movement over angles
             */
+                
+
+            kmVec2 intersection_a, intersection_b;
+            
+            kmVec2Assign(&intersection_a, &a.point);
+            kmVec2Assign(&intersection_b, &b.point);
             
             kmVec2 diff_vec, diff_normalized, half_diff, new_intersection, new_normal;
-            
-            float diff_length;
-            kmVec2Subtract(&diff_vec, &collision_map['B'].point, &collision_map['A'].point);
-            diff_length = kmVec2Length(&diff_vec);
-            kmVec2Normalize(&diff_normalized, &diff_vec);
-            kmVec2Scale(&half_diff, &diff_normalized, diff_length * 0.5f);
-            
-            kmVec2Add(&new_intersection, &collision_map['A'].point, &half_diff);
-            
+
             //Get the normal for the other object, but from the hit with ray A (confusing I know :/ )
+            CollisionPrimitive* A_object_a = a.object_a;
+            kmVec2 a_normal = (A_object_a == &this->geom()) ? a.b_normal : a.a_normal;
             
-            CollisionPrimitive* A_object_a = collision_map['A'].object_a;
-            kmVec2 a_normal = (A_object_a == &this->geom()) ? collision_map['A'].b_normal : collision_map['A'].a_normal;
-            
-            CollisionPrimitive* B_object_a = collision_map['B'].object_a;
-            kmVec2 b_normal = (B_object_a == &this->geom()) ? collision_map['B'].b_normal : collision_map['B'].a_normal;            
-            kmVec2Add(&new_normal, &a_normal, &b_normal);
-            kmVec2Normalize(&new_normal, &new_normal); //Average the normals
+            CollisionPrimitive* B_object_a = b.object_a;
+            kmVec2 b_normal = (B_object_a == &this->geom()) ? b.b_normal : b.a_normal;            
             
             kmVec2 pos_diff;
-            kmVec2Subtract(&pos_diff, &new_intersection, &position());
+            if(!same_collision) {
+                float diff_length;
+                kmVec2Subtract(&diff_vec, &intersection_b, &intersection_a);
+                diff_length = kmVec2Length(&diff_vec);
+                kmVec2Normalize(&diff_normalized, &diff_vec);
+                kmVec2Scale(&half_diff, &diff_normalized, diff_length * 0.5f);        
+                kmVec2Add(&new_intersection, &intersection_a, &half_diff);        
+
+                kmVec2Add(&new_normal, &a_normal, &b_normal);
+                kmVec2Normalize(&new_normal, &new_normal); //Average the normals            
+                
+                kmVec2Subtract(&pos_diff, &new_intersection, &position());
+            } else {
+                kmVec2Assign(&new_intersection, &intersection_a);
+                kmVec2Assign(&new_normal, &a_normal);
+                
+                kmRay2& collision_ray = (A_object_a == &this->geom()) ? ray_box->ray(a.a_ray) : ray_box->ray(a.b_ray);
+                
+                kmVec2Subtract(&pos_diff, &intersection_a, &collision_ray.start);
+            }
+
             float to_move_length = (ray_box->height() * 0.5f) - fabs(kmVec2Length(&pos_diff));
             kmVec2Scale(&to_move, &new_normal, to_move_length);
 
@@ -132,42 +150,23 @@ void Character::respond_to(const std::vector<Collision>& collisions) {
             angle = (angle < 0) ? 360.0f + angle : angle;
             set_rotation(angle);
         
-            if(isnan(to_move.x)) {
-                std::cout << "WTF";
-            }        
-        } else if(hitmask['A']) {
-            kmVec2& a_normal = (collision_map['A'].object_a == &this->geom()) ? collision_map['A'].b_normal : collision_map['A'].a_normal;
-        
-            kmVec2 diff;
-            kmVec2Subtract(&diff, &collision_map['A'].point, &position());
-            float a_dist = kmVec2Length(&diff);        
-            kmVec2Scale(&to_move, &a_normal, (ray_box->height() / 2.0f) - fabs(a_dist));
-            
-            float dot = kmVec2Dot(&a_normal, &up);
-            float angle = kmRadiansToDegrees(acosf(dot));
-            angle = -angle;
-            angle = (angle < 0)? 360.0f + angle : angle;
-            set_rotation(angle);        
-        } else {
-            kmVec2& b_normal = (collision_map['B'].object_a == &this->geom()) ? collision_map['B'].b_normal : collision_map['B'].a_normal;
-                    
-            kmVec2 diff;
-            kmVec2Subtract(&diff, &collision_map['B'].point, &position());
-            float b_dist = kmVec2Length(&diff);        
-            kmVec2Scale(&to_move, &b_normal, (ray_box->height() / 2.0f) - fabs(b_dist));
-            
-            float dot = kmVec2Dot(&b_normal, &up);
-            float angle = kmRadiansToDegrees(acosf(dot));
-            angle = -angle;
-            angle = (angle < 0)? 360.0f + angle : angle;
-            set_rotation(angle);        
+            if(!isnan(to_move.x) &&
+               !isnan(to_move.y)) {
+                
+                kmVec2 pos;
+                kmVec2Assign(&pos, &position());
+                kmVec2Add(&pos, &pos, &to_move);
+                
+                set_position(pos.x, pos.y);            
+            } else {
+                std::cout << "To-move vector is NAN - FIX THIS" << std::endl;
+            }
         }
+    
+
         
-        kmVec2 pos;
-        kmVec2Assign(&pos, &position());
-        kmVec2Add(&pos, &pos, &to_move);
         
-        set_position(pos.x, pos.y);
+
     } 
     if (hitmask['L'] || hitmask['R']) {
         kmRay2& ray_hit = (hitmask['L']) ? ray_box->ray('L') : ray_box->ray('R');
@@ -302,7 +301,7 @@ void Character::update_finished(float dt) {
     if(is_grounded_) {
         gsp_ += slp * sin_rot * dt;
     } else {
-        set_rotation(0);        
+        //set_rotation(0);        
     }
 
     //Done this way so pressing left and right at the same time, does nothing
@@ -413,7 +412,6 @@ void Character::post_prepare(float dt) {
 static Character* get_character(SDuint object_id) {
     Object* obj = Object::by_id(object_id);
     Character* c = dynamic_cast<Character*>(obj);
-    assert(c && "Not a character");
     return c;
 }
 
@@ -457,8 +455,17 @@ void sdCharacterStopJumping(SDuint character) {
     c->stop_jumping();
 }
 
+void sdCharacterStopRolling(SDuint character) {
+    Character* c = get_character(character);
+    c->stop_rolling();
+}
+
 SDbool sdCharacterIsGrounded(SDuint character) {
     Character* c = get_character(character);
     return c->is_grounded();
 }
 
+SDbool sdObjectIsCharacter(SDuint object) {
+    Character* c = get_character(object);
+    return (c) ? true: false;
+}

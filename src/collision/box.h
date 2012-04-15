@@ -7,6 +7,11 @@ class Box : public CollisionPrimitive {
 public:
     Box(Object* owner, float width, float height);
     
+    Box():
+        CollisionPrimitive(nullptr) {
+        
+    }
+    
     void set_position(float x, float y);
     void set_rotation(float angle);
     
