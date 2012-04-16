@@ -12,28 +12,31 @@ std::vector<Collision> do_collide(Triangle* triangle, RayBox* ray_box, bool swap
         kmRay2& ray = ray_box->ray(which);
         
         kmVec2 intersection, a_normal, b_normal, normal;
-        
+        float distance; 
         if(kmRay2IntersectTriangle(&ray, &triangle->points[0], 
                                          &triangle->points[1], 
                                          &triangle->points[2], 
-                                         &intersection, &normal)) {
-            Collision new_collision;
-            kmVec2Normalize(&a_normal, &normal);
-            kmVec2Normalize(&b_normal, &ray.dir);
-            
-            new_collision.object_a = (swap_result) ? (CollisionPrimitive*)ray_box : (CollisionPrimitive*)triangle;
-            new_collision.object_b = (swap_result) ? (CollisionPrimitive*)triangle : (CollisionPrimitive*)ray_box;
-            
-            new_collision.a_normal = (swap_result) ? b_normal : a_normal;
-            new_collision.b_normal = (swap_result) ? a_normal : b_normal;
-            new_collision.point = intersection;
-            
-            if(!swap_result){
-                new_collision.b_ray = which;
-            } else {
-                new_collision.a_ray = which;
+                                         &intersection, &normal, &distance)) {
+                                         
+            if(distance <= kmVec2Length(&ray.dir)) {
+                Collision new_collision;
+                kmVec2Normalize(&a_normal, &normal);
+                kmVec2Normalize(&b_normal, &ray.dir);
+                
+                new_collision.object_a = (swap_result) ? (CollisionPrimitive*)ray_box : (CollisionPrimitive*)triangle;
+                new_collision.object_b = (swap_result) ? (CollisionPrimitive*)triangle : (CollisionPrimitive*)ray_box;
+                
+                new_collision.a_normal = (swap_result) ? b_normal : a_normal;
+                new_collision.b_normal = (swap_result) ? a_normal : b_normal;
+                new_collision.point = intersection;
+                
+                if(!swap_result){
+                    new_collision.b_ray = which;
+                } else {
+                    new_collision.a_ray = which;
+                }
+                collisions.push_back(new_collision);
             }
-            collisions.push_back(new_collision);
         }
     }
 

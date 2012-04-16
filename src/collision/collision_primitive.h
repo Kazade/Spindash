@@ -10,7 +10,7 @@ class CollisionPrimitive;
 
 struct Collision {
     kmVec2 point; //Where in space did the collision occur
-    
+
     kmVec2 a_normal; //The normal of the surface on object_a that collided
     kmVec2 b_normal; //The normal of the surface on object_b that collided
     

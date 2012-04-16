@@ -36,11 +36,13 @@ public:
     
     bool is_grounded() { return is_grounded_; }
     
-    void respond_to(const std::vector<Collision>& collisions);
+    bool respond_to(const std::vector<Collision>& collisions);
     
     void set_speed(float x, float y);
     
 private:
+    Collision find_nearest_collision(const std::vector<Collision>& collisions);
+    
     bool moving_left_;
     bool moving_right_;
     bool looking_down_;

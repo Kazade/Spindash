@@ -1,0 +1,239 @@
+bool Character::respond_to(const std::vector<Collision>& collisions) {
+    //Find the closest ray
+    //FIXME: Find which ray is closest and respond to only that set
+    // e.g. if A is the closest collision, do the A/B stuff. If L is the
+    // closest, do the L stuff
+    std::map<char, bool> hitmask;
+    std::map<char, Collision> collision_map;
+    std::map<char, float> distance; //The distance along the ray the hit occurred
+
+    RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
+    
+    for(const Collision& c: collisions) {        
+        char ray = (c.object_a == &this->geom()) ? c.a_ray : c.b_ray;
+    
+        kmRay2& r = ray_box->ray(ray);
+        kmVec2 diff;
+
+        kmVec2Subtract(&diff, &c.point, &r.start);
+        float dist = kmVec2Length(&diff);
+
+        hitmask[ray] = true;
+        
+        distance[ray] = dist;
+        collision_map[ray] = c;
+    }
+    
+    float collision_distance;
+    if(hitmask['A'] || hitmask['B']) {
+        if(!is_grounded_ && kmVec2Dot(&speed(), &ray_box->ray('A').dir) < 0.0f) {
+            //std::cout << "Ignoring collision as we are moving away from the surface" << std::endl;
+        } else {
+            kmVec2 to_move;
+            kmVec2Fill(&to_move, 0, 0);
+            
+            //FIXME: should check both rays!
+                    
+            Object* other = nullptr;
+            if(hitmask['A']) {
+                other = get_other_object_from_collision(collision_map['A']);
+            } else if (hitmask['B']) {
+                other = get_other_object_from_collision(collision_map['B']);
+            }
+
+            if(!is_grounded_) {
+                //Only mark if grounded if the object doesn't have the NOT_GROUND flag
+                is_grounded_ = (other) ? !other->has_collision_flag(NOT_GROUND) : true;
+            }
+
+            kmVec2 up;
+            kmVec2Fill(&up, 0.0f, 1.0f);
+
+            Collision a, b;
+            bool a_collision_only = false;
+            bool b_collision_only = false;
+            if(hitmask['A'] && hitmask['B']) {
+                a = collision_map['A'];
+                b = collision_map['B'];
+                collision_distance = distance['A'];
+            } else if(hitmask['A']) {
+                a = collision_map['A'];
+                b = collision_map['A'];        
+                a_collision_only = true;
+                collision_distance = distance['A'];
+            } else {
+                a = collision_map['B'];
+                b = collision_map['B'];
+                b_collision_only = true;
+                collision_distance = distance['B'];
+            }
+            
+            if(collision_distance < ray_box->height() / 2.0f) {
+                /* Inventive logic follows:
+                    In the Sonic game, there were 4 modes if sonic hit a 45.0f
+                    angle then we'd go from "floor mode" to "right wall" mode.
+                    So, all the physics were only based around angles between -45
+                    and 45. This meant that if two ray hit the floor you could just
+                    pick the angle of the highest (on the Y-axis) and it would work.
+                    
+                    We don't have 4 modes, and we can do better. Here's what we do:
+                    
+                    1. Take the two collision points, find the vector between them
+                    2. Calculate a new intersection point which is A + (Vec * 0.5)
+                    3. Calculate a new normal by averaging the two other normals
+                    4. Move the character by normal * half_height - fabs(length(position - new_intersection))
+                    5. Set the angle based on the new normal
+                    
+                    This should result in smooth movement over angles
+                */
+                    
+
+                kmVec2 intersection_a, intersection_b;
+                
+                kmVec2Assign(&intersection_a, &a.point);
+                kmVec2Assign(&intersection_b, &b.point);
+                
+                kmVec2 diff_vec, diff_normalized, half_diff, new_intersection, new_normal;
+
+                //Get the normal for the other object, but from the hit with ray A (confusing I know :/ )
+                CollisionPrimitive* A_object_a = a.object_a;
+                kmVec2 a_normal = (A_object_a == &this->geom()) ? a.b_normal : a.a_normal;
+                
+                CollisionPrimitive* B_object_a = b.object_a;
+                kmVec2 b_normal = (B_object_a == &this->geom()) ? b.b_normal : b.a_normal;            
+                
+                kmVec2 pos_diff;
+                if(!a_collision_only && !b_collision_only) {
+                    std::cout << "Both" << std::endl;
+                    
+                    float diff_length;
+                    kmVec2Subtract(&diff_vec, &intersection_b, &intersection_a);
+                    diff_length = kmVec2Length(&diff_vec);
+                    kmVec2Normalize(&diff_normalized, &diff_vec);
+                    kmVec2Scale(&half_diff, &diff_normalized, diff_length * 0.5f);        
+                    kmVec2Add(&new_intersection, &intersection_a, &half_diff);        
+
+                    kmVec2Add(&new_normal, &a_normal, &b_normal);
+                    kmVec2Normalize(&new_normal, &new_normal); //Average the normals            
+                    
+                    kmVec2Subtract(&pos_diff, &new_intersection, &position());
+                    
+                    float to_move_length = (ray_box->height() * 0.5f) - fabs(kmVec2Length(&pos_diff));
+                    kmVec2Scale(&to_move, &new_normal, to_move_length);
+                } else {
+                    std::cout << "One only" << std::endl;
+                    kmVec2 dir_vec;
+                    kmVec2 origin;
+                    kmVec2Fill(&origin, 0.0f, 0.0f);
+                    if(a_collision_only) {
+                        kmVec2RotateBy(&dir_vec, &a_normal, -90.0f, &origin);
+                    } else {
+                        kmVec2RotateBy(&dir_vec, &b_normal, 90.0f, &origin);
+                    }
+                    
+                    kmVec2Scale(&dir_vec, &dir_vec, ray_box->width() * 0.5f);
+                
+                    if(a_collision_only) {
+                        kmVec2Add(&new_intersection, &intersection_a, &dir_vec);
+                        kmVec2Assign(&new_normal, &a_normal);
+                    } else {
+                        kmVec2Add(&new_intersection, &intersection_b, &dir_vec);
+                        kmVec2Assign(&new_normal, &b_normal);
+                    }
+
+                    kmVec2Subtract(&pos_diff, &new_intersection, &position());
+                    
+                    kmVec2 dest_pos, dest_vec;
+                    kmVec2Scale(&dest_vec, &new_normal, ray_box->height() * 0.5f);
+                    kmVec2Add(&dest_pos, &new_intersection, &dest_vec);
+                    set_position(dest_pos.x, dest_pos.y);
+                }
+
+
+                float dot = kmVec2Dot(&new_normal, &up);
+                float angle = kmRadiansToDegrees(acosf(dot));
+                angle = -angle;
+                angle = (angle < 0) ? 360.0f + angle : angle;
+                set_rotation(angle);
+            
+                if(!isnan(to_move.x) &&
+                   !isnan(to_move.y)) {
+                    
+                    kmVec2 pos;
+                    kmVec2Assign(&pos, &position());
+                    kmVec2Add(&pos, &pos, &to_move);
+                    
+                    set_position(pos.x, pos.y);            
+                } else {
+                    std::cout << "To-move vector is NAN - FIX THIS" << std::endl;
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+    } else if (hitmask['L'] || hitmask['R']) {
+        kmRay2& ray_hit = (hitmask['L']) ? ray_box->ray('L') : ray_box->ray('R');
+        Collision& hitpoint = (hitmask['L']) ? collision_map['L'] : collision_map['R'];
+        kmVec2& hitpoint_normal = (hitpoint.object_a == &this->geom()) ? hitpoint.b_normal : hitpoint.a_normal;
+        
+        
+        kmVec2 diff;
+        kmVec2Subtract(&diff, &hitpoint.point, &ray_hit.start);
+        float lr_dist = kmVec2Length(&diff);
+        
+        kmVec2 to_move;
+        kmVec2Scale(&to_move, &hitpoint_normal, (kmVec2Length(&ray_hit.dir) - fabs(lr_dist)) * 1.01f);
+
+        kmVec2 pos;
+        kmVec2Assign(&pos, &position());
+        kmVec2Add(&pos, &pos, &to_move);
+        set_position(pos.x, pos.y);
+
+        if(is_grounded_ && hitmask['L'] && gsp_ < 0.0f) gsp_ = 0.0f;
+        if(is_grounded_ && hitmask['R'] && gsp_ > 0.0f) gsp_ = 0.0f;
+        if(!is_grounded_) {
+            //This is a little more complicated... basically, we need to reset
+            // the X/Y speed if we are in the air, and we hit the left ray
+            // and we are heading towards the wall which we collided with
+            //so... we take the dot-product between the speed
+            //and the normal. If the resulting angle is greater than 90 degrees
+            //(e.g. the dot product is negative) then we were heading towards
+            //the surface when we hit it.
+            kmVec2 speed_vec;
+            kmVec2Assign(&speed_vec, &speed());
+            float speed_length = kmVec2Length(&speed_vec);
+            kmVec2Normalize(&speed_vec, &speed());
+            if(kmVec2Dot(&speed_vec, &hitpoint_normal) < 0.0f) {
+                //Now, we need to subtract the normal from the speed, but
+                //scaled to the length of the speed
+                
+                kmVec2 new_speed;                
+                //Add the normalized speed_vec and the normal
+                kmVec2Add(&new_speed, &speed_vec, &hitpoint_normal);
+                
+                //Rescale up so we don't lose the energy
+                kmVec2Scale(&new_speed, &new_speed, speed_length);
+                
+                /*
+                    Final bit of hacking, we never want the speed.x or speed.y
+                    to change sign (otherwise we bounce). So, if the original speed had a positive X
+                    and now it's negative. We set it to zero
+                */
+                if((speed_vec.x < 0.0f && new_speed.x > 0.0f) ||
+                   (speed_vec.x > 0.0f && new_speed.x < 0.0f)) {
+                   new_speed.x = 0.0f;
+                }
+
+                if((speed_vec.y < 0.0f && new_speed.y > 0.0f) ||
+                   (speed_vec.y > 0.0f && new_speed.y < 0.0f)) {
+                   new_speed.y = 0.0f;
+                }
+                
+                set_speed(new_speed.x, new_speed.y);
+            }
+        }
+    }
+    return true;
+}
+

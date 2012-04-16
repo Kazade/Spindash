@@ -150,14 +150,12 @@ void World::update(float step) {
 
     for(uint32_t i = 0; i < objects_.size(); ++i) {
         Object& lhs = *objects_.at(i);
-        bool first_loop = true;
+        bool run_loop = true;
         std::vector<Collision> collisions;
         
         lhs.update(step); //Move without responding to collisions
 
-        while(!collisions.empty() || first_loop) {
-            first_loop = false;
-            
+        while(run_loop) {
             for(uint32_t j = 0; j < get_triangle_count(); ++j) {
                 Triangle& triangle = triangles_.at(j);
                 
@@ -187,8 +185,10 @@ void World::update(float step) {
             }   
             
             if(!collisions.empty()) {
-                lhs.respond_to(collisions);                
+                run_loop = lhs.respond_to(collisions);                
                 collisions.clear();
+            } else {
+                run_loop = false;
             }
         }
         lhs.update_finished(step);

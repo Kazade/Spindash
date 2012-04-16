@@ -15,7 +15,7 @@ public:
         set_collision_flag(NOT_GROUND);
     }
     
-    void respond_to(const std::vector<Collision>& collisions);
+    bool respond_to(const std::vector<Collision>& collisions);
     
 private:
     float power_;

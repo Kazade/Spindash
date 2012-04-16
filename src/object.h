@@ -66,7 +66,7 @@ public:
     virtual void update(float dt);
     virtual void update_finished(float dt) {}
     
-    virtual void respond_to(const std::vector<Collision>& collisions) {}
+    virtual bool respond_to(const std::vector<Collision>& collisions) { return true; }
     
     SDuint id() const { return id_; }
     

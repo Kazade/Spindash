@@ -9,9 +9,9 @@ SDuint sdSpringCreate(SDuint world_id, SDfloat angle, SDfloat power) {
 }
 
 
-void Spring::respond_to(const std::vector<Collision>& collisions) {
+bool Spring::respond_to(const std::vector<Collision>& collisions) {
     
-    if(collisions.empty()) return;
+    if(collisions.empty()) return false;
     
     //FIXME: search for collisions where the angle of the normal matches angle
     Object* other = (collisions[0].object_a == &geom()) ? collisions[0].object_b->owner() : collisions[0].object_a->owner();    
@@ -22,6 +22,8 @@ void Spring::respond_to(const std::vector<Collision>& collisions) {
     if(sdObjectIsCharacter(other->id())) {
         sdCharacterStopRolling(other->id());
     }
+    
+    return false;
 }
 
 
