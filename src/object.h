@@ -28,6 +28,8 @@ protected:
     kmVec2 acceleration_;
     float rotation_;
 
+    kmVec2 last_safe_position_;
+
 private:
     static std::map<ObjectID, Object*> objects_;
 
@@ -51,6 +53,13 @@ public:
     static void unregister_object(Object* obj);
     static Object* by_id(SDuint object_id);
     static bool exists(SDuint object_id);
+    
+    void store_safe_position() {
+        kmVec2Assign(&last_safe_position_, &position_);
+    }
+    void revert_to_safe_position() {
+        kmVec2Assign(&position_, &last_safe_position_);
+    }
     
     void set_position(float x, float y);
     virtual void set_speed(float x, float y);
