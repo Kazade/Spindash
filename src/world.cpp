@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cassert>
 #include <map>
 #include <GL/gl.h>
@@ -154,8 +155,8 @@ void World::update(float step) {
         std::vector<Collision> collisions;
         
         lhs.update(step); //Move without responding to collisions
-
-        while(run_loop) {
+        uint32_t tries = 4;
+        while(run_loop && tries--) {
             for(uint32_t j = 0; j < get_triangle_count(); ++j) {
                 Triangle& triangle = triangles_.at(j);
                 
@@ -192,6 +193,12 @@ void World::update(float step) {
             }
         }
         lhs.update_finished(step);
+        if(!tries) {
+            std::cout << "Something went wrong, respawning in safe location" << std::endl;
+            lhs.revert_to_safe_position();
+        } else {
+            lhs.store_safe_position();
+        }
     }
     
 }
@@ -231,7 +238,7 @@ void World::add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const 
 }
 
 ObjectID World::new_character() {
-    Character::ptr new_character(new Character(this));    
+    Character::ptr new_character(new Character(this, 0.5f, 1.0f));    
     objects_.push_back(new_character);
     return new_character->id();
 }
