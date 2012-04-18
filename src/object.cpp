@@ -19,6 +19,7 @@ Object::Object(World* world, CollisionPrimitive::ptr shape):
     kmVec2Fill(&position_, 0.0f, 0.0f);
     kmVec2Fill(&speed_, 0.0f, 0.0f);
     kmVec2Fill(&acceleration_, 0.0f, 0.0f);
+    kmVec2Assign(&last_safe_position_, &position_);
 }
 
 Object::~Object() {
@@ -69,9 +70,11 @@ void Object::set_position(float x, float y) {
     geom().set_position(x, y);
 }
 
-void Object::set_rotation(float degrees) {
-    rotation_ = degrees;
-    geom().set_rotation(degrees);
+void Object::set_rotation(float angle) {
+	angle = (angle < 0) ? 360.0f + angle : angle;
+	
+    rotation_ = angle;
+    geom().set_rotation(angle);
 }
 
 void Object::set_speed(float x, float y) {

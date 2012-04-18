@@ -44,55 +44,159 @@ Collision Character::find_nearest_collision(const std::vector<Collision>& collis
     return found;
 }
 
-bool Character::respond_to(const std::vector<Collision>& collisions) {
-    //First basic collision response
-    RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
-    bool position_changed = false;
+std::pair<Collision, bool> Character::find_collision_with_ray(const std::vector<Collision>& collisions, char ray) {
+    bool found = false;
     
-    for(Collision c: collisions) {
-        char r = (c.object_a == &geom()) ? c.a_ray : c.b_ray;
-        kmRay2& ray = ray_box->ray(r);
-        kmVec2 other_normal;
-        kmVec2Assign(&other_normal, ((c.object_a == &geom()) ? &c.b_normal : &c.a_normal));
-        
-        if(r == 'A' || r == 'B') {
-            is_grounded_ = true;
+    uint32_t i = 0;
+    for(; i < collisions.size(); ++i) {
+        const Collision& c = collisions.at(i);
+        if(c.object_a == &geom() && c.a_ray == ray) {
+            found = true;
+            break;
         }
-            
-        //1. move the position out from the collision
-        float ray_length;
-        ray_length = kmVec2Length(&ray.dir);
-        
-        float dist_to_intersection;
-        kmVec2 vec_to_intersection;
-        kmVec2Subtract(&vec_to_intersection, &c.point, &ray.start);
-        dist_to_intersection = kmVec2Length(&vec_to_intersection);
-
-        //Only respond if we need to
-        if(dist_to_intersection < ray_length) {
-            if(kmVec2Dot(&other_normal, &speed()) < 0.0f) {
-                kmVec2 normalized_speed;
-                kmVec2Normalize(&normalized_speed, &speed());
-
-                kmVec2 to_move;
-                kmVec2Scale(&to_move, &normalized_speed, fabs(ray_length - dist_to_intersection));
-
-                kmVec2 new_pos;
-                kmVec2Subtract(&new_pos, &position(), &to_move);
-                set_position(new_pos.x, new_pos.y);
-                
-                position_changed = true;
-            }
-    /*
-            //2. Find the angle of rotation and rotate position around the intersection
-            
-            float angle_between_normal_and_ray;
-
-            
-            angle_between_normal_and_ray = acosf(kmVec2Dot()*/
+        if(c.object_b == &geom() && c.b_ray == ray) {
+            found = true;
+            break;
         }
     }
-    return position_changed;
+    if(found) {
+        Collision found_col = collisions.at(i);
+        return std::pair<Collision, bool>(found_col, found);
+    }
+    
+    return std::pair<Collision, bool>(Collision(), false);
+}
+
+bool Character::respond_to(const std::vector<Collision>& collisions) {
+
+	kmVec2 up;
+	kmVec2Fill(&up, 0.0f, 1.0f);
+
+	//Store the original position, we need this to work out
+	//if anything changed
+	kmVec2 original_position;
+	kmVec2Assign(&original_position, &position());
+	
+	RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
+	
+	kmVec2 normalized_speed;
+	kmVec2Normalize(&normalized_speed, &speed());
+	std::map<char, bool> hitmask;
+	
+	struct CollisionInfo {
+		CollisionInfo():other(nullptr), distance(100000) {}
+		
+		kmVec2 normal;
+		kmVec2 point;
+		char ray;
+		Object* other;
+		float distance;
+	};
+	
+	std::map<char, CollisionInfo> collision_info;
+	
+	//Organize the collision data into something more useful
+	for(Collision c: collisions) {
+		kmVec2 normal = (c.object_a == &geom()) ? c.b_normal : c.a_normal;
+		if(kmVec2DegreesBetween(&normal, &normalized_speed) < 90.0f) {
+			continue;
+		}
+		
+		char ray = (c.object_a == &geom()) ? c.a_ray : c.b_ray;		
+		Object* other = get_other_object_from_collision(c);
+							
+		float distance = kmVec2DistanceBetween(&c.point, &ray_box->ray(ray).start);		
+		
+		if(ray == 'A' || ray == 'B') {
+			is_grounded_ = (other) ? !other->has_collision_flag(NOT_GROUND) : true;				
+		} 		
+		
+		float length = (ray == 'L' || ray == 'R') ? width_ / 2.0f : height_ / 2.0f;
+		if(distance < length) {								
+			if(hitmask[ray]) {
+				//We've already seen a collision for this ray, only
+				//store this one if distance is less than the existing one			
+				if(distance >= collision_info[ray].distance) {
+					std::cout << "Ignoring collision too far" << std::endl;	
+					continue;
+				}
+			}					
+			hitmask[ray] = true;			
+			collision_info[ray].ray = ray;
+			collision_info[ray].normal = normal;
+			collision_info[ray].point = c.point;
+			collision_info[ray].other = other;		
+			collision_info[ray].distance = distance;
+		}
+	}
+	
+	//If both A and B rays hit, we work out a midpoint to calculate
+	// the response
+	if(hitmask['A'] && hitmask['B']) {
+		std::cout << "Both" << std::endl;
+		kmVec2 intersection, normal;
+		kmVec2MidPointBetween(&intersection, &collision_info['A'].point, &collision_info['B'].point);
+		kmVec2Add(&normal, &collision_info['A'].normal, &collision_info['B'].normal);
+		kmVec2Normalize(&normal, &normal);
+		
+		kmVec2 scaled_normal, new_pos;
+		kmVec2Scale(&scaled_normal, &normal, (height_ / 2.0f));
+		kmVec2Add(&new_pos, &intersection, &scaled_normal);
+		
+		set_position(new_pos.x, new_pos.y);
+		set_rotation(-kmVec2DegreesBetween(&normal, &up));	
+	} else if (hitmask['A'] || hitmask['B']) {
+		std::cout << "Single" << std::endl;
+		//Only one floor ray collided, we need to move the character
+		//out of the floor and rotate around the collision point
+		CollisionInfo info = (hitmask['A']) ? collision_info['A'] : collision_info['B'];
+		kmRay2 ray = (hitmask['A']) ? ray_box->ray('A') : ray_box->ray('B');
+		
+		float dist = kmVec2DistanceBetween(&info.point, &ray.start);
+		
+		//Move out
+		kmVec2 to_move, new_pos;
+		kmVec2Normalize(&to_move, &ray.dir);
+		kmVec2Scale(&to_move, &to_move, (height_ / 2.0f) - dist);
+		kmVec2Subtract(&new_pos, &position(), &to_move);
+		
+		kmVec2 reversed_ray_dir;
+		kmVec2Normalize(&reversed_ray_dir, &ray.dir);
+		kmVec2Fill(&reversed_ray_dir, -reversed_ray_dir.x, -reversed_ray_dir.y);		
+		
+		//And rotate the position by that angle, around the intersection point
+		float angle = kmVec2DegreesBetween(&reversed_ray_dir, &info.normal);
+		kmVec2RotateBy(&new_pos, &new_pos, angle, &info.point);
+
+		//Finally, we set the angle relative to up
+		float rotation = kmVec2DegreesBetween(&info.normal, &up);
+		set_rotation(-rotation);	
+	}
+	
+	if (hitmask['L'] || hitmask['R']) {
+		CollisionInfo info = (hitmask['L']) ? collision_info['L'] : collision_info['R'];
+		kmRay2& ray = (hitmask['L']) ? ray_box->ray('L') : ray_box->ray('R');		
+		
+		float dist = kmVec2DistanceBetween(&info.point, &ray.start);
+		
+		//Move out
+		kmVec2 to_move, new_pos;
+		kmVec2Normalize(&to_move, &ray.dir);
+		kmVec2Scale(&to_move, &to_move, (width_ / 2.0f) - dist);
+		kmVec2Subtract(&new_pos, &position(), &to_move);
+		set_position(new_pos.x, new_pos.y);
+		
+		if(is_grounded_) {
+			gsp_ = 0.0f;
+		} else {
+			speed_.x = 0.0f; //FIXME: Take into account rotation
+		}
+	} else {
+		return false; //Ignore all other collisions for now
+	}
+	
+	//If the position changed, re-run the collision loop
+	return !kmVec2AreEqual(&original_position, &position());
 }
 
 void Character::update_finished(float dt) {
@@ -108,14 +212,14 @@ void Character::update_finished(float dt) {
     const float UNROLL_SPEED = 0.5f * WORLD_SCALE;
     const float ALLOWED_ROLL_SPEED = 1.03125f * WORLD_SCALE;
     
-    float sin_rot = sinf(rotation());
+    float sin_rot = sinf(kmDegreesToRadians(rotation()));
     float slp = SLP;
     
     static bool jump_pressed_last_time = false;
     static bool grounded_last_frame = false;
     
     if(!grounded_last_frame && is_grounded_) {
-        std::cout << "Reorienting" << std::endl;
+        std::cout << "Reorienting: " << rotation() << std::endl;
         if(speed_.y < 0.0f) {
             //We just hit the ground, we need to recalculate gsp
             if((rotation() >= 360.0f - 15.0f && rotation() <= 360.0f) ||
@@ -153,7 +257,7 @@ void Character::update_finished(float dt) {
     }
         
     if(rolling_) {
-        if(sgn(sin_rot) == sgn(gsp_) || sgn(gsp_) == 0) {
+        if(sgn(sin_rot) == sgn(gsp_)) {
             slp = SLP_DOWNHILL;
         } else {
             slp = SLP_UPHILL;
@@ -237,8 +341,16 @@ void Character::update_finished(float dt) {
     }
     
     if(is_grounded_) {
-        speed_.x = gsp_ * cosf(kmDegreesToRadians(rotation()));
-        speed_.y = gsp_ * -sinf(kmDegreesToRadians(rotation()));    
+		/*
+		 * 	The 'R' ray of the raybox always points to the local "forwards"
+		 *  so we use that to calculate the speed vector based on gsp_
+		 *  rather than calculating it with cos/sine
+		 */
+		RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
+		kmVec2Normalize(&speed_, &ray_box->ray('R').dir);
+		kmVec2Scale(&speed_, &speed_, gsp_);
+        //speed_.x = gsp_ * cos(kmDegreesToRadians(rotation()));
+        //speed_.y = gsp_ * -sin(kmDegreesToRadians(rotation()));    
     } else {
         //Air drag effect
         /*
@@ -248,8 +360,6 @@ void Character::update_finished(float dt) {
 
         speed_.y -= GRV * dt;        
     }
-    
-    std::cout << "Grounded: " << is_grounded_ << std::endl;
     
     jump_pressed_last_time = jump_pressed_;
     grounded_last_frame = is_grounded_;
