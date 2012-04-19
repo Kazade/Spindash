@@ -13,6 +13,8 @@ portability.
 * Run: cmake .. && make
 * Then run ./playground/spindash_playground
 
+You will need OpenGL and SDL libraries installed
+
 Playground is the sample test application for the library. If you find bugs, please
 report them here: https://github.com/Kazade/Spindash/issues
 
