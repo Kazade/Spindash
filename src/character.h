@@ -10,7 +10,7 @@
 class Character : public Object {
 public:
     Character(World* world, SDdouble width, SDdouble height):
-        Object(world, CollisionPrimitive::ptr(new RayBox(this, width, height))),
+        Object(world, CollisionPrimitive::ptr(new RayBox(this, width, height*1.1))),
         height_(height),
         width_(width),
         moving_left_(false),
