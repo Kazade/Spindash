@@ -130,7 +130,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	
 	kmVec2 normalized_speed;
 	kmVec2Normalize(&normalized_speed, &speed());
-	std::map<char, bool> hitmask;
+
 	
 	struct CollisionInfo {
 		CollisionInfo():other(nullptr), distance(100000) {}
@@ -141,8 +141,12 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		Object* other;
 		float distance;
 	};
-	
+
+	std::map<char, bool> hitmask;	
 	std::map<char, CollisionInfo> collision_info;
+	
+    std::map<char, bool> oor_hitmask;
+	std::map<char, CollisionInfo> out_of_range;
 	
 	std::cout << "Start" << std::endl;
 	//Organize the collision data into something more useful
@@ -157,13 +161,13 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&reversed_normal, &normalized_speed);
 		std::cout << "Ray: " << ray << " Angle: " << angle_between_speed_and_normal << std::endl;		
 		
-		/*
+		
 		//FIXME: Only in the air?
 		if(angle_between_speed_and_normal > 90.0 - 0.001) {
 			std::cout << "Ignoring collision with ray: " << ray << " because angle is: " << angle_between_speed_and_normal << std::endl;
 			continue;
 		}
-		*/
+		
 		
 		Object* other = get_other_object_from_collision(c);
 							
@@ -191,7 +195,20 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 			collision_info[ray].other = other;		
 			collision_info[ray].distance = distance;
 		} else {
-			std::cout << "Ignoring collision with ray because the distance was too far: " << ray << "(" << distance << ")" << std::endl;
+			if(oor_hitmask[ray]) {
+				//We've already seen a collision for this ray, only
+				//store this one if distance is less than the existing one			
+				if(distance >= out_of_range[ray].distance) {
+					std::cout << "Ignoring collision too far" << std::endl;	
+					continue;
+				}
+			}					
+		    oor_hitmask[ray] = true;
+			out_of_range[ray].ray = ray;
+			out_of_range[ray].normal = normal;
+			out_of_range[ray].point = c.point;
+			out_of_range[ray].other = other;		
+			out_of_range[ray].distance = distance;
 		}
 	}
 	
@@ -241,7 +258,33 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		
 		kmScalar dist = kmVec2DistanceBetween(&info.point, &ray.start);
 		
-		if(1) {		
+		//We hit both rays, it's just one was slightly further than the character height
+		if(hitmask['A'] && oor_hitmask['B'] ||
+            hitmask['B'] && oor_hitmask['A']) {
+           
+            CollisionInfo a = (hitmask['A']) ? info : out_of_range['A'];
+            CollisionInfo b = (hitmask['B']) ? info : out_of_range['B'];
+		   
+			std::cout << "Extended Both" << std::endl;
+			kmVec2 intersection, normal;
+			kmVec2MidPointBetween(&intersection, &a.point, &b.point);
+			kmVec2Add(&normal, &a.normal, &b.normal);
+			kmVec2Normalize(&normal, &normal);
+			std::cout << "N1: " << a.normal.x << ", " << a.normal.y << std::endl;
+			std::cout << "N2: " << b.normal.x << ", " << b.normal.y << std::endl;
+			kmVec2 scaled_normal, new_pos;
+			kmVec2Scale(&scaled_normal, &normal, (height_ / 2.0f));
+			kmVec2Add(&new_pos, &intersection, &scaled_normal);
+
+			std::cout << "New pos: (" << new_pos.x << ", " << new_pos.y << ")" << std::endl;
+			assert(!isnan(new_pos.x));
+			assert(!isnan(new_pos.y));
+						
+			set_position(new_pos.x, new_pos.y);
+			SDdouble angle = kmVec2DegreesBetween(&normal, &up);
+			set_rotation(-angle);			   
+		   
+		} else {		
 			//Move out
 			kmVec2 to_move, new_pos;
 			kmVec2Normalize(&to_move, &ray.dir);
