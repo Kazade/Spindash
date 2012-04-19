@@ -3,7 +3,7 @@
 #include "spindash.h"
 #include "world.h"
 
-SDuint sdSpringCreate(SDuint world_id, SDfloat angle, SDfloat power) {
+SDuint sdSpringCreate(SDuint world_id, SDdouble angle, SDdouble power) {
     World* world = get_world_by_id(world_id);
     return world->new_spring(power, angle);
 }

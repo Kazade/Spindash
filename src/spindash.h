@@ -11,24 +11,25 @@ void sdWorldAddTriangle(SDuint world, kmVec2* points);
 void sdWorldAddBox(SDuint world, kmVec2* points);
 void sdWorldAddMesh(SDuint world, SDuint num_triangles, kmVec2* points);
 void sdWorldRemoveTriangles(SDuint world);
-void sdWorldStep(SDuint world, SDfloat dt);
+void sdWorldStep(SDuint world, SDdouble dt);
 void sdWorldDebugRenderGL(SDuint world);
 void sdWorldDestroy(SDuint world);
+SDuint64 sdWorldGetStepCounter(SDuint world);
 
 void sdObjectDestroy(SDuint object);
 
-void sdObjectSetPosition(SDuint object, float x, float y);
+void sdObjectSetPosition(SDuint object, SDdouble x, SDdouble y);
 kmVec2 sdObjectGetPosition(SDuint object);
-SDfloat sdObjectGetPositionX(SDuint object);
-SDfloat sdObjectGetPositionY(SDuint object);
-SDfloat sdObjectGetSpeedX(SDuint object);
-SDfloat sdObjectGetSpeedY(SDuint object);
-void sdObjectSetSpeedX(SDuint object, SDfloat x);
-void sdObjectSetSpeedY(SDuint object, SDfloat y);
-SDfloat sdObjectGetRotation(SDuint object);
+SDdouble sdObjectGetPositionX(SDuint object);
+SDdouble sdObjectGetPositionY(SDuint object);
+SDdouble sdObjectGetSpeedX(SDuint object);
+SDdouble sdObjectGetSpeedY(SDuint object);
+void sdObjectSetSpeedX(SDuint object, SDdouble x);
+void sdObjectSetSpeedY(SDuint object, SDdouble y);
+SDdouble sdObjectGetRotation(SDuint object);
 
-void sdObjectSetBounciness(SDuint object, SDfloat v);
-void sdObjectSetFriction(SDuint object, SDfloat friction);
+void sdObjectSetBounciness(SDuint object, SDdouble v);
+void sdObjectSetFriction(SDuint object, SDdouble friction);
 
 SDuint sdCharacterCreate(SDuint world);
 
@@ -42,10 +43,12 @@ void sdCharacterStopJumping(SDuint character);
 void sdCharacterStartLookingDown(SDuint character);
 void sdCharacterStopLookingDown(SDuint character);
 void sdCharacterStopRolling(SDuint character);
+SDdouble sdCharacterGetWidth(SDuint character);
+
 SDbool sdObjectIsCharacter(SDuint object);
 
 
-SDuint sdSpringCreate(SDuint world, SDfloat angle, SDfloat power);
+SDuint sdSpringCreate(SDuint world, SDdouble angle, SDdouble power);
 
 SDuint sdBoxCreate(SDuint world);
 SDuint sdCircleCreate(SDuint world);

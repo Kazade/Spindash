@@ -26,7 +26,7 @@ protected:
     kmVec2 position_;
     kmVec2 speed_;
     kmVec2 acceleration_;
-    float rotation_;
+    kmScalar rotation_;
 
     kmVec2 last_safe_position_;
 
@@ -61,15 +61,15 @@ public:
         kmVec2Assign(&position_, &last_safe_position_);
     }
     
-    void set_position(float x, float y);
-    virtual void set_speed(float x, float y);
-    void set_acceleration(float x, float y);
-    void set_rotation(float degrees);
+    void set_position(kmScalar x, kmScalar y);
+    virtual void set_speed(kmScalar x, kmScalar y);
+    void set_acceleration(kmScalar x, kmScalar y);
+    void set_rotation(kmScalar degrees);
 
     const kmVec2& speed() const { return speed_; }
     const kmVec2& position() const { return position_; }
     const kmVec2& acceleration() const { return acceleration_; }
-    float rotation() const { return rotation_; }
+    double rotation() const { return rotation_; }
     
     virtual void prepare(float dt);
     virtual void update(float dt);
