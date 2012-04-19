@@ -199,6 +199,13 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	// the response
 	if(hitmask['A'] && hitmask['B']) {
 		if(1) {
+			/**
+			 * 	We've hit the floor with both rays, what do we do??
+			 *  1. Find the point mid-way between both intersections
+			 *  2. Calculate a normal by averaging the two collision normals
+			 *  3. Set the position of the character to the mid-way point - (normal * height / 2)
+			 *  4. Rotate the character to the floor
+			 */			
 			std::cout << "Both" << std::endl;
 			kmVec2 intersection, normal;
 			kmVec2MidPointBetween(&intersection, &collision_info['A'].point, &collision_info['B'].point);
@@ -219,6 +226,13 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 			set_rotation(-angle);	
 		} 
 	} else if (hitmask['A'] || hitmask['B']) {
+		/**
+		 * 	We've hit the floor with one ray, what do we do??
+		 *  1. Move the character away from the collision along the ray
+		 *  2. Rotate the position around the intersection until we are perpendicular 
+		 *  3. Set the rotation angle
+		 */			
+			 		
 		std::cout << "Single" << std::endl;
 		//Only one floor ray collided, we need to move the character
 		//out of the floor and rotate around the collision point
