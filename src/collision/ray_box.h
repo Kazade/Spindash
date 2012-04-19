@@ -20,8 +20,7 @@
    (L)--|     |--(R)
         |     |
        (A)   (B)
-        |     |
-       (Y)   (Z)   
+
     A ray box is used to represent a character. 
      * Rays C and D are used to detect ceilings
      * Rays L and R are used to detect walls, notice that they are
