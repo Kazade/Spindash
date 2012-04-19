@@ -19,7 +19,8 @@
 SDuint World::world_id_counter_ = 0;
 
 World::World(SDuint id):
-    id_(id) {
+    id_(id),
+	step_counter_(0) {
     set_gravity(0.0f, -7.0f);
     
 }
@@ -155,7 +156,7 @@ void World::update(float step) {
         std::vector<Collision> collisions;
         
         lhs.update(step); //Move without responding to collisions
-        uint32_t tries = 4;
+        uint32_t tries = 10;
         while(run_loop && tries--) {
             for(uint32_t j = 0; j < get_triangle_count(); ++j) {
                 Triangle& triangle = triangles_.at(j);
@@ -186,6 +187,7 @@ void World::update(float step) {
             }   
             
             if(!collisions.empty()) {
+				std::cout << tries << std::endl;
                 run_loop = lhs.respond_to(collisions);                
                 collisions.clear();
             } else {
@@ -201,6 +203,7 @@ void World::update(float step) {
         }
     }
     
+    ++step_counter_;
 }
 
 void World::destroy_object(ObjectID object_id) {
@@ -325,7 +328,7 @@ void sdWorldRemoveTriangles(SDuint world_id) {
     world->remove_all_triangles();
 }
 
-void sdWorldStep(SDuint world_id, SDfloat dt) {
+void sdWorldStep(SDuint world_id, SDdouble dt) {
     World* world = get_world_by_id(world_id);
     if(!world) {
         //Log error
@@ -343,4 +346,9 @@ void sdWorldDebugRenderGL(SDuint world_id) {
     }
 
     world->debug_render();
+}
+
+SDuint64 sdWorldGetStepCounter(SDuint world_id) {
+	World* world = get_world_by_id(world_id);
+	return world->step_counter();
 }

@@ -9,8 +9,8 @@
 
 class Character : public Object {
 public:
-    Character(World* world, float width, float height):
-        Object(world, CollisionPrimitive::ptr(new RayBox(this, 0.5f, height * 1.1f))),
+    Character(World* world, SDdouble width, SDdouble height):
+        Object(world, CollisionPrimitive::ptr(new RayBox(this, width, height))),
         height_(height),
         width_(width),
         moving_left_(false),
@@ -42,12 +42,13 @@ public:
     
     void set_speed(float x, float y);
     
+    SDdouble width() const { return width_; }
 private:
     Collision find_nearest_collision(const std::vector<Collision>& collisions);
     std::pair<Collision, bool> find_collision_with_ray(const std::vector<Collision>& collisions, char ray);
     
-    float height_;
-    float width_;
+    SDdouble height_;
+    SDdouble width_;
     
     bool moving_left_;
     bool moving_right_;

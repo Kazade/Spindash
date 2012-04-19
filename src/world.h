@@ -37,6 +37,8 @@ public:
     
     SDuint get_box_count() const { return boxes_.size(); }
     Box* get_box_at(SDuint i) { return &boxes_.at(i); }
+    
+    uint64_t step_counter() const { return step_counter_; }
 private:
     SDuint id_;
     kmVec2 gravity_;
@@ -44,6 +46,8 @@ private:
     std::vector<Triangle> triangles_;
     std::vector<Box> boxes_;
     std::vector<Object::ptr> objects_;
+    
+    uint64_t step_counter_;
 };
 
 extern World* get_world_by_id(SDuint world);
