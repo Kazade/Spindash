@@ -187,24 +187,23 @@ static void build_world() {
     kmVec2 slope[3];
     kmVec2Fill(&slope[0], 3.0f, 0.0f);
     kmVec2Fill(&slope[1], 10.0f, 0.0f);
-    kmVec2Fill(&slope[2], 10.0f, 5.0f); 
+    kmVec2Fill(&slope[2], 10.0f, 3.0f); 
     sdWorldAddTriangle(world, slope);
     
-    kmVec2 wall[3];
+    kmVec2 wall[4];
 
     kmVec2Fill(&wall[0], -10.0f, 0.0f);     
     kmVec2Fill(&wall[1], -5.0f, 0.0f);
     kmVec2Fill(&wall[2], -5.0f, 5.0f);
     kmVec2Fill(&wall[3], -10.0f, 5.0f);
     sdWorldAddBox(world, wall);    
-
-    /*
-    kmVec2 platform[3];
+    
+    kmVec2 platform[4];
     kmVec2Fill(&platform[0], 1.0f, 1.5f);
     kmVec2Fill(&platform[1], 3.0f, 1.5f); 
     kmVec2Fill(&platform[2], 3.0f, 2.0f);
     kmVec2Fill(&platform[3], 1.0f, 2.0f);
-    sdWorldAddBox(world, platform);*/
+    sdWorldAddBox(world, platform);
     
     spring = sdSpringCreate(world, 0, 10.0f / 40.0f);
     sdObjectSetPosition(spring, -4.75f, 0.125f);

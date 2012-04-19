@@ -11,6 +11,7 @@ static SDuint generate_id() {
 
 Object::Object(World* world, CollisionPrimitive::ptr shape):
     id_(generate_id()),
+    world_(world),
     rotation_(0.0f),
     shape_(shape) {
     
@@ -63,26 +64,26 @@ bool Object::exists(SDuint object_id) {
     return objects_.find(object_id) != objects_.end();
 }
 
-void Object::set_position(float x, float y) {
+void Object::set_position(kmScalar x, kmScalar y) {
     position_.x = x;
     position_.y = y;
     
     geom().set_position(x, y);
 }
 
-void Object::set_rotation(float angle) {
-	angle = (angle < 0) ? 360.0f + angle : angle;
+void Object::set_rotation(kmScalar angle) {
+	angle = (angle < 0) ? 360.0 + angle : angle;
 	
     rotation_ = angle;
     geom().set_rotation(angle);
 }
 
-void Object::set_speed(float x, float y) {
+void Object::set_speed(kmScalar x, kmScalar y) {
     speed_.x = x;
     speed_.y = y;
 }
 
-void Object::set_acceleration(float x, float y) {
+void Object::set_acceleration(kmScalar x, kmScalar y) {
     acceleration_.x = x;
     acceleration_.y = y;
 }
@@ -115,7 +116,7 @@ void sdObjectDestroy(SDuint entity) {
     obj->world()->destroy_object(entity);
 }
 
-void sdObjectSetPosition(SDuint object, float x, float y) {
+void sdObjectSetPosition(SDuint object, SDdouble x, SDdouble y) {
     Object* obj = Object::by_id(object);        
     obj->set_position(x, y);        
 }
@@ -125,39 +126,39 @@ kmVec2 sdObjectGetPosition(SDuint object) {
     return obj->position();
 }
 
-SDfloat sdObjectGetPositionX(SDuint object) {
+SDdouble sdObjectGetPositionX(SDuint object) {
     Object* obj = Object::by_id(object);        
     return obj->position().x;
 }
 
-SDfloat sdObjectGetPositionY(SDuint object) {
+SDdouble sdObjectGetPositionY(SDuint object) {
     Object* obj = Object::by_id(object);        
     return obj->position().y;
 }
 
-SDfloat sdObjectGetSpeedX(SDuint object) {
+SDdouble sdObjectGetSpeedX(SDuint object) {
     Object* obj = Object::by_id(object);
     return obj->speed().x;
 }
 
-SDfloat sdObjectGetSpeedY(SDuint object) {
+SDdouble sdObjectGetSpeedY(SDuint object) {
     Object* obj = Object::by_id(object);
     return obj->speed().y;
 }
 
-void sdObjectSetSpeedX(SDuint object, SDfloat x) {
+void sdObjectSetSpeedX(SDuint object, SDdouble x) {
     Object* obj = Object::by_id(object);
     
     obj->set_speed(x, obj->speed().y);
 }
 
-void sdObjectSetSpeedY(SDuint object, SDfloat y) {
+void sdObjectSetSpeedY(SDuint object, SDdouble y) {
     Object* obj = Object::by_id(object);
     
     obj->set_speed(obj->speed().x, y);
 }
 
-SDfloat sdObjectGetRotation(SDuint object) {
+SDdouble sdObjectGetRotation(SDuint object) {
     Object* obj = Object::by_id(object);
     return obj->rotation();
 }

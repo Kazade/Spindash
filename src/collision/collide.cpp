@@ -8,11 +8,11 @@
 std::vector<Collision> do_collide(Triangle* triangle, RayBox* ray_box, bool swap_result=false) {
     std::vector<Collision> collisions;
     
-    for(char which: { 'A', 'B', 'C', 'D', 'L', 'R' }) {
+    for(char which: { 'A', 'B', 'C', 'D', 'L', 'R', 'Y', 'Z' }) {
         kmRay2& ray = ray_box->ray(which);
         
         kmVec2 intersection, a_normal, b_normal, normal;
-        float distance; 
+        kmScalar distance; 
         if(kmRay2IntersectTriangle(&ray, &triangle->points[0], 
                                          &triangle->points[1], 
                                          &triangle->points[2], 

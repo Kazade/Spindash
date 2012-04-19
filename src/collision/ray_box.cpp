@@ -67,6 +67,23 @@ void RayBox::init() {
     kmVec2Transform(&d.start, &d.start, &rotation);
     d.start.x += x_; d.start.y += y_;
     kmVec2Transform(&d.dir, &d.dir, &rotation);
+    
+    //EXTRA RAYS FOR DETECTING THE GROUND!
+    kmRay2& y = rays_['Y'];
+    kmVec2Fill(&y.start, -width_ / 2.0f, 0.0f); 
+    kmVec2Fill(&y.dir, 0, (-height_ / 2.0f) * 1.1f);
+    
+    kmVec2Transform(&y.start, &y.start, &rotation);
+    y.start.x += x_; y.start.y += y_;
+    kmVec2Transform(&y.dir, &y.dir, &rotation);
+    
+    kmRay2& z = rays_['Z'];
+    kmVec2Fill(&z.start, width_ / 2.0f, 0.0f); 
+    kmVec2Fill(&z.dir, 0, (-height_ /2.0f) * 1.1f);
+    
+    kmVec2Transform(&z.start, &z.start, &rotation);
+    z.start.x += x_; z.start.y += y_;
+    kmVec2Transform(&z.dir, &z.dir, &rotation);    
 }
 
 void RayBox::set_rotation(float degrees) {

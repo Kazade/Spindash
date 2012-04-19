@@ -29,12 +29,12 @@ TEST(test_horizontal_sensors) {
     
     kmVec2 wall_triangle[3];
     kmVec2Fill(&wall_triangle[0], wall_x, 100.0f);
-    kmVec2Fill(&wall_triangle[1], wall_x, -100.0f);
+    kmVec2Fill(&wall_triangle[1], wall_x, 0.0f);
     kmVec2Fill(&wall_triangle[2], 20, 0.0f);
     
     sdWorldAddTriangle(world, wall_triangle);
     
-    float character_width = 20.0f * world_scale;
+    float character_width = sdCharacterGetWidth(character);
 
     //Position the character on the floor, next to the wall
     sdObjectSetPosition(character, wall_x - (character_width/2), 0.5f); 
@@ -50,7 +50,7 @@ TEST(test_horizontal_sensors) {
     CHECK_CLOSE(wall_x - (character_width/2), sdObjectGetPositionX(character), EPSILON);
     
     //Now, make us intersect the wall
-    sdObjectSetPosition(character, (wall_x - (character_width/2)) + 0.25f, 0.5f); 
+    sdObjectSetPosition(character, (wall_x - (character_width/2)) + 0.15f, 0.5f); 
     sdWorldStep(world, frame_time);
     
     //Should be back where we were
@@ -80,11 +80,11 @@ TEST(test_vertical_down_sensors) {
     
     sdWorldAddTriangle(world, floor_triangle);
     
-    sdObjectSetPosition(character, -10.0f * world_scale, 0.0f);
+    sdObjectSetPosition(character, -10.0f * world_scale, 0.1f);
     sdWorldStep(world, 1.0f);
     CHECK(sdCharacterIsGrounded(character));
     
-    sdObjectSetPosition(character, 0.0f, 0.0f);
+    sdObjectSetPosition(character, 0.0f, 0.1f);
     sdWorldStep(world, 1.0f);
     CHECK(sdCharacterIsGrounded(character));
     
@@ -106,7 +106,7 @@ TEST(test_vertical_down_sensors) {
     sdObjectSetPosition(character, 50.0f, 50.0f);
     
     //Run 5 seconds of gameplay
-    for(uint32_t i = 0; i < 5; ++i) sdWorldStep(world, 1.0f);
+    for(uint32_t i = 0; i < 5 * 60; ++i) sdWorldStep(world, frame_time);
     
     //Now the character should have fallen, and be stood on the slope 
     //with a rotation of -45.0 (or 360.0f - 45.0f)
