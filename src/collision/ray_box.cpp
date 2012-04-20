@@ -27,17 +27,17 @@ void RayBox::init() {
     kmMat3RotationZ(&rotation, kmDegreesToRadians(degrees_));
     
     kmRay2& l = rays_['L'];
-    kmVec2Fill(&l.start, x_, y_); //FIXME: Y-pos should be below center
+    kmVec2Fill(&l.start, x_, y_ - ((height_ / 2.0) * 0.2)); //FIXME: Y-pos should be below center
     kmVec2Fill(&l.dir, -(width_/2), 0.0f);
     kmVec2Transform(&l.dir, &l.dir, &rotation);
     
     kmRay2& r = rays_['R'];
-    kmVec2Fill(&r.start, x_, y_); //FIXME: Y-pos should be below center
+    kmVec2Fill(&r.start, x_, y_ - ((height_ / 2.0) * 0.2)); //FIXME: Y-pos should be below center
     kmVec2Fill(&r.dir, (width_/2), 0.0f); 
     kmVec2Transform(&r.dir, &r.dir, &rotation);
     
     kmRay2& a = rays_['A'];
-    kmVec2Fill(&a.start, -width_ / 2.0f, 0.0f); 
+    kmVec2Fill(&a.start, -(width_ / 2.0), 0.0f); 
     kmVec2Fill(&a.dir, 0, -height_ / 2.0f);
     
     kmVec2Transform(&a.start, &a.start, &rotation);

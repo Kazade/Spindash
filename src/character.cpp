@@ -155,18 +155,16 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		
 		char ray = (c.object_a == &geom()) ? c.a_ray : c.b_ray;	 
 		
-		kmVec2 reversed_normal;
-		reversed_normal.x = -normal.x;
-		reversed_normal.y = -normal.y;	
-		kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&reversed_normal, &normalized_speed);
+		kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&normal, &normalized_speed);
+
+		std::cout << angle_between_speed_and_normal << std::endl;
 		
 		//FIXME: Only in the air?
-		if(angle_between_speed_and_normal > 90.0 - 0.001) {
+		if(angle_between_speed_and_normal < 90.0) {
 			L_DEBUG((boost::format("Ignoring collision with ray: %s because angle is: %f") % ray % angle_between_speed_and_normal).str());
 			continue;
 		}
-		
-		
+
 		Object* other = get_other_object_from_collision(c);
 							
 		kmScalar distance = kmVec2DistanceBetween(&c.point, &ray_box->ray(ray).start);		
