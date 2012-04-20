@@ -30,7 +30,7 @@ TEST(test_acceleration) {
     SDuint character = sdCharacterCreate(world);
     
     //Character by default should be 1.0f units high
-    sdObjectSetPosition(character, 0.0f, 0.5f);    
+    sdObjectSetPosition(character, 0.0f, 0.51f);    
     create_floor_plane(world);
     
     //Check that the X and Y speed are zero
@@ -54,7 +54,8 @@ TEST(test_acceleration) {
     sdCharacterStopMovingRight(character);
 
     //Reset the X speed
-    sdObjectSetSpeedX(character, 0.0f);
+    sdObjectSetSpeedX(character, 0.0);
+    sdCharacterSetGroundSpeed(character, 0.0);
     sdCharacterStartMovingLeft(character);
     
     sdWorldStep(world, frame_time);
@@ -100,12 +101,13 @@ TEST(test_deceleration) {
     
     sdCharacterStartMovingRight(character);
     //Set the speed so that subtracting decelration would switch sign
-    sdObjectSetSpeedX(character, 0.1 * world_scale);
+    sdCharacterSetGroundSpeed(character, 0.1 * world_scale);  
+    sdCharacterStopMovingRight(character); 
     sdCharacterStartMovingLeft(character); //We have turned around
     
     sdWorldStep(world, frame_time);
     //Emulate weird anomoly (see SPG Running - Deceleration)
-    CHECK_CLOSE(-0.5 * world_scale, sdObjectGetSpeedX(character), EPSILON);
+    CHECK_CLOSE(-0.5 * world_scale, sdCharacterGetGroundSpeed(character), EPSILON);
     
     sdWorldDestroy(world);
 }
@@ -156,10 +158,10 @@ TEST(test_top_speed) {
     CHECK_CLOSE(6.0f * world_scale, sdObjectGetSpeedX(character), EPSILON);
     
     //Set the speed faster than max
-    sdObjectSetSpeedX(character, 7.0f * world_scale);
+    sdCharacterSetGroundSpeed(character, 7.0f * world_scale);
     sdWorldStep(world, frame_time);
     //No acceleration should have been added
-    CHECK_CLOSE(7.0f * world_scale, sdObjectGetSpeedX(character), EPSILON);
+    CHECK_CLOSE(7.0f * world_scale, sdCharacterGetGroundSpeed(character), EPSILON);
     
     sdWorldDestroy(world);
 }

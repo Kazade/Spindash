@@ -6,6 +6,10 @@
 #include "kazmath/vec2.h"
 #include "typedefs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SDuint sdWorldCreate();
 void sdWorldAddTriangle(SDuint world, kmVec2* points);
 void sdWorldAddBox(SDuint world, kmVec2* points);
@@ -44,6 +48,8 @@ void sdCharacterStartLookingDown(SDuint character);
 void sdCharacterStopLookingDown(SDuint character);
 void sdCharacterStopRolling(SDuint character);
 SDdouble sdCharacterGetWidth(SDuint character);
+void sdCharacterSetGroundSpeed(SDuint character, SDdouble value);
+SDdouble sdCharacterGetGroundSpeed(SDuint character);
 
 SDbool sdObjectIsCharacter(SDuint object);
 
@@ -53,6 +59,8 @@ SDuint sdSpringCreate(SDuint world, SDdouble angle, SDdouble power);
 SDuint sdBoxCreate(SDuint world);
 SDuint sdCircleCreate(SDuint world);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif // KAZPHYSICS2_H_INCLUDED

@@ -43,6 +43,9 @@ public:
     void set_speed(float x, float y);
     
     SDdouble width() const { return width_; }
+    
+    void set_ground_speed(double speed) { gsp_ = speed; }
+    double ground_speed() const { return gsp_; }
 private:
     Collision find_nearest_collision(const std::vector<Collision>& collisions);
     std::pair<Collision, bool> find_collision_with_ray(const std::vector<Collision>& collisions, char ray);
@@ -59,7 +62,7 @@ private:
     bool rolling_;
     bool is_grounded_;
     
-    float gsp_;
+    double gsp_;
     
     //override
     void pre_prepare(float dt);

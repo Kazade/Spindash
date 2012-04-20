@@ -187,7 +187,6 @@ void World::update(float step) {
             }   
             
             if(!collisions.empty()) {
-				std::cout << tries << std::endl;
                 run_loop = lhs.respond_to(collisions);                
                 collisions.clear();
             } else {

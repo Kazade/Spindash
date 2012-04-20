@@ -133,11 +133,12 @@ TEST(test_slp_factor) {
     CHECK(sdCharacterIsGrounded(character));
     CHECK_CLOSE(360.0f - 45.0f, sdObjectGetRotation(character), EPSILON);    
     
-    sdObjectSetSpeedX(character, 0.0f); //Reset gsp
+    sdCharacterSetGroundSpeed(character, 0.0f); //Reset gsp
     sdWorldStep(world, frame_time); //Run a single step
     
-    float x_speed = sdObjectGetSpeedX(character);
-    CHECK_CLOSE(0.125 * world_scale * sinf(kmDegreesToRadians(315)), x_speed / cosf(kmDegreesToRadians(sdObjectGetRotation(character))), EPSILON);
+    float x_speed = sdCharacterGetGroundSpeed(character);
+    float frc = 0.00117187505;
+    CHECK_CLOSE(0.125 * world_scale * sinf(kmDegreesToRadians(315)), x_speed, EPSILON);
     
     //Move the character above the slope
     sdObjectSetPosition(character, 50.0f, 50.0f);
@@ -146,13 +147,13 @@ TEST(test_slp_factor) {
     CHECK(sdCharacterIsGrounded(character));
     CHECK_CLOSE(360.0f - 45.0f, sdObjectGetRotation(character), EPSILON);    
     
-    sdObjectSetSpeedX(character, 0.0f); //Reset gsp
+    sdCharacterSetGroundSpeed(character, 0.0f); //Reset gsp
     sdCharacterStartLookingDown(character);
     sdWorldStep(world, frame_time); //Run a single step
 
     //FIXME: Friction is messing this test up!
-    x_speed = sdObjectGetSpeedX(character) / cosf(kmDegreesToRadians(sdObjectGetRotation(character)));
-    CHECK_CLOSE((0.3125f * world_scale * sinf(kmDegreesToRadians(315))), x_speed + (0.046875f * world_scale), EPSILON);
+    x_speed = sdCharacterGetGroundSpeed(character);
+    CHECK_CLOSE(0.3125f * world_scale * sinf(kmDegreesToRadians(315)), x_speed - frc, EPSILON);
     
     sdWorldDestroy(world);
 }

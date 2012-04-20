@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cassert>
 #include <limits>
+#include <boost/format.hpp>
+#include "logging/logging.h"
 #include "character.h"
 #include "world.h"
 
@@ -19,7 +21,6 @@ void Character::pre_prepare(float dt) {
 void Character::prepare(float dt) {
     pre_prepare(dt);
     
-    std::cout << "Setting ungrounded" << std::endl;
     is_grounded_ = false; //Reset the grounded flag
     
     post_prepare(dt);
@@ -148,7 +149,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
     std::map<char, bool> oor_hitmask;
 	std::map<char, CollisionInfo> out_of_range;
 	
-	std::cout << "Start" << std::endl;
 	//Organize the collision data into something more useful
 	for(Collision c: collisions) {
 		kmVec2 normal = (c.object_a == &geom()) ? c.b_normal : c.a_normal;
@@ -159,12 +159,10 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		reversed_normal.x = -normal.x;
 		reversed_normal.y = -normal.y;	
 		kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&reversed_normal, &normalized_speed);
-		std::cout << "Ray: " << ray << " Angle: " << angle_between_speed_and_normal << std::endl;		
-		
 		
 		//FIXME: Only in the air?
 		if(angle_between_speed_and_normal > 90.0 - 0.001) {
-			std::cout << "Ignoring collision with ray: " << ray << " because angle is: " << angle_between_speed_and_normal << std::endl;
+			L_DEBUG((boost::format("Ignoring collision with ray: %s because angle is: %f") % ray % angle_between_speed_and_normal).str());
 			continue;
 		}
 		
@@ -174,7 +172,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		kmScalar distance = kmVec2DistanceBetween(&c.point, &ray_box->ray(ray).start);		
 		
 		if(ray == 'A' || ray == 'B') {
-			std::cout << "Setting grounded" << std::endl;
 			is_grounded_ = (other) ? !other->has_collision_flag(NOT_GROUND) : true;				
 		} 		
 		
@@ -184,7 +181,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 				//We've already seen a collision for this ray, only
 				//store this one if distance is less than the existing one			
 				if(distance >= collision_info[ray].distance) {
-					std::cout << "Ignoring collision too far" << std::endl;	
 					continue;
 				}
 			}					
@@ -199,7 +195,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 				//We've already seen a collision for this ray, only
 				//store this one if distance is less than the existing one			
 				if(distance >= out_of_range[ray].distance) {
-					std::cout << "Ignoring collision too far" << std::endl;	
 					continue;
 				}
 			}					
@@ -223,18 +218,14 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 			 *  3. Set the position of the character to the mid-way point - (normal * height / 2)
 			 *  4. Rotate the character to the floor
 			 */			
-			std::cout << "Both" << std::endl;
 			kmVec2 intersection, normal;
 			kmVec2MidPointBetween(&intersection, &collision_info['A'].point, &collision_info['B'].point);
 			kmVec2Add(&normal, &collision_info['A'].normal, &collision_info['B'].normal);
 			kmVec2Normalize(&normal, &normal);
-			std::cout << "N1: " << collision_info['A'].normal.x << ", " << collision_info['A'].normal.y << std::endl;
-			std::cout << "N2: " << collision_info['B'].normal.x << ", " << collision_info['B'].normal.y << std::endl;
 			kmVec2 scaled_normal, new_pos;
 			kmVec2Scale(&scaled_normal, &normal, (height_ / 2.0f));
 			kmVec2Add(&new_pos, &intersection, &scaled_normal);
 
-			std::cout << "New pos: (" << new_pos.x << ", " << new_pos.y << ")" << std::endl;
 			assert(!isnan(new_pos.x));
 			assert(!isnan(new_pos.y));
 						
@@ -249,34 +240,31 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		 *  2. Rotate the position around the intersection until we are perpendicular 
 		 *  3. Set the rotation angle
 		 */			
-			 		
-		std::cout << "Single" << std::endl;
+			 				
 		//Only one floor ray collided, we need to move the character
 		//out of the floor and rotate around the collision point
 		CollisionInfo info = (hitmask['A']) ? collision_info['A'] : collision_info['B'];
 		kmRay2 ray = (hitmask['A']) ? ray_box->ray('A') : ray_box->ray('B');
-		
+		L_DEBUG("Single ray floor collision");
+				
 		kmScalar dist = kmVec2DistanceBetween(&info.point, &ray.start);
 		
 		//We hit both rays, it's just one was slightly further than the character height
-		if(hitmask['A'] && oor_hitmask['B'] ||
-            hitmask['B'] && oor_hitmask['A']) {
+		if((hitmask['A'] && oor_hitmask['B']) ||
+           (hitmask['B'] && oor_hitmask['A'])) {
            
             CollisionInfo a = (hitmask['A']) ? info : out_of_range['A'];
             CollisionInfo b = (hitmask['B']) ? info : out_of_range['B'];
 		   
-			std::cout << "Extended Both" << std::endl;
+			L_DEBUG("Found extended collision with other floor ray, adjusting");
 			kmVec2 intersection, normal;
 			kmVec2MidPointBetween(&intersection, &a.point, &b.point);
 			kmVec2Add(&normal, &a.normal, &b.normal);
 			kmVec2Normalize(&normal, &normal);
-			std::cout << "N1: " << a.normal.x << ", " << a.normal.y << std::endl;
-			std::cout << "N2: " << b.normal.x << ", " << b.normal.y << std::endl;
 			kmVec2 scaled_normal, new_pos;
 			kmVec2Scale(&scaled_normal, &normal, (height_ / 2.0f));
 			kmVec2Add(&new_pos, &intersection, &scaled_normal);
 
-			std::cout << "New pos: (" << new_pos.x << ", " << new_pos.y << ")" << std::endl;
 			assert(!isnan(new_pos.x));
 			assert(!isnan(new_pos.y));
 						
@@ -308,13 +296,12 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 			//Finally, we set the angle relative to up
 			kmScalar rotation = kmVec2DegreesBetween(&info.normal, &up);
 			set_rotation(-rotation);	
-			std::cout << "New pos: (" << new_pos.x << ", " << new_pos.y << ")" << std::endl;
 			assert(!isnan(new_pos.x));
 			assert(!isnan(new_pos.y));
 			set_position(position().x, new_pos.y);			
 		} 	
 	} else {
-		std::cout << "No A-B collision" << std::endl;
+
 	}
 	
 	if (hitmask['L'] || hitmask['R']) {
@@ -388,21 +375,23 @@ void Character::update_finished(float dt) {
     
     //Unroll if we go too slow
     if(rolling_ && fabs(gsp_) < UNROLL_SPEED) {
-        std::cout << "Unrolling" << std::endl;
+        L_DEBUG("Unrolling as speed dropped too low");
         stop_rolling();
     }
     
     //std::cout << fabs(gsp_) << std::endl;
     if(fabs(gsp_) > ALLOWED_ROLL_SPEED && looking_down_ && !rolling_) {
-        std::cout << "Rolling" << std::endl;
+        L_DEBUG("Rolling");
         start_rolling();
     }
         
     if(rolling_) {
         if(sgn(sin_rot) == sgn(gsp_) || sgn(gsp_) == 0) {
             slp = SLP_DOWNHILL;
+            L_DEBUG("Using downhill slope speed");
         } else {
             slp = SLP_UPHILL;
+            L_DEBUG("Using up slope speed");
         }
     }
     
@@ -417,10 +406,14 @@ void Character::update_finished(float dt) {
         if(is_grounded_) {
             if(gsp_ <= 0.0f) {
                 //You can't accelerate while rolling
-                if(!rolling_) gsp_ += (-ACC * dt);
+                if(!rolling_) {
+					if(gsp_ > -TOP) {
+						gsp_ += (-ACC * dt);
+					}
+				}
             } else {
                 float dec_val = (rolling_) ? -(DEC * 0.5f) : -DEC;
-                gsp_ += (dec_val * dt);
+                gsp_ += (dec_val * dt);                
             }
         } else {
             //Accelerate twice as fast in the air
@@ -430,9 +423,13 @@ void Character::update_finished(float dt) {
         if(is_grounded_) {
             if(gsp_ >= 0.0f) {
                 //You can't accelerate while rolling
-                if(!rolling_) gsp_ += (ACC * dt);
+                if(!rolling_) { 
+					if(gsp_ < TOP) {
+						gsp_ += (ACC * dt);
+					}
+				}
             } else {
-                float dec_val = (rolling_) ? (DEC * 0.5f) : DEC;
+                float dec_val = (rolling_) ? (DEC * 0.5f) : DEC;                
                 gsp_ += dec_val * dt;
             }        
         } else {
@@ -453,16 +450,6 @@ void Character::update_finished(float dt) {
             if(gsp_ < 0.0f) gsp_ += frc;    
         }
     }
-    
-    if(moving_left_) {
-        if(gsp_ < -TOP) {
-            gsp_ = -TOP;
-        }
-    } else if (moving_right_) {
-        if(gsp_ > TOP) {
-            gsp_ = TOP;
-        }
-    }    
     
     if(waiting_for_jump_release_ && !jump_pressed_) {
         waiting_for_jump_release_ = false;
@@ -592,4 +579,14 @@ SDbool sdCharacterIsGrounded(SDuint character) {
 SDbool sdObjectIsCharacter(SDuint object) {
     Character* c = get_character(object);
     return (c) ? true: false;
+}
+
+void sdCharacterSetGroundSpeed(SDuint character, SDdouble value) {
+	Character* c = get_character(character);
+	c->set_ground_speed(value);
+}
+
+SDdouble sdCharacterGetGroundSpeed(SDuint character) {
+	Character* c = get_character(character);
+	return c->ground_speed();	
 }
