@@ -156,8 +156,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		char ray = (c.object_a == &geom()) ? c.a_ray : c.b_ray;	 
 		
 		kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&normal, &normalized_speed);
-
-		std::cout << angle_between_speed_and_normal << std::endl;
 		
 		//FIXME: Only in the air?
 		if(angle_between_speed_and_normal < 90.0) {
@@ -345,6 +343,19 @@ void Character::update_finished(float dt) {
     static bool jump_pressed_last_time = false;
     static bool grounded_last_frame = false;
     
+    if(looking_down_ && spindash_charge_) {
+		spindash_charge_ = spindash_charge_ - (floor(spindash_charge_ / 0.125) / 256.0);
+	} else if(spindash_charge_) {
+		double boost = 8.0 + (floor(spindash_charge_) / 2.0);
+		if(facing_ == DIRECTION_RIGHT) {
+			gsp_ = boost * WORLD_SCALE;
+		} else {
+			gsp_ = -boost * WORLD_SCALE;
+		}
+		spindash_charge_ = 0.0;
+		start_rolling();
+	}
+    
     if(!grounded_last_frame && is_grounded_) {
         std::cout << "Reorienting: " << rotation() << std::endl;
         if(speed_.y < 0.0f) {
@@ -379,8 +390,8 @@ void Character::update_finished(float dt) {
     
     //std::cout << fabs(gsp_) << std::endl;
     if(fabs(gsp_) > ALLOWED_ROLL_SPEED && looking_down_ && !rolling_) {
-        L_DEBUG("Rolling");
-        start_rolling();
+        L_DEBUG("Rolling");        
+		start_rolling();		
     }
         
     if(rolling_) {
@@ -587,4 +598,19 @@ void sdCharacterSetGroundSpeed(SDuint character, SDdouble value) {
 SDdouble sdCharacterGetGroundSpeed(SDuint character) {
 	Character* c = get_character(character);
 	return c->ground_speed();	
+}
+
+void sdCharacterEnableSkill(SDuint character, sdSkill skill) {
+	Character* c = get_character(character);
+	c->enable_skill(skill);	
+}
+
+void sdCharacterDisableSkill(SDuint character, sdSkill skill) {
+	Character* c = get_character(character);
+	c->disable_skill(skill);		
+}
+
+SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill) {
+	Character* c = get_character(character);
+	return c->skill_enabled(skill);
 }

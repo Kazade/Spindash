@@ -10,6 +10,12 @@
 extern "C" {
 #endif
 
+enum sdSkill {
+	SD_SKILL_NONE = 0,
+	SD_SKILL_ROLL = 1,
+	SD_SKILL_SPINDASH = 2	
+};
+
 SDuint sdWorldCreate();
 void sdWorldAddTriangle(SDuint world, kmVec2* points);
 void sdWorldAddBox(SDuint world, kmVec2* points);
@@ -50,6 +56,10 @@ void sdCharacterStopRolling(SDuint character);
 SDdouble sdCharacterGetWidth(SDuint character);
 void sdCharacterSetGroundSpeed(SDuint character, SDdouble value);
 SDdouble sdCharacterGetGroundSpeed(SDuint character);
+
+void sdCharacterEnableSkill(SDuint character, sdSkill skill);
+void sdCharacterDisableSkill(SDuint character, sdSkill skill);
+SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill);
 
 SDbool sdObjectIsCharacter(SDuint object);
 

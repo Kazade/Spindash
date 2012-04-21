@@ -37,7 +37,7 @@ void RayBox::init() {
     kmVec2Transform(&r.dir, &r.dir, &rotation);
     
     kmRay2& a = rays_['A'];
-    kmVec2Fill(&a.start, -(width_ / 2.0), 0.0f); 
+    kmVec2Fill(&a.start, -(width_ / 2.0) * 0.9, 0.0f); 
     kmVec2Fill(&a.dir, 0, -height_ / 2.0f);
     
     kmVec2Transform(&a.start, &a.start, &rotation);
@@ -45,7 +45,7 @@ void RayBox::init() {
     kmVec2Transform(&a.dir, &a.dir, &rotation);
     
     kmRay2& b = rays_['B'];
-    kmVec2Fill(&b.start, width_ / 2.0f, 0.0f); 
+    kmVec2Fill(&b.start, (width_ / 2.0) * 0.9, 0.0f); 
     kmVec2Fill(&b.dir, 0, -height_ /2.0f);
     
     kmVec2Transform(&b.start, &b.start, &rotation);
@@ -53,7 +53,7 @@ void RayBox::init() {
     kmVec2Transform(&b.dir, &b.dir, &rotation);
         
     kmRay2& c = rays_['C'];
-    kmVec2Fill(&c.start, -width_ / 2.0f, 0.0f); 
+    kmVec2Fill(&c.start, -(width_ / 2.0) * 0.9, 0.0f); 
     kmVec2Fill(&c.dir, 0, height_ / 2.0f);
     
     kmVec2Transform(&c.start, &c.start, &rotation);
@@ -61,7 +61,7 @@ void RayBox::init() {
     kmVec2Transform(&c.dir, &c.dir, &rotation);
     
     kmRay2& d = rays_['D'];
-    kmVec2Fill(&d.start, width_ / 2.0f, 0.0f); 
+    kmVec2Fill(&d.start, (width_ / 2.0) * 0.9, 0.0f); 
     kmVec2Fill(&d.dir, 0, height_ / 2.0f);
     
     kmVec2Transform(&d.start, &d.start, &rotation);
