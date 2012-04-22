@@ -4,3 +4,6 @@
 [submodule "kaztimer"]
 	path = kaztimer
 	url = https://github.com/Kazade/Kaztimer.git
+[submodule "kaztext"]
+	path = kaztext
+	url = git@github.com:Kazade/Kaztext.git
