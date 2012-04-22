@@ -52,8 +52,6 @@ public:
 	}
     void stop_rolling() { rolling_ = false; }
     void start_jumping() { 
-		
-		
 		if(skill_enabled(SD_SKILL_SPINDASH) && looking_down_) {
 			spindash_charge_ += 2;
 			if(spindash_charge_ > 8) spindash_charge_ = 8;

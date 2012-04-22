@@ -357,7 +357,7 @@ void Character::update_finished(float dt) {
 	}
     
     if(!grounded_last_frame && is_grounded_) {
-        std::cout << "Reorienting: " << rotation() << std::endl;
+        L_DEBUG("Reorienting");
         if(speed_.y < 0.0f) {
             //We just hit the ground, we need to recalculate gsp
             if((rotation() >= 360.0f - 15.0f && rotation() <= 360.0f) ||
