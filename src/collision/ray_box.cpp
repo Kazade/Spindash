@@ -81,3 +81,9 @@ void RayBox::set_position(float x, float y) {
     
     init();
 }
+
+void RayBox::set_size(float width, float height) {
+    width_ = width;
+    height_ = height;
+    init();
+}

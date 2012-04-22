@@ -42,6 +42,8 @@ public:
     
     float height() const { return height_; }
     float width() const { return width_; }
+    
+    void set_size(float width, float height);
 private:
     float x_;
     float y_;

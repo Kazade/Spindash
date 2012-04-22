@@ -44,18 +44,24 @@ void sdObjectSetFriction(SDuint object, SDdouble friction);
 SDuint sdCharacterCreate(SDuint world);
 
 SDbool sdCharacterIsGrounded(SDuint character);
+SDbool sdCharacterIsJumping(SDuint character);
+SDbool sdCharacterIsRolling(SDuint character);
+
 void sdCharacterStartMovingLeft(SDuint character);
 void sdCharacterStopMovingLeft(SDuint character);
 void sdCharacterStartMovingRight(SDuint character);
 void sdCharacterStopMovingRight(SDuint character);
-void sdCharacterStartJumping(SDuint character);
-void sdCharacterStopJumping(SDuint character);
+void sdCharacterStartPressingJump(SDuint character);
+void sdCharacterStopPressingJump(SDuint character);
 void sdCharacterStartLookingDown(SDuint character);
 void sdCharacterStopLookingDown(SDuint character);
 void sdCharacterStopRolling(SDuint character);
+void sdCharacterStopJumping(SDuint character);
+
 SDdouble sdCharacterGetWidth(SDuint character);
 void sdCharacterSetGroundSpeed(SDuint character, SDdouble value);
 SDdouble sdCharacterGetGroundSpeed(SDuint character);
+SDdouble sdCharacterGetSpindashCharge(SDuint character);
 
 void sdCharacterEnableSkill(SDuint character, sdSkill skill);
 void sdCharacterDisableSkill(SDuint character, sdSkill skill);

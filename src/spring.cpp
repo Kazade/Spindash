@@ -21,6 +21,7 @@ bool Spring::respond_to(const std::vector<Collision>& collisions) {
     
     if(sdObjectIsCharacter(other->id())) {
         sdCharacterStopRolling(other->id());
+        sdCharacterStopJumping(other->id());
     }
     
     return false;

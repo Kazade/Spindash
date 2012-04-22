@@ -1,3 +1,4 @@
+#include <boost/format.hpp>
 
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -5,6 +6,9 @@
 #include "spindash.h"
 
 #include "kaztimer/kaztimer.h"
+#include "kaztext/kaztext.h"
+
+#include "debug_new.h"
 
 #define WIDTH  640
 #define HEIGHT 480
@@ -14,6 +18,7 @@ SDuint sonic = 0;
 SDuint spring = 0;
 SDuint spring2 = 0;
 
+KTuint font;
 KTIuint timer;
 
 static void repaint() {
@@ -23,6 +28,33 @@ static void repaint() {
     glTranslatef(0.0f, 0.0f, -15.0f);
     sdWorldDebugRenderGL(world);
     
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 800, 600, 0, 0, 1.0);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glDisable(GL_CULL_FACE);
+    
+    glColor3f(1, 1, 0);
+    std::wstring gsp_text = (boost::wformat(L"GSP: %d") % sdCharacterGetGroundSpeed(sonic)).str();
+    ktDrawText(10, 20, gsp_text.c_str());
+    
+    std::wstring sp_text = (boost::wformat(L"Spindash charge: %d") % sdCharacterGetSpindashCharge(sonic)).str();
+    ktDrawText(10, 40, sp_text.c_str());
+    
+    std::wstring jmp_text = (boost::wformat(L"Jumping: %s") % ((sdCharacterIsJumping(sonic)) ? "true" : "false")).str();
+    ktDrawText(10, 60, jmp_text.c_str());    
+
+    std::wstring rll_text = (boost::wformat(L"Rolling: %s") % ((sdCharacterIsRolling(sonic)) ? "true" : "false")).str();
+    ktDrawText(10, 80, rll_text.c_str());
+        
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+        
     SDL_GL_SwapBuffers();
 }
 
@@ -92,21 +124,25 @@ static void setup_opengl()
 
     /* Do draw back-facing polygons*/
     glDisable(GL_CULL_FACE);
+    
+    ktGenFonts(1, &font);
+    ktBindFont(font);
+    ktLoadFont("/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-BI.ttf", 12);
 }
 
 
 static void main_loop() 
 {
     SDL_Event event;
-
-    while (1) {
+    bool running = true;
+    while (running) {
         /* process pending events */
         while( SDL_PollEvent( &event ) ) {
             switch( event.type ) {
                 case SDL_KEYDOWN:
                     switch ( event.key.keysym.sym ) {
                     case SDLK_ESCAPE:
-                        exit(0);
+                        running = false;
                     break;
                     case SDLK_RIGHT:
                         sdCharacterStartMovingRight(sonic);
@@ -118,7 +154,7 @@ static void main_loop()
                         sdCharacterStartLookingDown(sonic);
                     break;
                     case SDLK_d:
-                        sdCharacterStartJumping(sonic);
+                        sdCharacterStartPressingJump(sonic);
                     break;
                     default:
                          //no default key processing
@@ -138,14 +174,14 @@ static void main_loop()
                             sdCharacterStopLookingDown(sonic);
                         break;
                         case SDLK_d:
-                            sdCharacterStopJumping(sonic);
+                            sdCharacterStopPressingJump(sonic);
                         break;                        
                         default:
                             break;
                     }
                 break;
                 case SDL_QUIT:
-                    exit (0);
+                    running = false;
                 break;
             }
         }
@@ -222,6 +258,8 @@ int main(int argc, char* argv[]) {
     setup_opengl();
     build_world();
     main_loop();
+    sdWorldDestroy(world);
+    
     return 0;
 }
 

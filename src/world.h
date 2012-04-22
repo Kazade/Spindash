@@ -14,6 +14,7 @@ public:
     static SDuint world_id_counter_;
 
     World(SDuint id);
+    
     void set_gravity(float x, float y);
     void get_gravity(float& x, float& y);
 

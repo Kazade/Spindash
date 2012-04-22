@@ -356,8 +356,9 @@ void Character::update_finished(float dt) {
 		start_rolling();
 	}
     
-    if(!grounded_last_frame && is_grounded_) {
+    if(!grounded_last_frame && is_grounded_ /*&& !waiting_for_jump_release_*/) {
         L_DEBUG("Reorienting");
+        stop_jumping();
         if(speed_.y < 0.0f) {
             //We just hit the ground, we need to recalculate gsp
             if((rotation() >= 360.0f - 15.0f && rotation() <= 360.0f) ||
@@ -420,13 +421,15 @@ void Character::update_finished(float dt) {
 						gsp_ += (-ACC * dt);
 					}
 				}
+                facing_ = DIRECTION_LEFT;
             } else {
                 float dec_val = (rolling_) ? -(DEC * 0.5f) : -DEC;
                 gsp_ += (dec_val * dt);                
             }
         } else {
             //Accelerate twice as fast in the air
-            speed_.x += (-ACC * 2.0f * dt);         
+            speed_.x += (-ACC * 2.0f * dt);    
+            facing_ = DIRECTION_LEFT;           
         }
     } else if(moving_right_ && !(moving_left_ && moving_right_)) {
         if(is_grounded_) {
@@ -437,13 +440,15 @@ void Character::update_finished(float dt) {
 						gsp_ += (ACC * dt);
 					}
 				}
+                facing_ = DIRECTION_RIGHT;
             } else {
                 float dec_val = (rolling_) ? (DEC * 0.5f) : DEC;                
                 gsp_ += dec_val * dt;
             }        
         } else {
             //Accelerate twice as fast in the air
-            speed_.x += (ACC * 2.0f * dt);         
+            speed_.x += (ACC * 2.0f * dt);   
+            facing_ = DIRECTION_RIGHT;      
         }
     } 
     
@@ -475,6 +480,9 @@ void Character::update_finished(float dt) {
         //speed_.y = JMP;
         is_grounded_ = false;
         waiting_for_jump_release_ = true;
+        
+        start_jumping();
+        
         //return false; //Prevent move this frame
     }
     
@@ -565,19 +573,24 @@ void sdCharacterStopLookingDown(SDuint character) {
     c->stop_looking_down();
 }
 
-void sdCharacterStartJumping(SDuint character) {
+void sdCharacterStartPressingJump(SDuint character) {
     Character* c = get_character(character);
-    c->start_jumping();
+    c->start_pressing_jump();
 }
 
-void sdCharacterStopJumping(SDuint character) {
+void sdCharacterStopPressingJump(SDuint character) {
     Character* c = get_character(character);
-    c->stop_jumping();
+    c->stop_pressing_jump();
 }
 
 void sdCharacterStopRolling(SDuint character) {
     Character* c = get_character(character);
     c->stop_rolling();
+}
+
+void sdCharacterStopJumping(SDuint character) {
+    Character* c = get_character(character);
+    c->stop_jumping();    
 }
 
 SDbool sdCharacterIsGrounded(SDuint character) {
@@ -613,4 +626,19 @@ void sdCharacterDisableSkill(SDuint character, sdSkill skill) {
 SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill) {
 	Character* c = get_character(character);
 	return c->skill_enabled(skill);
+}
+
+SDdouble sdCharacterGetSpindashCharge(SDuint character) {
+	Character* c = get_character(character);
+	return c->spindash_charge();
+}
+
+SDbool sdCharacterIsJumping(SDuint character) {
+	Character* c = get_character(character);
+	return c->jumping();
+}
+
+SDbool sdCharacterIsRolling(SDuint character) {
+	Character* c = get_character(character);
+	return c->rolling();
 }

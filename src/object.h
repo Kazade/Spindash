@@ -31,8 +31,6 @@ protected:
     kmVec2 last_safe_position_;
 
 private:
-    static std::tr1::shared_ptr<std::map<ObjectID, Object*>> objects_;
-
     World* world_;       
     
     virtual void pre_prepare(float dt) {}
