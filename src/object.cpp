@@ -2,7 +2,7 @@
 #include "world.h"
 #include "logging/logging.h"
 
-std::map<ObjectID, Object*> Object::objects_;
+std::tr1::shared_ptr<std::map<ObjectID, Object*>> Object::objects_;
 
 static SDuint generate_id() {
     static SDuint id = 0;    
@@ -45,23 +45,32 @@ void Object::update(float dt) {
 }
 
 Object* Object::by_id(SDuint object_id) {
-    std::map<ObjectID, Object*>::iterator it = objects_.find(object_id);
+    std::map<ObjectID, Object*>::iterator it = objects_->find(object_id);
     
-    if(it == objects_.end()) throw std::logic_error("Invalid object");
+    if(it == objects_->end()) throw std::logic_error("Invalid object");
     
     return (*it).second;
 }
 
 void Object::register_object(Object* obj) {
-    objects_[obj->id()] = obj;
+    if(!objects_) {
+        objects_.reset(new std::map<ObjectID, Object*>());
+    }
+    (*objects_)[obj->id()] = obj;
 }
 
 void Object::unregister_object(Object* obj) {
-    objects_.erase(obj->id());
+    if(!objects_) {
+        return;
+    }
+    std::map<uint32_t, Object*>::iterator it = objects_->find(obj->id());
+    if(it != objects_->end()) {
+        objects_->erase(it);
+    }
 }
 
 bool Object::exists(SDuint object_id) {
-    return objects_.find(object_id) != objects_.end();
+    return objects_->find(object_id) != objects_->end();
 }
 
 void Object::set_position(kmScalar x, kmScalar y) {

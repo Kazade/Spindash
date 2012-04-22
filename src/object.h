@@ -31,7 +31,7 @@ protected:
     kmVec2 last_safe_position_;
 
 private:
-    static std::map<ObjectID, Object*> objects_;
+    static std::tr1::shared_ptr<std::map<ObjectID, Object*>> objects_;
 
     World* world_;       
     
