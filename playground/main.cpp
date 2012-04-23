@@ -8,7 +8,7 @@
 #include "kaztimer/kaztimer.h"
 #include "kaztext/kaztext.h"
 
-#include "debug_new.h"
+//#include "debug_new.h"
 
 #define WIDTH  640
 #define HEIGHT 480
