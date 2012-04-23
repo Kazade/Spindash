@@ -359,6 +359,7 @@ void Character::update_finished(float dt) {
     if(!grounded_last_frame && is_grounded_ /*&& !waiting_for_jump_release_*/) {
         L_DEBUG("Reorienting");
         stop_jumping();
+        stop_rolling(); //Sonic stops rolling if when you hit the ground
         if(speed_.y < 0.0f) {
             //We just hit the ground, we need to recalculate gsp
             if((rotation() >= 360.0f - 15.0f && rotation() <= 360.0f) ||
