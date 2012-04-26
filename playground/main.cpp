@@ -49,6 +49,12 @@ static void repaint() {
 
     std::wstring rll_text = (boost::wformat(L"Rolling: %s") % ((sdCharacterIsRolling(sonic)) ? "true" : "false")).str();
     ktDrawText(10, 80, rll_text.c_str());
+
+    std::wstring gnd_text = (boost::wformat(L"Grounded: %s") % ((sdCharacterIsGrounded(sonic)) ? "true" : "false")).str();
+    ktDrawText(10, 100, gnd_text.c_str());
+            
+    std::wstring rot_text = (boost::wformat(L"Rotation: %s") % sdObjectGetRotation(sonic)).str();
+    ktDrawText(10, 120, rot_text.c_str());
         
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -123,7 +129,7 @@ static void setup_opengl()
     glEnable(GL_DEPTH_TEST);
 
     /* Do draw back-facing polygons*/
-    glDisable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
     
     ktGenFonts(1, &font);
     ktBindFont(font);
@@ -156,6 +162,17 @@ static void main_loop()
                     case SDLK_d:
                         sdCharacterStartPressingJump(sonic);
                     break;
+                    case SDLK_SPACE:
+						std::cout << "Stepping" << std::endl;
+						sdWorldDebugStep(world, 1.0/60.0);
+					break;
+					case SDLK_p:
+						if(!sdWorldDebugIsEnabled(world)) {
+							sdWorldDebugEnable(world);
+						} else {
+							sdWorldDebugDisable(world);
+						}
+					break;
                     default:
                          //no default key processing
                          //(stops compiler warnings for unhandled SDL keydefs
@@ -220,11 +237,11 @@ static void build_world() {
     sdObjectSetPosition(sonic, 3.0f, 3.0f);
     create_floor_plane(world);
     
-    kmVec2 slope[3];
+    /*kmVec2 slope[3];
     kmVec2Fill(&slope[0], 3.0f, 0.0f);
     kmVec2Fill(&slope[1], 10.0f, 0.0f);
     kmVec2Fill(&slope[2], 10.0f, 3.0f); 
-    sdWorldAddTriangle(world, slope);
+    sdWorldAddTriangle(world, slope);*/
     
     kmVec2 wall[4];
 
@@ -234,18 +251,20 @@ static void build_world() {
     kmVec2Fill(&wall[3], -10.0f, 5.0f);
     sdWorldAddBox(world, wall);    
     
-    kmVec2 platform[4];
+    /*kmVec2 platform[4];
     kmVec2Fill(&platform[0], 1.0f, 1.5f);
     kmVec2Fill(&platform[1], 3.0f, 1.5f); 
     kmVec2Fill(&platform[2], 3.0f, 2.0f);
     kmVec2Fill(&platform[3], 1.0f, 2.0f);
-    sdWorldAddBox(world, platform);
+    sdWorldAddBox(world, platform);*/
     
     spring = sdSpringCreate(world, 0, 10.0f / 40.0f);
     sdObjectSetPosition(spring, -4.75f, 0.125f);
     
-    spring2 = sdSpringCreate(world, -45.0f, 10.0f/40.0f);
-    sdObjectSetPosition(spring2, 2.0f, 2.25f);
+ /*   spring2 = sdSpringCreate(world, -45.0f, 10.0f/40.0f);
+    sdObjectSetPosition(spring2, 2.0f, 2.25f);*/
+    
+    sdWorldConstructLoop(world, 4.0f, 8.0f, 8.0f);
 }
 
 int main(int argc, char* argv[]) {

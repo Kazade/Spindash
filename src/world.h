@@ -31,7 +31,7 @@ public:
     
     void debug_render();
 
-    void update(float step);
+    void update(double step, bool override_step_mode=false);
 
     SDuint get_triangle_count() const { return triangles_.size(); }
     Triangle* get_triangle_at(SDuint i) { return &triangles_[i]; }
@@ -40,6 +40,12 @@ public:
     Box* get_box_at(SDuint i) { return &boxes_.at(i); }
     
     uint64_t step_counter() const { return step_counter_; }
+    
+    bool debug_mode_enabled() const { return step_mode_enabled_; }
+    void debug_step(double dt) { update(dt, true); }
+    void enable_debug_mode() { step_mode_enabled_ = true; }
+    void disable_debug_mode() { step_mode_enabled_ = false; }		
+    
 private:
     SDuint id_;
     kmVec2 gravity_;
@@ -49,6 +55,8 @@ private:
     std::vector<Object::ptr> objects_;
     
     uint64_t step_counter_;
+    
+    bool step_mode_enabled_;
 };
 
 extern World* get_world_by_id(SDuint world);

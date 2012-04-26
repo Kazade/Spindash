@@ -20,7 +20,8 @@ SDuint World::world_id_counter_ = 0;
 
 World::World(SDuint id):
     id_(id),
-	step_counter_(0) {
+	step_counter_(0),
+	step_mode_enabled_(false) {
     set_gravity(0.0f, -7.0f);
     
 }
@@ -119,7 +120,9 @@ void World::debug_render() {
     glPopAttrib();
 }
 
-void World::update(float step) {
+void World::update(double step, bool override_step_mode) {
+	if(!override_step_mode && step_mode_enabled_) return;
+	
     /*
         How should collisions be processed? Collision detection and respons
         is recursive, and also, we need to do some sweeping tests
@@ -192,6 +195,10 @@ void World::update(float step) {
             } else {
                 run_loop = false;
             }
+            
+            if(debug_mode_enabled()) { 
+				run_loop = false;
+			}
         }
         lhs.update_finished(step);
         if(!tries) {
@@ -350,4 +357,91 @@ void sdWorldDebugRenderGL(SDuint world_id) {
 SDuint64 sdWorldGetStepCounter(SDuint world_id) {
 	World* world = get_world_by_id(world_id);
 	return world->step_counter();
+}
+
+/**
+ * Mainly for testing, constructs a loop out of triangles
+ */
+void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
+	SDdouble width) {
+
+	SDdouble thickness = width * 0.1;
+	SDdouble height = width;
+	SDdouble radius = (width - (thickness * 2)) / 2.0;
+		
+	
+	kmVec2 tmp;
+
+	const SDuint slices = 40;
+
+	//Generate the points of a circle
+	std::vector<kmVec2> circle_points;	
+	for(SDuint i = 0; i < slices; ++i) {
+		SDdouble a = kmDegreesToRadians((360.0 / SDdouble(slices)) * (SDdouble)i);
+		
+		kmVec2Fill(&tmp, radius * cos(a), radius * sin(a));
+		
+		tmp.x += (left + radius) + thickness;
+		tmp.y += (top - radius) - thickness;		
+		circle_points.push_back(tmp);
+	}
+	
+	//Now, build the surrounding triangles
+	kmVec2 points[3];
+	/*kmVec2Fill(&points[0], left, top - height); //Bottom left of loop
+	kmVec2Fill(&points[1], left + width, top - height); //Bottom right of loop
+	kmVec2Fill(&points[2], circle_points[0].x, circle_points[0].y);
+	sdWorldAddTriangle(world, points);*/
+		
+	for(SDuint i = 0; i < slices / 4; ++i) {
+		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
+		kmVec2Fill(&points[1], left + width, top); //Top right of loop		
+		kmVec2Fill(&points[2], circle_points[i + 1].x, circle_points[i + 1].y);
+		sdWorldAddTriangle(world, points);
+	}
+	
+	for(SDuint i = slices / 4; i < ((slices / 4) * 2); ++i) {
+		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
+		kmVec2Fill(&points[1], left, top); //Top left of loop		
+		kmVec2Fill(&points[2], circle_points[i+1].x, circle_points[i+1].y);
+		sdWorldAddTriangle(world, points);
+	}	
+	/*
+	for(SDuint i = (slices / 4) * 2; i < ((slices / 4) * 3); ++i) {
+		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
+		kmVec2Fill(&points[1], left, top - height); //Bottom right of the loop
+		kmVec2Fill(&points[2], circle_points[i+1].x, circle_points[i+1].y);
+		sdWorldAddTriangle(world, points);
+	}*/		
+
+	for(SDuint i = (slices / 4) * 3; i < slices ; ++i) {
+		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
+		kmVec2Fill(&points[1], left + width, top - height); //Bottom right of the loop
+		if(i < slices -1 ) {
+			kmVec2Fill(&points[2], circle_points[i+1].x, circle_points[i+1].y);
+		} else {
+			kmVec2Fill(&points[2], circle_points[0].x, circle_points[0].y);
+		}
+		sdWorldAddTriangle(world, points);
+	}			
+}
+
+void sdWorldDebugEnable(SDuint world_id) {
+	World* world = get_world_by_id(world_id);
+	return world->enable_debug_mode();	
+}
+
+void sdWorldDebugStep(SDuint world_id, double step) {
+	World* world = get_world_by_id(world_id);
+	return world->debug_step(step);
+}
+
+void sdWorldDebugDisable(SDuint world_id) {
+	World* world = get_world_by_id(world_id);
+	return world->disable_debug_mode();		
+}
+
+SDbool sdWorldDebugIsEnabled(SDuint world_id) {
+	World* world = get_world_by_id(world_id);
+	return world->debug_mode_enabled();			
 }

@@ -20,11 +20,18 @@ SDuint sdWorldCreate();
 void sdWorldAddTriangle(SDuint world, kmVec2* points);
 void sdWorldAddBox(SDuint world, kmVec2* points);
 void sdWorldAddMesh(SDuint world, SDuint num_triangles, kmVec2* points);
+void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
+	SDdouble width);
 void sdWorldRemoveTriangles(SDuint world);
 void sdWorldStep(SDuint world, SDdouble dt);
 void sdWorldDebugRenderGL(SDuint world);
 void sdWorldDestroy(SDuint world);
 SDuint64 sdWorldGetStepCounter(SDuint world);
+
+void sdWorldDebugEnable(SDuint world);
+void sdWorldDebugStep(SDuint world, SDdouble step);
+SDbool sdWorldDebugIsEnabled(SDuint world);
+void sdWorldDebugDisable(SDuint world);
 
 void sdObjectDestroy(SDuint object);
 

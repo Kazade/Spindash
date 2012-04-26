@@ -106,7 +106,9 @@ TEST(test_vertical_down_sensors) {
     sdObjectSetPosition(character, 50.0f, 50.0f);
     
     //Run 5 seconds of gameplay
-    for(uint32_t i = 0; i < 5 * 60; ++i) sdWorldStep(world, frame_time);
+    for(uint32_t i = 0; i < 5 * 60; ++i) {
+		sdWorldStep(world, frame_time);
+	}
     
     //Now the character should have fallen, and be stood on the slope 
     //with a rotation of -45.0 (or 360.0f - 45.0f)

@@ -11,7 +11,7 @@ float frame_time = 1.0f / 60.0f;
 //that he is one unit high
 float world_scale = 1.0f / 40.0f;
 
-void create_floor_plane(SDuint world) {
+static void create_floor_plane(SDuint world) {
     kmVec2 points[6];
     
     kmVec2Fill(&points[0], -1000.0f, 0.0f);

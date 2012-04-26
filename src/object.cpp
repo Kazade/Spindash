@@ -79,7 +79,7 @@ void Object::set_position(kmScalar x, kmScalar y) {
 }
 
 void Object::set_rotation(kmScalar angle) {
-	angle = (angle < 0) ? 360.0 + angle : angle;
+	//angle = (angle < 0) ? 360.0 + angle : angle;
 	
     rotation_ = angle;
     geom().set_rotation(angle);

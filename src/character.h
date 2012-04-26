@@ -16,7 +16,7 @@ enum Direction {
 class Character : public Object {
 public:
     Character(World* world, SDdouble width, SDdouble height):
-        Object(world, CollisionPrimitive::ptr(new RayBox(this, width, height*1.1))),
+        Object(world, CollisionPrimitive::ptr(new RayBox(this, width, height*1.5))),
         original_height_(height),
         original_width_(width),
         height_(height),
@@ -29,6 +29,7 @@ public:
         rolling_(false),
         jumping_(false),
         is_grounded_(false),
+        horizontal_control_lock_(0),
         facing_(DIRECTION_RIGHT),
         spindash_charge_(0),
         gsp_(0.0),
@@ -63,7 +64,7 @@ public:
         width_ = new_width;
         height_ = new_height;
         
-        (dynamic_cast<RayBox*>(&geom()))->set_size(width_, height_ * 1.1);
+        (dynamic_cast<RayBox*>(&geom()))->set_size(width_, height_ * 1.5);
         
         set_position(position().x, position().y - ((original_height_ - height_) / 2.0));
     }
@@ -71,7 +72,7 @@ public:
     void exit_small_mode() {
         width_ = original_width_;
         height_ = original_height_;
-        (dynamic_cast<RayBox*>(&geom()))->set_size(width_, height_ * 1.1);
+        (dynamic_cast<RayBox*>(&geom()))->set_size(width_, height_ * 1.5);
         
         set_position(position().x, position().y + ((original_height_ - height_) / 2.0));
     }
@@ -139,7 +140,19 @@ public:
 	}
     
     double spindash_charge() const { return spindash_charge_; }
+    
+    bool horizontal_control_lock_active() const { return horizontal_control_lock_ > 0.0; }
+    
 private:
+	void start_horizontal_control_lock(double amount) {
+		horizontal_control_lock_ = amount;
+	}
+	
+	void update_horizontal_control_lock(double dt) {
+		horizontal_control_lock_ -= dt;
+		if(horizontal_control_lock_ < 0.0) horizontal_control_lock_ = 0.0;
+	}
+
     Collision find_nearest_collision(const std::vector<Collision>& collisions);
     std::pair<Collision, bool> find_collision_with_ray(const std::vector<Collision>& collisions, char ray);
     
@@ -157,6 +170,9 @@ private:
     bool rolling_;
     bool jumping_;
     bool is_grounded_;
+    bool grounded_last_frame_;
+    
+    double horizontal_control_lock_;
     
     Direction facing_;
     
