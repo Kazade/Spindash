@@ -5,6 +5,11 @@
 #include <tr1/memory>
 #include "kazmath/vec2.h"
 
+enum CollisionLayer {
+    COLLISION_LAYER_BACK,
+    COLLISION_LAYER_FRONT
+};
+
 class Object;
 class CollisionPrimitive;
 
@@ -26,7 +31,8 @@ public:
     typedef std::tr1::shared_ptr<CollisionPrimitive> ptr;
     
     CollisionPrimitive(Object* owner):
-        owner_(owner) {}
+        owner_(owner)
+        layer_(COLLISION_LAYER_FRONT) {}
 
     virtual ~CollisionPrimitive();
 
@@ -34,9 +40,10 @@ public:
     virtual void set_rotation(float degrees) = 0;
     
     Object* owner() { return owner_; }
-    
+    CollisionLayer layer() const { return layer_; }
 private:
     Object* owner_;    
+    CollisionLayer layer_;
 };
 
 #endif
