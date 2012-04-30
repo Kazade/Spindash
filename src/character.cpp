@@ -225,7 +225,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		//Move out
 		kmVec2 to_move, new_pos;
 		kmVec2Normalize(&to_move, &ray.dir);
-		kmVec2Scale(&to_move, &to_move, (width_ / 2.0f) - (dist * 1.001));
+		kmVec2Scale(&to_move, &to_move, (width_ / 2.0f) - (dist * 0.99));
 		kmVec2Subtract(&new_pos, &position(), &to_move);
 		set_position(new_pos.x, new_pos.y);
 		
