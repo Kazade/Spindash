@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cassert>
 #include <map>
-#include <GL/gl.h>
 #include <functional>
 #include <algorithm>
 #include <tr1/functional>
@@ -35,6 +34,7 @@ void World::get_gravity(float& x, float& y) {
     y = gravity_.y;
 }
 
+/*
 void World::debug_render() {
     float colours [10][3] = {
         { 1.0f, 0.0f, 0.0f},
@@ -118,7 +118,7 @@ void World::debug_render() {
         glPopMatrix();
     }
     glPopAttrib();
-}
+}*/
 
 void World::update(double step, bool override_step_mode) {
 	if(!override_step_mode && step_mode_enabled_) return;
@@ -351,7 +351,7 @@ void sdWorldDebugRenderGL(SDuint world_id) {
         return;
     }
 
-    world->debug_render();
+    //world->debug_render();
 }
 
 SDuint64 sdWorldGetStepCounter(SDuint world_id) {

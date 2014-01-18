@@ -2,7 +2,8 @@
 #include <cassert>
 #include <limits>
 #include <boost/format.hpp>
-#include "logging/logging.h"
+#include <kazbase/logging.h>
+
 #include "character.h"
 #include "world.h"
 

@@ -1,6 +1,6 @@
+#include <kazbase/logging.h>
 #include "object.h"
 #include "world.h"
-#include "logging/logging.h"
 
 static std::map<ObjectID, Object*> objects_;
 

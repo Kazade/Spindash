@@ -28,8 +28,6 @@ public:
     ObjectID new_spring(float angle, float power);
     
     void destroy_object(ObjectID object_id);
-    
-    void debug_render();
 
     void update(double step, bool override_step_mode=false);
 
