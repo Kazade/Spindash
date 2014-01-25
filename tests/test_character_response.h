@@ -3,9 +3,9 @@
 
 #include <kaztest/kaztest.h>
 
-#include "spindash.h"
-#include "character.h"
-#include "world.h"
+#include "spindash/spindash.h"
+#include "spindash/character.h"
+#include "spindash/world.h"
 
 static float world_scale = 1.0f / 40.0f;
 static float frame_time = 1.0f / 60.0f;

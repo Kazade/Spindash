@@ -1,7 +1,7 @@
 #ifndef TEST_SOLID_TILES_H
 #define TEST_SOLID_TILES_H
 
-#include "spindash.h"
+#include "spindash/spindash.h"
 
 namespace TST{
     static const float EPSILON = 1.0f / 256.0f;

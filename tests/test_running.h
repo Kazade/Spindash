@@ -2,7 +2,7 @@
 #define TEST_RUNNING_H
 
 #include <kaztest/kaztest.h>
-#include "spindash.h"
+#include "spindash/spindash.h"
 
 namespace TR {
     static const float EPSILON = 1.0f / 256.0f;
