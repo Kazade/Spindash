@@ -13,9 +13,9 @@ std::vector<Collision> do_collide(Triangle* triangle, RayBox* ray_box, bool swap
         
         kmVec2 intersection, a_normal, b_normal, normal;
         kmScalar distance; 
-        if(kmRay2IntersectTriangle(&ray, &triangle->points[0], 
-                                         &triangle->points[1], 
-                                         &triangle->points[2], 
+        if(kmRay2IntersectTriangle(&ray, &triangle->point(0),
+                                         &triangle->point(1),
+                                         &triangle->point(2),
                                          &intersection, &normal, &distance)) {
                                          
             if(distance <= kmVec2Length(&ray.dir)) {

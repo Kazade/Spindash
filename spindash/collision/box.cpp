@@ -31,17 +31,17 @@ void Box::init() {
     float hw = width_ * 0.5f;
     float hh = height_ * 0.5f;
 
-    points[0].x = -hw;
-    points[0].y = -hh;
+    points_[0].x = -hw;
+    points_[0].y = -hh;
     
-    points[1].x = hw;
-    points[1].y = -hh;
+    points_[1].x = hw;
+    points_[1].y = -hh;
 
-    points[2].x = hw;
-    points[2].y = hh;    
+    points_[2].x = hw;
+    points_[2].y = hh;
     
-    points[3].x = -hw;
-    points[3].y = hh;    
+    points_[3].x = -hw;
+    points_[3].y = hh;
     
     kmMat3 rotation;
     kmMat3RotationZ(&rotation, kmDegreesToRadians(degrees_));
@@ -51,7 +51,7 @@ void Box::init() {
     
     //Rotate the box to match the angle and add the position
     for(uint32_t i = 0; i < 4; ++i) {
-        kmVec2Transform(&points[i], &points[i], &rotation);
-        kmVec2Add(&points[i], &points[i], &translation);
+        kmVec2Transform(&points_[i], &points_[i], &rotation);
+        kmVec2Add(&points_[i], &points_[i], &translation);
     }        
 }

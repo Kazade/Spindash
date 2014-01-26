@@ -2,6 +2,7 @@
 #define SD_BOX_H
 
 #include "collision_primitive.h"
+#include "../typedefs.h"
 
 class Box : public CollisionPrimitive {
 public:
@@ -15,7 +16,11 @@ public:
     void set_position(float x, float y);
     void set_rotation(float angle);
     
-    kmVec2& point(const int i) { return points[i]; }
+    kmVec2& point(const int i) { return points_[i]; }
+    kmVec2* points() { return points_; }
+
+    void set_geometry_handle(SDGeometryHandle handle) { handle_ = handle; }
+    SDGeometryHandle geometry_handle() const { return handle_; }
 private:
     float x_;
     float y_;
@@ -23,9 +28,11 @@ private:
     float height_;
     float degrees_;
     
-    kmVec2 points[4];    
+    kmVec2 points_[4];
     
     void init();    
+
+    SDGeometryHandle handle_ = 0;
 };
 
 #endif 

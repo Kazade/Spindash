@@ -34,6 +34,39 @@ void World::get_gravity(float& x, float& y) {
     y = gravity_.y;
 }
 
+void World::render() {
+    if(!compile_callback_ || !render_callback_) {
+        return;
+    }
+
+    SDfloat angle = 0;
+    SDVec2 translation;
+    translation.x = 0;
+    translation.y = 0;
+
+    for(const Triangle& triangle: triangles_) {
+        auto handle = triangle.geometry_handle();
+        if(handle) {
+            render_callback_->callback(handle, &translation, angle, render_callback_->user_data);
+        }
+    }
+
+    for(const Box& box: boxes_) {
+        auto handle = box.geometry_handle();
+        if(handle) {
+            render_callback_->callback(handle, &translation, angle, render_callback_->user_data);
+        }
+    }
+
+    for(const auto& object: objects_) {
+        auto handle = object->geometry_handle();
+        if(handle) {
+            auto trans = object->position();
+            render_callback_->callback(handle, &trans, object->rotation(), render_callback_->user_data);
+        }
+    }
+}
+
 /*
 void World::debug_render() {
     float colours [10][3] = {
@@ -229,9 +262,19 @@ void World::destroy_object(ObjectID object_id) {
 void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
     Triangle new_tri;
 
-    new_tri.points[0] = v1;
-    new_tri.points[1] = v2;
-    new_tri.points[2] = v3;
+    new_tri.points()[0] = v1;
+    new_tri.points()[1] = v2;
+    new_tri.points()[2] = v3;
+
+    if(compile_callback_) {
+        std::vector<SDuint> indexes = { 0, 1, 2 };
+
+        SDGeometryHandle new_handle = compile_callback_->callback(
+            &new_tri.points()[0], 3, &indexes[0], indexes.size(), compile_callback_->user_data
+        );
+
+        new_tri.set_geometry_handle(new_handle);
+    }
 
     triangles_.push_back(new_tri);
 }
@@ -242,6 +285,16 @@ void World::add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const 
     new_box.point(1) = v2;
     new_box.point(2) = v3;
     new_box.point(3) = v4;
+
+    if(compile_callback_) {
+        std::vector<SDuint> indexes = { 0, 1, 2, 0, 2, 3 };
+
+        SDGeometryHandle new_handle = compile_callback_->callback(
+            &new_box.points()[0], 4, &indexes[0], indexes.size(), compile_callback_->user_data
+        );
+
+        new_box.set_geometry_handle(new_handle);
+    }
     
     boxes_.push_back(new_box);
 }
@@ -344,16 +397,6 @@ void sdWorldStep(SDuint world_id, SDdouble dt) {
     world->update(dt);
 }
 
-void sdWorldDebugRenderGL(SDuint world_id) {
-    World* world = get_world_by_id(world_id);
-    if(!world) {
-        //Log error
-        return;
-    }
-
-    //world->debug_render();
-}
-
 SDuint64 sdWorldGetStepCounter(SDuint world_id) {
 	World* world = get_world_by_id(world_id);
 	return world->step_counter();
@@ -424,6 +467,21 @@ void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
 		}
 		sdWorldAddTriangle(world, points);
 	}			
+}
+
+void sdWorldSetCompileGeometryCallback(SDuint world_id, SDCompileGeometryCallback callback, void* data) {
+    World* world = get_world_by_id(world_id);
+    world->set_compile_callback(callback, data);
+}
+
+void sdWorldSetRenderGeometryCallback(SDuint world_id, SDRenderGeometryCallback callback, void* data) {
+    World* world = get_world_by_id(world_id);
+    world->set_render_callback(callback, data);
+}
+
+void sdWorldRender(SDuint world_id) {
+    World* world = get_world_by_id(world_id);
+    return world->render();
 }
 
 void sdWorldDebugEnable(SDuint world_id) {

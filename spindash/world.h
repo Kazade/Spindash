@@ -2,6 +2,8 @@
 #define KP_WORLD_H
 
 #include <vector>
+#include <memory>
+
 #include "kazmath/kazmath.h"
 #include "spindash.h"
 #include "object.h"
@@ -44,6 +46,19 @@ public:
     void enable_debug_mode() { step_mode_enabled_ = true; }
     void disable_debug_mode() { step_mode_enabled_ = false; }		
     
+    void set_compile_callback(SDCompileGeometryCallback callback, void* user_data) {
+        compile_callback_.reset(new CompileCallback);
+        compile_callback_->callback = callback;
+        compile_callback_->user_data = user_data;
+    }
+
+    void set_render_callback(SDRenderGeometryCallback callback, void* user_data) {
+        render_callback_.reset(new RenderCallback);
+        render_callback_->callback = callback;
+        render_callback_->user_data = user_data;
+    }
+
+    void render();
 private:
     SDuint id_;
     kmVec2 gravity_;
@@ -55,6 +70,19 @@ private:
     uint64_t step_counter_;
     
     bool step_mode_enabled_;
+
+    struct CompileCallback {
+        SDCompileGeometryCallback callback;
+        void* user_data;
+    };
+
+    struct RenderCallback {
+        SDRenderGeometryCallback callback;
+        void* user_data;
+    };
+
+    std::shared_ptr<CompileCallback> compile_callback_;
+    std::shared_ptr<RenderCallback> render_callback_;
 };
 
 extern World* get_world_by_id(SDuint world);

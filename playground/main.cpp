@@ -6,11 +6,16 @@ class Playground : public kglt::App {
 public:
     bool do_init() {
         build_world();
+
+        //sdWorldSetCompileGeometryCallback(world, SDCompileGeometryCallback callback, void* userData);
+        //sdWorldSetRenderGeometryCallback(world, SDRenderGeometryCallback callback, void* userData);
+
         return true;
     }
 
     void do_step(double dt) {
         sdWorldStep(world, dt);
+        sdWorldRender(world);
     }
 
     void do_cleanup() {

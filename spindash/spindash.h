@@ -24,9 +24,12 @@ void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
 	SDdouble width);
 void sdWorldRemoveTriangles(SDuint world);
 void sdWorldStep(SDuint world, SDdouble dt);
-void sdWorldDebugRenderGL(SDuint world);
 void sdWorldDestroy(SDuint world);
 SDuint64 sdWorldGetStepCounter(SDuint world);
+
+void sdWorldSetCompileGeometryCallback(SDuint world_id, SDCompileGeometryCallback callback, void* userData);
+void sdWorldSetRenderGeometryCallback(SDuint world_id, SDRenderGeometryCallback callback, void* userData);
+void sdWorldRender(SDuint world_id);
 
 void sdWorldDebugEnable(SDuint world);
 void sdWorldDebugStep(SDuint world, SDdouble step);

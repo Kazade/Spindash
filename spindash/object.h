@@ -41,6 +41,8 @@ private:
     CollisionPrimitive::ptr shape_;
     
     uint32_t collision_flags_;
+
+    SDGeometryHandle handle_ = 0;
 public:
     typedef std::tr1::shared_ptr<Object> ptr;
 
@@ -85,6 +87,9 @@ public:
     bool has_collision_flag(CollisionFlag flag) const { return (collision_flags_ & flag) == flag; }
     
     Object* get_other_object_from_collision(Collision& c);
+
+    void set_geometry_handle(const SDGeometryHandle handle) { handle_ = handle; }
+    SDGeometryHandle geometry_handle() const { return handle_; }
 };
 
 template <typename T> int sgn(T val) {
