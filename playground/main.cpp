@@ -2,13 +2,60 @@
 
 #include "spindash/spindash.h"
 
+class KGLTGeometryRenderer {
+public:
+    KGLTGeometryRenderer(kglt::Scene& scene, kglt::StageID stage_id=kglt::StageID()):
+        scene_(scene),
+        stage_id_(stage_id) {
+
+    }
+
+    SDGeometryHandle compile_geometry(SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndexes) {
+
+        return 0;
+    }
+
+    void render_geometry(SDGeometryHandle handle, const SDVec2* translation, const SDfloat angle) {
+
+    }
+
+    static SDGeometryHandle compile_geometry_callback(SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndexes, void* userData) {
+        auto bound_func = std::bind(&KGLTGeometryRenderer::compile_geometry,
+            (KGLTGeometryRenderer*) userData,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3,
+            std::placeholders::_4
+        );
+
+        return bound_func(vertices, numVertices, indices, numIndexes);
+    }
+
+    static void render_geometry_callback(SDGeometryHandle handle, const SDVec2* translation, const SDfloat angle, void* userData) {
+        auto bound_func = std::bind(&KGLTGeometryRenderer::render_geometry,
+            (KGLTGeometryRenderer*) userData,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3
+        );
+
+        bound_func(handle, translation, angle);
+    }
+
+private:
+    kglt::Scene& scene_;
+    kglt::StageID stage_id_;
+};
+
 class Playground : public kglt::App {
 public:
     bool do_init() {
         build_world();
 
-        //sdWorldSetCompileGeometryCallback(world, SDCompileGeometryCallback callback, void* userData);
-        //sdWorldSetRenderGeometryCallback(world, SDRenderGeometryCallback callback, void* userData);
+        renderer_.reset(new KGLTGeometryRenderer(scene()));
+
+        sdWorldSetCompileGeometryCallback(world, &KGLTGeometryRenderer::compile_geometry_callback, renderer_.get());
+        sdWorldSetRenderGeometryCallback(world, &KGLTGeometryRenderer::render_geometry_callback, renderer_.get());
 
         return true;
     }
@@ -27,6 +74,15 @@ private:
     SDuint sonic = 0;
     SDuint spring = 0;
     SDuint spring2 = 0;
+
+    kglt::MeshID static_mesh_;
+    kglt::ActorID static_actor_;
+    std::map<SDGeometryHandle, kglt::SubMeshIndex> static_submeshes_;
+
+    std::map<SDGeometryHandle, kglt::MeshID> dynamic_meshes_;
+    std::map<SDGeometryHandle, kglt::ActorID> dynamic_actors_;
+
+    std::shared_ptr<KGLTGeometryRenderer> renderer_;
 
     bool on_key_release(SDL_Keysym key) override {
         switch(key.scancode) {
