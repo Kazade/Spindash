@@ -41,20 +41,20 @@ public:
 
         //Position the character on the floor, next to the wall
         sdObjectSetPosition(character, wall_x - (character_width/2), 0.5f);
-        sdWorldStep(world, frame_time); //Step the world
+        sdWorldStep(world, TST::frame_time); //Step the world
 
         //Nothing should have changed
         assert_close(wall_x - (character_width / 2), sdObjectGetPositionX(character), TST::EPSILON);
 
         sdCharacterStartMovingRight(character);
-        sdWorldStep(world, frame_time); //Step the world
+        sdWorldStep(world, TST::frame_time); //Step the world
 
         //Again nothing should have changed, the wall should've stopped us
         assert_close(wall_x - (character_width/2), sdObjectGetPositionX(character), TST::EPSILON);
 
         //Now, make us intersect the wall
         sdObjectSetPosition(character, (wall_x - (character_width/2)) + 0.15f, 0.5f);
-        sdWorldStep(world, frame_time);
+        sdWorldStep(world, TST::frame_time);
 
         //Should be back where we were
         assert_close(wall_x - (character_width/2), sdObjectGetPositionX(character), TST::EPSILON);
@@ -83,7 +83,7 @@ public:
 
         sdWorldAddTriangle(world, floor_triangle);
 
-        sdObjectSetPosition(character, -10.0f * world_scale, 0.1f);
+        sdObjectSetPosition(character, -10.0f * TST::world_scale, 0.1f);
         sdWorldStep(world, 1.0f);
         assert_true(sdCharacterIsGrounded(character));
 
@@ -91,7 +91,7 @@ public:
         sdWorldStep(world, 1.0f);
         assert_true(sdCharacterIsGrounded(character));
 
-        sdObjectSetPosition(character, 10.0f * world_scale, 10.0f);
+        sdObjectSetPosition(character, 10.0f * TST::world_scale, 10.0f);
         sdWorldStep(world, 0.1f);
         assert_true(!sdCharacterIsGrounded(character));
 
@@ -110,7 +110,7 @@ public:
 
         //Run 5 seconds of gameplay
         for(uint32_t i = 0; i < 5 * 60; ++i) {
-            sdWorldStep(world, frame_time);
+            sdWorldStep(world, TST::frame_time);
         }
 
         //Now the character should have fallen, and be stood on the slope
@@ -139,11 +139,11 @@ public:
         assert_close(360.0f - 45.0f, sdObjectGetRotation(character), TST::EPSILON);
 
         sdCharacterSetGroundSpeed(character, 0.0f); //Reset gsp
-        sdWorldStep(world, frame_time); //Run a single step
+        sdWorldStep(world, TST::frame_time); //Run a single step
 
         float x_speed = sdCharacterGetGroundSpeed(character);
         float frc = 0.00117187505;
-        assert_close(0.125 * world_scale * sinf(kmDegreesToRadians(315)), x_speed, TST::EPSILON);
+        assert_close(0.125 * TST::world_scale * sinf(kmDegreesToRadians(315)), x_speed, TST::EPSILON);
 
         //Move the character above the slope
         sdObjectSetPosition(character, 50.0f, 50.0f);
@@ -154,11 +154,11 @@ public:
 
         sdCharacterSetGroundSpeed(character, 0.0f); //Reset gsp
         sdCharacterStartLookingDown(character);
-        sdWorldStep(world, frame_time); //Run a single step
+        sdWorldStep(world, TST::frame_time); //Run a single step
 
         //FIXME: Friction is messing this test up!
         x_speed = sdCharacterGetGroundSpeed(character);
-        assert_close(0.3125f * world_scale * sinf(kmDegreesToRadians(315)), x_speed - frc, TST::EPSILON);
+        assert_close(0.3125f * TST::world_scale * sinf(kmDegreesToRadians(315)), x_speed - frc, TST::EPSILON);
 
         sdWorldDestroy(world);
     }

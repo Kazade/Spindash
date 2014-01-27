@@ -4,9 +4,9 @@
 #include <memory>
 #include <kaztest/kaztest.h>
 
-#include "/home/kazade/Git/Spindash/tests/test_character_response.h"
-#include "/home/kazade/Git/Spindash/tests/test_solid_tiles.h"
-#include "/home/kazade/Git/Spindash/tests/test_running.h"
+#include "/home/lukeb/GitHub/Spindash/tests/test_solid_tiles.h"
+#include "/home/lukeb/GitHub/Spindash/tests/test_character_response.h"
+#include "/home/lukeb/GitHub/Spindash/tests/test_running.h"
 
 int main(int argc, char* argv[]) {
     std::shared_ptr<TestRunner> runner(new TestRunner());
