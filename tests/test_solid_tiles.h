@@ -14,7 +14,7 @@ namespace TST{
     static float world_scale = 1.0f / 40.0f;
 }
 
-class TestSolidTiles: public TestCase {
+class TestSolidTiles : public TestCase {
 public:
     void test_horizontal_sensors() {
         SDuint world = sdWorldCreate();
