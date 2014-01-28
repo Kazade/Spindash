@@ -16,8 +16,13 @@ typedef SDuint SDGeometryHandle;
 
 typedef kmVec2 SDVec2;
 
+enum SDRenderMode {
+    SD_RENDER_MODE_TRIANGLES,
+    SD_RENDER_MODE_LINES
+};
+
 typedef SDGeometryHandle (*SDCompileGeometryCallback)(
-    SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndexes, void* userData
+    SDRenderMode render_mode, SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndexes, void* userData
 );
 
 typedef void (*SDRenderGeometryCallback)(

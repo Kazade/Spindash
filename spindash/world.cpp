@@ -270,7 +270,7 @@ void World::add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3) {
         std::vector<SDuint> indexes = { 0, 1, 2 };
 
         SDGeometryHandle new_handle = compile_callback_->callback(
-            &new_tri.points()[0], 3, &indexes[0], indexes.size(), compile_callback_->user_data
+            SD_RENDER_MODE_TRIANGLES, &new_tri.points()[0], 3, &indexes[0], indexes.size(), compile_callback_->user_data
         );
 
         new_tri.set_geometry_handle(new_handle);
@@ -290,7 +290,7 @@ void World::add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const 
         std::vector<SDuint> indexes = { 0, 1, 2, 0, 2, 3 };
 
         SDGeometryHandle new_handle = compile_callback_->callback(
-            &new_box.points()[0], 4, &indexes[0], indexes.size(), compile_callback_->user_data
+            SD_RENDER_MODE_TRIANGLES, &new_box.points()[0], 4, &indexes[0], indexes.size(), compile_callback_->user_data
         );
 
         new_box.set_geometry_handle(new_handle);
@@ -300,7 +300,48 @@ void World::add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const 
 }
 
 ObjectID World::new_character() {
-    Character::ptr new_character(new Character(this, 0.5f, 1.0f));    
+    Character::ptr new_character(new Character(this, 0.5f, 1.0f));
+
+    RayBox& box = dynamic_cast<RayBox&>(new_character->geom());
+
+    std::vector<SDVec2> vertices;
+    vertices.push_back(box.ray('A').start);
+    SDVec2 tmp;
+    kmVec2Add(&tmp, &box.ray('A').start, &box.ray('A').dir);
+    vertices.push_back(tmp);
+    vertices.push_back(box.ray('B').start);
+    kmVec2Add(&tmp, &box.ray('B').start, &box.ray('B').dir);
+    vertices.push_back(tmp);
+    vertices.push_back(box.ray('C').start);
+    kmVec2Add(&tmp, &box.ray('C').start, &box.ray('C').dir);
+    vertices.push_back(tmp);
+
+    vertices.push_back(box.ray('D').start);
+    kmVec2Add(&tmp, &box.ray('D').start, &box.ray('D').dir);
+    vertices.push_back(tmp);
+    vertices.push_back(box.ray('L').start);
+    kmVec2Add(&tmp, &box.ray('L').start, &box.ray('L').dir);
+    vertices.push_back(tmp);
+
+    vertices.push_back(box.ray('R').start);
+    kmVec2Add(&tmp, &box.ray('R').start, &box.ray('R').dir);
+    vertices.push_back(tmp);
+
+    std::vector<SDuint> indices = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+
+    if(compile_callback_) {
+        SDGeometryHandle new_handle = compile_callback_->callback(
+            SD_RENDER_MODE_LINES,
+            &vertices[0],
+            vertices.size(),
+            &indices[0],
+            indices.size(),
+            compile_callback_->user_data
+        );
+
+        new_character->set_geometry_handle(new_handle);
+    }
+
     objects_.push_back(new_character);
     return new_character->id();
 }

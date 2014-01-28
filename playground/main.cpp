@@ -15,14 +15,14 @@ public:
         mat->technique().pass(0).set_polygon_mode(kglt::POLYGON_MODE_LINE);
     }
 
-    SDGeometryHandle compile_geometry(SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndices) {
+    SDGeometryHandle compile_geometry(SDRenderMode mode, SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndices) {
         kglt::MeshID new_mesh = stage().new_mesh();
 
         {
             auto mesh = stage().mesh(new_mesh);
             auto submesh = mesh->new_submesh(
                 stage().get_material_with_name("diffuse_render"),
-                (numIndices > 2) ? kglt::MESH_ARRANGEMENT_TRIANGLES : kglt::MESH_ARRANGEMENT_LINES, true
+                (mode == SD_RENDER_MODE_TRIANGLES) ? kglt::MESH_ARRANGEMENT_TRIANGLES : kglt::MESH_ARRANGEMENT_LINES, true
             );
 
             for(SDuint i = 0; i < numVertices; ++i) {
@@ -50,16 +50,17 @@ public:
         actor->rotate_to(kglt::Degrees(angle));
     }
 
-    static SDGeometryHandle compile_geometry_callback(SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndexes, void* userData) {
+    static SDGeometryHandle compile_geometry_callback(SDRenderMode mode, SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndexes, void* userData) {
         auto bound_func = std::bind(&KGLTGeometryRenderer::compile_geometry,
             (KGLTGeometryRenderer*) userData,
             std::placeholders::_1,
             std::placeholders::_2,
             std::placeholders::_3,
-            std::placeholders::_4
+            std::placeholders::_4,
+            std::placeholders::_5
         );
 
-        return bound_func(vertices, numVertices, indices, numIndexes);
+        return bound_func(mode, vertices, numVertices, indices, numIndexes);
     }
 
     static void render_geometry_callback(SDGeometryHandle handle, const SDVec2* translation, const SDfloat angle, void* userData) {
