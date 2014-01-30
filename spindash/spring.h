@@ -7,10 +7,12 @@
 class Spring : public Object {
 public:
     Spring(World* world, float power, float angle):
-        Object(world, CollisionPrimitive::ptr(new Box(this, 0.75, 0.6))),
+        Object(world),
         power_(power),
         angle_(angle) {
         
+        set_geom(CollisionPrimitive::ptr(new Box(this, 0.75, 0.6)));
+
         geom().set_rotation(angle_);
         set_collision_flag(NOT_GROUND);
     }

@@ -32,10 +32,11 @@
 
 class RayBox : public CollisionPrimitive {
 public:
-    typedef std::tr1::shared_ptr<RayBox> ptr;
+    typedef std::shared_ptr<RayBox> ptr;
     
     RayBox(Object* owner, float width, float height);   
-    kmRay2& ray(char which);    
+    kmRay2& ray(char which);
+    const kmRay2& ray(char which) const;
     
     void set_position(float x, float y);
     void set_rotation(float degrees);

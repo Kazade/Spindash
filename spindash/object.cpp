@@ -9,11 +9,10 @@ static SDuint generate_id() {
     return ++id;
 }
 
-Object::Object(World* world, CollisionPrimitive::ptr shape):
+Object::Object(World* world):
     id_(generate_id()),
     world_(world),
-    rotation_(0.0f),
-    shape_(shape) {
+    rotation_(0.0f) {
     
     register_object(this);
     

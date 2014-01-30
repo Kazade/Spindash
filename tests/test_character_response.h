@@ -7,10 +7,12 @@
 #include "spindash/character.h"
 #include "spindash/world.h"
 
-static float world_scale = 1.0f / 40.0f;
-static float frame_time = 1.0f / 60.0f;
+namespace CR {
+    static float world_scale = 1.0f / 40.0f;
+    static float frame_time = 1.0f / 60.0f;
+}
 
-class CollisionTest: public TestCase {
+class CollisionTest : public TestCase {
 public:
     void test_ray_collisions_on_a_flat_plane() {
         SDuint world = sdWorldCreate();

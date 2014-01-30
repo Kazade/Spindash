@@ -13,32 +13,32 @@ enum Direction {
 	DIRECTION_RIGHT
 };
 
+
+enum CharacterSize {
+    CHARACTER_SIZE_STANDING,
+    CHARACTER_SIZE_CROUCHING
+};
+
+
 class Character : public Object {
 public:
-    Character(World* world, SDdouble width, SDdouble height):
-        Object(world, CollisionPrimitive::ptr(new RayBox(this, width, height*1.5))),
-        original_height_(height),
-        original_width_(width),
-        height_(height),
-        width_(width),
-        moving_left_(false),
-        moving_right_(false),
-        looking_down_(false),
-        jump_pressed_(false),
-        waiting_for_jump_release_(false),
-        rolling_(false),
-        jumping_(false),
-        is_grounded_(false),
-        horizontal_control_lock_(0),
-        facing_(DIRECTION_RIGHT),
-        spindash_charge_(0),
-        gsp_(0.0),
-        enabled_skills_(0) {
+    static float setting(const std::string& setting);
+    static void override_setting(const std::string& setting, float value);
 
-		enable_skill(SD_SKILL_ROLL);
-		enable_skill(SD_SKILL_SPINDASH);
-    }
+    Character(World* world, SDdouble width, SDdouble height);
     
+    //============ NEW STUFF ===============
+
+    const RayBox& ray_box() const {
+        return dynamic_cast<const RayBox&>(geom());
+    }
+
+    void set_size(CharacterSize size);
+    CharacterSize size() const { return size_; }
+
+    //======================================
+
+
     void start_moving_left() { 
 		moving_left_ = true; 
 	}
@@ -144,6 +144,15 @@ public:
     bool horizontal_control_lock_active() const { return horizontal_control_lock_ > 0.0; }
     
 private:
+
+    // ============== NEW STUFF ================
+
+    CharacterSize size_ = CHARACTER_SIZE_STANDING;
+    CollisionPrimitive::ptr standing_shape_;
+    CollisionPrimitive::ptr crouching_shape_;
+
+    // =========================================
+
 	void start_horizontal_control_lock(double amount) {
 		horizontal_control_lock_ = amount;
 	}

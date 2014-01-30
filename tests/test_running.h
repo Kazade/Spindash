@@ -45,15 +45,15 @@ public:
 
         //Start moving the character right
         sdCharacterStartMovingRight(character);
-        sdWorldStep(world, frame_time);
+        sdWorldStep(world, TR::frame_time);
 
         //Sonic physics guide: Running
-        float expected = 0.046875f * world_scale;
+        float expected = 0.046875f * TR::world_scale;
         assert_close(expected, sdObjectGetSpeedX(character), TR::EPSILON);
         assert_true(sdCharacterIsGrounded(character));
         assert_close(0.0f, sdObjectGetSpeedY(character), TR::EPSILON);
 
-        sdWorldStep(world, frame_time);
+        sdWorldStep(world, TR::frame_time);
 
         assert_close(expected * 2, sdObjectGetSpeedX(character), TR::EPSILON);
         assert_close(0.0f, sdObjectGetSpeedY(character), TR::EPSILON);
@@ -64,11 +64,11 @@ public:
         sdCharacterSetGroundSpeed(character, 0.0);
         sdCharacterStartMovingLeft(character);
 
-        sdWorldStep(world, frame_time);
+        sdWorldStep(world, TR::frame_time);
         assert_close(-expected, sdObjectGetSpeedX(character), TR::EPSILON);
         assert_close(0.0f, sdObjectGetSpeedY(character), TR::EPSILON);
 
-        sdWorldStep(world, frame_time * 2); //Move two steps
+        sdWorldStep(world, TR::frame_time * 2); //Move two steps
         assert_close(-expected * 3, sdObjectGetSpeedX(character), TR::EPSILON); //Now should be negative
         assert_close(0.0f, sdObjectGetSpeedY(character), TR::EPSILON);
 
@@ -87,33 +87,33 @@ public:
         sdCharacterStartMovingRight(character);
 
         //Run 3 world steps
-        for(uint32_t i = 0; i < 3; ++i) sdWorldStep(world, frame_time);
+        for(uint32_t i = 0; i < 3; ++i) sdWorldStep(world, TR::frame_time);
 
         //Should have accelerated to 3 * expected
-        float expected = 0.046875f * world_scale;
+        float expected = 0.046875f * TR::world_scale;
         assert_close(expected * 3, sdObjectGetSpeedX(character), TR::EPSILON);
 
         //0.5f is the decelaration constant
-        float new_expected = (expected * 3) - (0.5f * world_scale);
+        float new_expected = (expected * 3) - (0.5f * TR::world_scale);
 
         //We are moving right, and we've pressed left - this will register
         //internally as a direction change
         sdCharacterStopMovingRight(character);
         sdCharacterStartMovingLeft(character);
-        sdWorldStep(world, frame_time);
+        sdWorldStep(world, TR::frame_time);
         sdCharacterStopMovingLeft(character);
 
         assert_close(new_expected, sdObjectGetSpeedX(character), TR::EPSILON);
 
         sdCharacterStartMovingRight(character);
         //Set the speed so that subtracting decelration would switch sign
-        sdCharacterSetGroundSpeed(character, 0.1 * world_scale);
+        sdCharacterSetGroundSpeed(character, 0.1 * TR::world_scale);
         sdCharacterStopMovingRight(character);
         sdCharacterStartMovingLeft(character); //We have turned around
 
-        sdWorldStep(world, frame_time);
+        sdWorldStep(world, TR::frame_time);
         //Emulate weird anomoly (see SPG Running - Deceleration)
-        assert_close(-0.5 * world_scale, sdCharacterGetGroundSpeed(character), TR::EPSILON);
+        assert_close(-0.5 * TR::world_scale, sdCharacterGetGroundSpeed(character), TR::EPSILON);
 
         sdWorldDestroy(world);
     }
@@ -128,20 +128,20 @@ public:
 
         //Accelerate for 1 second
         sdCharacterStartMovingRight(character);
-        for(uint32_t i = 0; i < 60; ++i) { sdWorldStep(world, frame_time); }
+        for(uint32_t i = 0; i < 60; ++i) { sdWorldStep(world, TR::frame_time); }
         sdCharacterStopMovingRight(character);
 
         float initial = sdObjectGetSpeedX(character);
 
         for(uint32_t i = 0; i < 60; ++i) {
-            sdWorldStep(world, frame_time); //No buttons are being pressed
-            assert_close(initial - (i * (0.046875 * world_scale)), sdObjectGetSpeedX(character), TR::EPSILON);
+            sdWorldStep(world, TR::frame_time); //No buttons are being pressed
+            assert_close(initial - (i * (0.046875 * TR::world_scale)), sdObjectGetSpeedX(character), TR::EPSILON);
         }
 
         //OK, now we are barely moving, applying friction would result
         //in a negative speed, it should be zero
-        sdObjectSetSpeedX(character, 0.01 * world_scale);
-        sdWorldStep(world, frame_time);
+        sdObjectSetSpeedX(character, 0.01 * TR::world_scale);
+        sdWorldStep(world, TR::frame_time);
         assert_close(0.0f, sdObjectGetSpeedX(character), TR::EPSILON);
 
         sdWorldDestroy(world);
@@ -158,16 +158,16 @@ public:
         sdCharacterStartMovingRight(character);
         //Run 10 seconds of game time, accelerating the whole time
         for(uint32_t i = 0; i < 60 * 10; ++i) {
-            sdWorldStep(world, frame_time);
+            sdWorldStep(world, TR::frame_time);
         }
 
-        assert_close(6.0f * world_scale, sdObjectGetSpeedX(character), TR::EPSILON);
+        assert_close(6.0f * TR::world_scale, sdObjectGetSpeedX(character), TR::EPSILON);
 
         //Set the speed faster than max
-        sdCharacterSetGroundSpeed(character, 7.0f * world_scale);
-        sdWorldStep(world, frame_time);
+        sdCharacterSetGroundSpeed(character, 7.0f * TR::world_scale);
+        sdWorldStep(world, TR::frame_time);
         //No acceleration should have been added
-        assert_close(7.0f * world_scale, sdCharacterGetGroundSpeed(character), TR::EPSILON);
+        assert_close(7.0f * TR::world_scale, sdCharacterGetGroundSpeed(character), TR::EPSILON);
 
         sdWorldDestroy(world);
     }

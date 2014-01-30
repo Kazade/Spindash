@@ -29,3 +29,4 @@ tests/test_running.h
 tests/test_solid_tiles.h
 tests/CMakeLists.txt
 playground/CMakeLists.txt
+tests/test_collisions.h

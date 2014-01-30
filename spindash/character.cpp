@@ -7,7 +7,79 @@
 #include "character.h"
 #include "world.h"
 
+
+static std::map<std::string, float> CHARACTER_SETTINGS = {
+    { "VERTICAL_SENSOR_EXTENSION_LENGTH", 16.0 }
+};
+
+float Character::setting(const std::string &setting) {
+    auto it = CHARACTER_SETTINGS.find(setting);
+    assert(it != CHARACTER_SETTINGS.end());
+    return it->second;
+}
+
+void Character::override_setting(const std::string &setting, float value) {
+    CHARACTER_SETTINGS[setting] = value;
+}
+
 const float WORLD_SCALE = 1.0f / 40.0f;
+
+Character::Character(World* world, SDdouble width, SDdouble height):
+    Object(world),
+    original_height_(height),
+    original_width_(width),
+    height_(height),
+    width_(width),
+    moving_left_(false),
+    moving_right_(false),
+    looking_down_(false),
+    jump_pressed_(false),
+    waiting_for_jump_release_(false),
+    rolling_(false),
+    jumping_(false),
+    is_grounded_(false),
+    horizontal_control_lock_(0),
+    facing_(DIRECTION_RIGHT),
+    spindash_charge_(0),
+    gsp_(0.0),
+    enabled_skills_(0) {
+
+    enable_skill(SD_SKILL_ROLL);
+    enable_skill(SD_SKILL_SPINDASH);
+
+    standing_shape_ = std::make_shared<RayBox>(
+        this,
+        width,
+        height + (Character::setting("VERTICAL_SENSOR_EXTENSION_LENGTH") * 2)
+
+    );
+
+    crouching_shape_ = std::make_shared<RayBox>(
+        this,
+        (width * 0.75),
+        (height * 0.75) + (Character::setting("VERTICAL_SENSOR_EXTENSION_LENGTH") * 2)
+    );
+
+    //Copy the standing shape to set the geom to default
+    set_geom(standing_shape_);
+}
+
+void Character::set_size(CharacterSize size) {
+    size_ = size;
+
+    float quarter_height = height_ * 0.25;
+
+    if(size_ == CHARACTER_SIZE_CROUCHING) {
+        //Copy the crouching shape to set the geom to default
+        set_geom(crouching_shape_);
+        set_position(position().x, position().y - (quarter_height / 2));
+    } else {
+        //Copy the standing shape to set the geom to default
+        set_geom(standing_shape_);
+        set_position(position().x, position().y + (quarter_height / 2));
+    }
+}
+
 
 SDuint sdCharacterCreate(SDuint world_id) {
     World* world = get_world_by_id(world_id);
@@ -153,22 +225,17 @@ std::pair<Collision, bool> find_nearest_collision_with_ray(
 		
 		//Ignore collisions with rays when the angle is too steep for the ray
 		double angle_diff = kmVec2DegreesBetween(&final.b_normal, &ray_box->ray(ray).dir);
-		if(angle_diff < 180.0 - 45.0) {
-			std::cout << "Ignoring due to angle: " << ray << ", " << angle_diff << std::endl;
+        if(angle_diff < 180.0 - 45.0) {
 			return std::make_pair(final, false);
 		}
-		std::cout << angle_diff << std::endl;		
-		
+
 		if(speed_length && ignore_based_on_speed) {
 			kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&final.b_normal, &normalized_speed);			
 			
 			if(angle_between_speed_and_normal < 90.0) {
-				std::cout << "Ignoring: " << angle_between_speed_and_normal << std::endl;
-				//L_DEBUG((boost::format("Ignoring collision with ray: %s because angle is: %f") % ray % angle_between_speed_and_normal).str());
+                //L_DEBUG((boost::format("Ignoring collision with ray: %s because angle is: %f") % ray % angle_between_speed_and_normal).str());
 				return std::make_pair(final, false);
-			} else {
-				std::cout << "Not Ignoring: " << angle_between_speed_and_normal << std::endl;
-			}			
+            }
 		}
 	}
 	
@@ -182,11 +249,7 @@ double calc_angle_from_up(const kmVec2& vec) {
 	kmVec2Normalize(&n, &vec);
 		
 	double angle = kmVec2DegreesBetween(&up, &n);
-	
-	if(isnan(angle)) {
-		std::cout << "WTF" << std::endl;	
-	}
-	
+
 	if(vec.x * up.y - vec.y * up.x <= 0) {
 		angle = -angle;
 	}
@@ -205,17 +268,15 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
+    is_grounded_ = false;
+
 	if (l.second || r.second) {
 		RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
 
 		Collision &info = (l.second) ? l.first : r.first;
 		kmRay2& ray = (l.second) ? ray_box->ray('L') : ray_box->ray('R');		
-		
-		std::cout << ((l.second) ? "L" : "R") << std::endl;
-		
+
 		double dist = kmVec2DistanceBetween(&info.point, &ray.start);
-		
-		std::cout << "Collision Point: (" << info.point.x << ", " << info.point.y << ")" << std::endl;
 		
 		/*kmVec2 new_pos;
 		kmVec2 reversed_ray;		
@@ -245,7 +306,42 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	} 
 	
 	if(a.second || b.second) {
-		RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
+        RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
+        float a_dist = std::numeric_limits<float>::max();
+        float b_dist = std::numeric_limits<float>::max();
+
+        if(a.second) {
+            a_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('A').start);
+        }
+
+        if(b.second) {
+            b_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('B').start);
+        }
+
+        kmVec2 diff;
+        diff.x = 0;
+        diff.y = height_ / 2.0;
+
+        kmVec2 up;
+        up.x = 0;
+        up.y = 1;
+
+        kmVec2 new_location;
+        float new_angle;
+        if(a_dist <= b_dist) {
+            kmVec2Add(&new_location, &a.first.point, &diff);
+            new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &a.first.b_normal)));
+        } else {
+            kmVec2Add(&new_location, &b.first.point, &diff);
+            new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &b.first.b_normal)));
+        }
+
+        set_position(new_location.x, new_location.y);
+        set_rotation(new_angle);
+        is_grounded_ = true;
+
+        return !kmVec2AreEqual(&original_position, &position());
+
 		kmVec2 normal, intersection;
 		
 		if(a.second && b.second) {
@@ -255,10 +351,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 			 * Set the position to intersection + (normal*height)
 			 * Set the rotation to the normal vs up
 			 */			 
-			 std::cout << "A & B" << std::endl;
-			 std::cout << "Collision Point A: (" << a.first.point.x << ", " << a.first.point.y << ")" << std::endl;
-			 std::cout << "Collision Point B: (" << b.first.point.x << ", " << b.first.point.y << ")" << std::endl;
-			 kmVec2MidPointBetween(&intersection, &a.first.point, &b.first.point);
+             kmVec2MidPointBetween(&intersection, &a.first.point, &b.first.point);
 			 
 			 kmVec2Add(&normal, &a.first.b_normal, &b.first.b_normal);
 			 kmVec2Normalize(&normal, &normal);			 
@@ -278,10 +371,8 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 			 
 			 kmVec2 edge;			 
 			 if(a.second) {				 
-				 std::cout << "A" << std::endl;
 				 kmVec2RotateBy(&edge, &normal, -90.0, &origin); //Rotate the normal by 90 degrees
 			 } else {
-				 std::cout << "B" << std::endl;
 				 kmVec2RotateBy(&edge, &normal, 90.0, &origin); //Rotate the normal by -90 degrees
 			 }			 			 
 			 
@@ -330,7 +421,6 @@ void Character::update_finished(float dt) {
     
     //Falling off of walls and ceilings
     if((rotation() > 45.0 && rotation() < 360.0 - 45.0) && fabs(gsp_) < (2.5 * WORLD_SCALE)) {
-		std::cout << "FALLING: " << gsp_ << std::endl;
 		gsp_ = 0.0;
 		//is_grounded_ = false; //FIXME: this needs setting but causes craziness
 		start_horizontal_control_lock(0.5); //FIXME: start when we hit the ground not immediately

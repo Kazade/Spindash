@@ -43,10 +43,19 @@ private:
     uint32_t collision_flags_;
 
     SDGeometryHandle handle_ = 0;
+
+protected:
+    //============== NEW STUFF =============
+
+    void set_geom(CollisionPrimitive::ptr shape) {
+        shape_ = shape;
+    }
+
+    //======================================
 public:
     typedef std::tr1::shared_ptr<Object> ptr;
 
-    Object(World* world, CollisionPrimitive::ptr shape);
+    Object(World* world);
     virtual ~Object();
 
     static void register_object(Object* obj);
@@ -82,6 +91,7 @@ public:
     World* world() { return world_; }
     
     CollisionPrimitive& geom() { return *shape_; }
+    const CollisionPrimitive& geom() const { return *shape_; }
     
     void set_collision_flag(CollisionFlag flag) { collision_flags_ |= flag; }
     bool has_collision_flag(CollisionFlag flag) const { return (collision_flags_ & flag) == flag; }

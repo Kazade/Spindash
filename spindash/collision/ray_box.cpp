@@ -14,6 +14,10 @@ RayBox::RayBox(Object* owner, float width, float height):
     init();
 }
 
+const kmRay2& RayBox::ray(char which) const {
+    return rays_.find(which)->second;
+}
+
 kmRay2& RayBox::ray(char which) {
     //FIXME: assert(which in { 'A', 'B', 'C', 'D', 'L', 'R' })
     return rays_[which];

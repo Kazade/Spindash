@@ -235,7 +235,6 @@ void World::update(double step, bool override_step_mode) {
         }
         lhs.update_finished(step);
         if(!tries) {
-            std::cout << "Something went wrong, respawning in safe location" << std::endl;
             lhs.revert_to_safe_position();
         } else {
             lhs.store_safe_position();

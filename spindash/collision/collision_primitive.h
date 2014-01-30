@@ -2,7 +2,7 @@
 #define COLLISION_PRIMITIVE_H
 
 #include <vector>
-#include <tr1/memory>
+#include <memory>
 #include "kazmath/vec2.h"
 
 class Object;
@@ -23,7 +23,7 @@ struct Collision {
 
 class CollisionPrimitive {
 public:
-    typedef std::tr1::shared_ptr<CollisionPrimitive> ptr;
+    typedef std::shared_ptr<CollisionPrimitive> ptr;
     
     CollisionPrimitive(Object* owner):
         owner_(owner) {}
