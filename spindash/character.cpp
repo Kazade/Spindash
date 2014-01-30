@@ -726,3 +726,7 @@ SDbool sdCharacterIsRolling(SDuint character) {
 	Character* c = get_character(character);
 	return c->rolling();
 }
+
+void sdCharacterOverrideSetting(const char* setting, float value) {
+    Character::override_setting(setting, value);
+}

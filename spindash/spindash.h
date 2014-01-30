@@ -52,6 +52,7 @@ void sdObjectSetBounciness(SDuint object, SDdouble v);
 void sdObjectSetFriction(SDuint object, SDdouble friction);
 
 SDuint sdCharacterCreate(SDuint world);
+void sdCharacterOverrideSetting(const char* setting, float value);
 
 SDbool sdCharacterIsGrounded(SDuint character);
 SDbool sdCharacterIsJumping(SDuint character);

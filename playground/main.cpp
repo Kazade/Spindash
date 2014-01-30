@@ -93,6 +93,8 @@ public:
     }
 
     bool do_init() {
+        sdCharacterOverrideSetting("VERTICAL_SENSOR_EXTENSION_LENGTH", 16.0 / 40.0);
+
         world = sdWorldCreate();
 
         sdWorldSetCompileGeometryCallback(world, &KGLTGeometryRenderer::compile_geometry_callback, renderer_.get());
