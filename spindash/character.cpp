@@ -312,87 +312,43 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 
         if(a.second) {
             a_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('A').start);
+            if(a_dist > height_  / 2) {
+                a_dist = std::numeric_limits<float>::max();
+            }
         }
 
         if(b.second) {
             b_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('B').start);
+            if(b_dist > height_ / 2) {
+                b_dist = std::numeric_limits<float>::max();
+            }
+        } 
+
+        if(a_dist != std::numeric_limits<float>::max() || b_dist != std::numeric_limits<float>::max()) {
+            kmVec2 diff;
+            diff.x = 0;
+            diff.y = height_ / 2.0;
+
+            kmVec2 up;
+            up.x = 0;
+            up.y = 1;
+
+            kmVec2 new_location;
+            float new_angle;
+            if(a_dist <= b_dist) {
+                kmVec2Add(&new_location, &a.first.point, &diff);
+                new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &a.first.b_normal)));
+            } else {
+                kmVec2Add(&new_location, &b.first.point, &diff);
+                new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &b.first.b_normal)));
+            }
+
+            set_position(new_location.x, new_location.y);
+            set_rotation(new_angle);
+            is_grounded_ = true;
+
+            return !kmVec2AreEqual(&original_position, &position());
         }
-
-        kmVec2 diff;
-        diff.x = 0;
-        diff.y = height_ / 2.0;
-
-        kmVec2 up;
-        up.x = 0;
-        up.y = 1;
-
-        kmVec2 new_location;
-        float new_angle;
-        if(a_dist <= b_dist) {
-            kmVec2Add(&new_location, &a.first.point, &diff);
-            new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &a.first.b_normal)));
-        } else {
-            kmVec2Add(&new_location, &b.first.point, &diff);
-            new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &b.first.b_normal)));
-        }
-
-        set_position(new_location.x, new_location.y);
-        set_rotation(new_angle);
-        is_grounded_ = true;
-
-        return !kmVec2AreEqual(&original_position, &position());
-
-		kmVec2 normal, intersection;
-		
-		if(a.second && b.second) {
-			/*
-			 * Find the line between the two collision points
-			 * Calculate a new normal and intersection
-			 * Set the position to intersection + (normal*height)
-			 * Set the rotation to the normal vs up
-			 */			 
-             kmVec2MidPointBetween(&intersection, &a.first.point, &b.first.point);
-			 
-			 kmVec2Add(&normal, &a.first.b_normal, &b.first.b_normal);
-			 kmVec2Normalize(&normal, &normal);			 
-		} else {
-			/*
-			 * if a: intersection = a.point + (a.normal + 90 degrees) * width / 2;
-			 * elif b: intersection = b.point - (b.normal - 90 degrees) * width / 2;
-			 * Set the position to intersection + (normal * height)
-			 * Set the rotation to the normal vs up
-			 */
-			 kmVec2 origin;
-			 kmVec2Fill(&origin, 0, 0);
-			 
-			 kmVec2 point = (a.second) ? a.first.point : b.first.point;
-			 
-			 normal = (a.second) ? a.first.b_normal : b.first.b_normal;
-			 
-			 kmVec2 edge;			 
-			 if(a.second) {				 
-				 kmVec2RotateBy(&edge, &normal, -90.0, &origin); //Rotate the normal by 90 degrees
-			 } else {
-				 kmVec2RotateBy(&edge, &normal, 90.0, &origin); //Rotate the normal by -90 degrees
-			 }			 			 
-			 
-			 double vray_diff = kmVec2DistanceBetween(&ray_box->ray('A').start, &ray_box->ray('B').start);
-			 
-			 kmVec2Scale(&edge, &edge, vray_diff / 2.0);
-			 kmVec2Add(&intersection, &point, &edge); //Calculate the point underneath the position			 
-		}
-		
-		kmVec2 new_pos, scaled_normal;
-		kmVec2Scale(&scaled_normal, &normal, height_ / 2.0);
-		kmVec2Add(&new_pos, &intersection, &scaled_normal);
-
-		set_position(new_pos.x, new_pos.y);
-		set_rotation(calc_angle_from_up(normal));		 
-		is_grounded_ = true;		
-
-		if((rotation() > 45.0 + kmEpsilon && rotation() < (360.0 - 45.0) - kmEpsilon) && fabs(gsp_) < (2.5 * WORLD_SCALE)) {
-			is_grounded_ = false;
-		}
 	} 
 	
 	//If the position changed, re-run the collision loop
