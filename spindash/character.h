@@ -173,7 +173,7 @@ private:
     CollisionPrimitive::ptr crouching_shape_[QUADRANT_MAX];
     Quadrant quadrant_ = QUADRANT_FLOOR;
     GroundState ground_state_ = GROUND_STATE_IN_THE_AIR;
-
+    bool is_grounded() const { return ground_state_ != GROUND_STATE_IN_THE_AIR; }
     // =========================================
 
 	void start_horizontal_control_lock(double amount) {

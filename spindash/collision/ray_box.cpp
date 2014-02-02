@@ -71,6 +71,14 @@ void RayBox::init() {
     kmVec2RotateBy(&d.start, &d.start, rotation, &KM_VEC2_ZERO);
     d.start.x += x_; d.start.y += y_;
     kmVec2RotateBy(&d.dir, &d.dir, rotation, &KM_VEC2_ZERO);
+
+    kmRay2& e = rays_['E'];
+    kmVec2Fill(&e.start, 0, 0);
+    kmVec2Fill(&e.dir, 0, -(height_ / 2.0));
+
+    kmVec2RotateBy(&e.start, &e.start, rotation, &KM_VEC2_ZERO);
+    e.start.x += x_; e.start.y += y_;
+    kmVec2RotateBy(&e.dir, &e.dir, rotation, &KM_VEC2_ZERO);
 }
 
 void RayBox::set_rotation(float degrees) {

@@ -37,7 +37,6 @@ Character::Character(World* world, SDdouble width, SDdouble height):
     waiting_for_jump_release_(false),
     rolling_(false),
     jumping_(false),
-    is_grounded_(false),
     horizontal_control_lock_(0),
     facing_(DIRECTION_RIGHT),
     spindash_charge_(0),
@@ -126,9 +125,6 @@ void Character::pre_prepare(float dt) {
 
 void Character::prepare(float dt) {
     pre_prepare(dt);
-    
-    is_grounded_ = false;
-    
     post_prepare(dt);
 }
 
@@ -226,7 +222,7 @@ std::pair<Collision, bool> find_nearest_collision_with_ray(
 	const std::vector<Collision>& collisions,
 	char ray,
 	const kmVec2& speed,
-	bool ignore_based_on_speed /* normally !is_grounded_ */) {
+    bool ignore_based_on_speed /* normally !is_grounded() */) {
 
 	kmVec2 normalized_speed;
 	double speed_length = kmVec2Length(&speed);
@@ -275,14 +271,13 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', speed(), !grounded_last_frame_);
 	std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', speed(), !grounded_last_frame_);
 	std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', speed(), !grounded_last_frame_);
-	
+    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', speed(), !grounded_last_frame_);
+
 	//Store the original position, we need this to work out
 	//if anything changed
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
-    is_grounded_ = false;
-
 	if (l.second || r.second) {
 		RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
 
@@ -304,41 +299,63 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 		kmVec2Subtract(&new_pos, &position(), &to_move);
 		set_position(new_pos.x, new_pos.y);
 		
-		if(is_grounded_) {
+        if(is_grounded()) {
 			if(l.second && gsp_ < 0.0) gsp_ = 0.0f;
 			if(r.second && gsp_ > 0.0) gsp_ = 0.0f;
 		} else {
 			speed_.x = 0.0f; //FIXME: Take into account rotation
 		}		
-		
-		if(a.second || b.second) {
-			is_grounded_ = true;
-		}
-		
+
 		return true;
 	} 
 	
+    ground_state_ = GROUND_STATE_IN_THE_AIR;
 	if(a.second || b.second) {
         RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
-        float a_dist = std::numeric_limits<float>::max();
-        float b_dist = std::numeric_limits<float>::max();
+        const float FLOAT_MAX = std::numeric_limits<float>::max();
+        float a_dist = FLOAT_MAX;
+        float b_dist = FLOAT_MAX;
+        float e_dist = FLOAT_MAX;
 
         if(a.second) {
             a_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('A').start);
             if(a_dist > height_  / 2) {
-                a_dist = std::numeric_limits<float>::max();
+                a_dist = FLOAT_MAX;
             }
         }
 
         if(b.second) {
-            b_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('B').start);
+            b_dist = kmVec2DistanceBetween(&b.first.point, &ray_box->ray('B').start);
             if(b_dist > height_ / 2) {
-                b_dist = std::numeric_limits<float>::max();
+                b_dist = FLOAT_MAX;
             }
-        } 
+        }
 
-        if(a_dist != std::numeric_limits<float>::max() && b_dist != std::numeric_limits<float>::max()) {
+        if(e.second) {
+            e_dist = kmVec2DistanceBetween(&e.first.point, &ray_box->ray('E').start);
+            if(e_dist > height_ / 2) {
+                e_dist = FLOAT_MAX;
+            }
+        }
+
+
+        if(a_dist !=  FLOAT_MAX && b_dist != FLOAT_MAX) {
+            //Both collided
             ground_state_ = GROUND_STATE_ON_THE_GROUND;
+        } else if(a_dist != FLOAT_MAX && b_dist == FLOAT_MAX) {
+            if(e_dist != FLOAT_MAX) {
+                //Both A and E have collisions
+                ground_state_ = GROUND_STATE_ON_THE_GROUND;
+            } else {
+                ground_state_ = GROUND_STATE_BALANCING_RIGHT;
+            }
+        } else if(b_dist != FLOAT_MAX && a_dist == FLOAT_MAX) {
+            if(e_dist != FLOAT_MAX) {
+                //Both B and E have collisions
+                ground_state_ = GROUND_STATE_ON_THE_GROUND;
+            } else {
+                ground_state_ = GROUND_STATE_BALANCING_LEFT;
+            }
         }
 
         if(a_dist != std::numeric_limits<float>::max() || b_dist != std::numeric_limits<float>::max()) {
@@ -370,7 +387,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 
             set_position(new_location.x, new_location.y);
             set_rotation(new_angle);
-            is_grounded_ = true;
 
             return !kmVec2AreEqual(&original_position, &position());
         }
@@ -403,7 +419,7 @@ void Character::update_finished(float dt) {
     //Falling off of walls and ceilings
     if((rotation() > 45.0 && rotation() < 360.0 - 45.0) && fabs(gsp_) < (2.5 * WORLD_SCALE)) {
 		gsp_ = 0.0;
-		//is_grounded_ = false; //FIXME: this needs setting but causes craziness
+        //is_grounded() = false; //FIXME: this needs setting but causes craziness
 		start_horizontal_control_lock(0.5); //FIXME: start when we hit the ground not immediately
 	}
         
@@ -420,7 +436,7 @@ void Character::update_finished(float dt) {
 		start_rolling();
 	}
     
-    if(!grounded_last_frame_ && is_grounded_ /*&& !waiting_for_jump_release_*/) {
+    if(!grounded_last_frame_ && is_grounded() /*&& !waiting_for_jump_release_*/) {
         L_DEBUG("Reorienting");
         stop_jumping();
         stop_rolling(); //Sonic stops rolling if when you hit the ground
@@ -470,7 +486,7 @@ void Character::update_finished(float dt) {
         }
     }
     
-    if(is_grounded_) {
+    if(is_grounded()) {
         gsp_ += slp * sin_rot * dt;
     } else {
         set_rotation(0);        
@@ -478,7 +494,7 @@ void Character::update_finished(float dt) {
 
     //Done this way so pressing left and right at the same time, does nothing
     if(moving_left_ && !(moving_left_ && moving_right_) && !horizontal_control_lock_active()) {
-        if(is_grounded_) {
+        if(is_grounded()) {
             if(gsp_ <= 0.0f) {
                 //You can't accelerate while rolling
                 if(!rolling_) {
@@ -497,7 +513,7 @@ void Character::update_finished(float dt) {
             facing_ = DIRECTION_LEFT;           
         }
     } else if(moving_right_ && !(moving_left_ && moving_right_) && !horizontal_control_lock_active()) {
-        if(is_grounded_) {
+        if(is_grounded()) {
             if(gsp_ >= 0.0f) {
                 //You can't accelerate while rolling
                 if(!rolling_) { 
@@ -521,7 +537,7 @@ void Character::update_finished(float dt) {
         If we are pressing no directions, or we are pressing both,
         or we are rolling. Apply friction
     */
-    if(is_grounded_) {
+    if(is_grounded()) {
         if((!moving_left_ && !moving_right_) || (moving_left_ && moving_right_) || rolling_) {
             float frc_val = (rolling_) ? FRC * 0.5f : FRC;
             float frc = std::min((float)fabs(gsp_), frc_val * dt);
@@ -537,13 +553,12 @@ void Character::update_finished(float dt) {
         }
     }
     
-    if(is_grounded_ && jump_pressed_ && !jump_pressed_last_time) {
+    if(is_grounded() && jump_pressed_ && !jump_pressed_last_time) {
         //Did we just start jumping?
         speed_.x += JMP * sinf(kmDegreesToRadians(rotation()));
         speed_.y += JMP * cosf(kmDegreesToRadians(rotation()));
         
         //speed_.y = JMP;
-        is_grounded_ = false;
         waiting_for_jump_release_ = true;
         
         start_jumping();
@@ -551,7 +566,7 @@ void Character::update_finished(float dt) {
         //return false; //Prevent move this frame
     }
     
-    if(is_grounded_) {
+    if(is_grounded()) {
 		/*
 		 * 	The 'R' ray of the raybox always points to the local "forwards"
 		 *  so we use that to calculate the speed vector based on gsp_
@@ -576,7 +591,7 @@ void Character::update_finished(float dt) {
     }
     
     jump_pressed_last_time = jump_pressed_;
-    grounded_last_frame_ = is_grounded_;
+    grounded_last_frame_ = is_grounded();
 }
 
 void Character::set_speed(float x, float y) {
@@ -586,7 +601,7 @@ void Character::set_speed(float x, float y) {
         we can do here is, if someone sets the speed manually,
         to make the character not on the ground
     */
-    is_grounded_ = false;
+    ground_state_ = GROUND_STATE_IN_THE_AIR;
     speed_.x = x;
     speed_.y = y;
 }

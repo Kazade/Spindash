@@ -218,26 +218,32 @@ public:
         assert_equal(GROUND_STATE_IN_THE_AIR, character.ground_state());
 
         //Simulate collisions on both A and B rays
+        character.set_position(0, 0);
         character.respond_to({a_collision, b_collision});
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
 
         //Simulate a collision on the A ray and the central (extra) E-ray
+        character.set_position(0, 0);
         character.respond_to({a_collision, e_collision});
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
 
         //Simulate a collision on the A ray only
+        character.set_position(0, 0);
         character.respond_to({a_collision});
         assert_equal(GROUND_STATE_BALANCING_RIGHT, character.ground_state());
 
         //Simulate a collision on the B ray and the central (extra) E-ray
+        character.set_position(0, 0);
         character.respond_to({e_collision, b_collision});
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
 
         //Simulate a collision on the B ray only
+        character.set_position(0, 0);
         character.respond_to({b_collision});
         assert_equal(GROUND_STATE_BALANCING_LEFT, character.ground_state());
 
         //Call respond_to without any collisions
+        character.set_position(0, 0);
         character.respond_to(std::vector<Collision>());
         assert_equal(GROUND_STATE_IN_THE_AIR, character.ground_state());
     }
