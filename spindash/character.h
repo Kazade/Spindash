@@ -19,6 +19,22 @@ enum CharacterSize {
     CHARACTER_SIZE_CROUCHING
 };
 
+enum Quadrant {
+    QUADRANT_FLOOR = 0,
+    QUADRANT_RIGHT_WALL,
+    QUADRANT_CEILING,
+    QUADRANT_LEFT_WALL,
+    QUADRANT_MAX
+};
+
+enum GroundState {
+    GROUND_STATE_IN_THE_AIR,
+    GROUND_STATE_ON_THE_GROUND,
+    GROUND_STATE_BALANCING_LEFT,
+    GROUND_STATE_BALANCING_RIGHT,
+    GROUND_STATE_BALANCING_LEFT_EXTREME,
+    GROUND_STATE_BALANCING_RIGHT_EXTREME
+};
 
 class Character : public Object {
 public:
@@ -35,6 +51,11 @@ public:
 
     void set_size(CharacterSize size);
     CharacterSize size() const { return size_; }
+
+    void set_quadrant(Quadrant quadrant);
+    Quadrant quadrant() const { return quadrant_; }
+
+    GroundState ground_state() const { return ground_state_; }
 
     //======================================
 
@@ -148,8 +169,10 @@ private:
     // ============== NEW STUFF ================
 
     CharacterSize size_ = CHARACTER_SIZE_STANDING;
-    CollisionPrimitive::ptr standing_shape_;
-    CollisionPrimitive::ptr crouching_shape_;
+    CollisionPrimitive::ptr standing_shape_[QUADRANT_MAX];
+    CollisionPrimitive::ptr crouching_shape_[QUADRANT_MAX];
+    Quadrant quadrant_ = QUADRANT_FLOOR;
+    GroundState ground_state_ = GROUND_STATE_IN_THE_AIR;
 
     // =========================================
 

@@ -12,6 +12,11 @@
 int main(int argc, char* argv[]) {
     std::shared_ptr<TestRunner> runner(new TestRunner());
     
+    std::string test_case;
+    if(argc > 1) {
+        test_case = argv[1];
+    }
+
     
     runner->register_case<CollisionTest>(
         std::vector<void (CollisionTest::*)()>({&CollisionTest::test_ray_collisions_on_a_flat_plane}),
@@ -26,8 +31,8 @@ int main(int argc, char* argv[]) {
 
 
     runner->register_case<TestSolidTiles>(
-        std::vector<void (TestSolidTiles::*)()>({&TestSolidTiles::test_character_ray_lengths_and_positions, &TestSolidTiles::test_position_changes_when_state_changes}),
-        {"TestSolidTiles::test_character_ray_lengths_and_positions", "TestSolidTiles::test_position_changes_when_state_changes"}
+        std::vector<void (TestSolidTiles::*)()>({&TestSolidTiles::test_character_ray_lengths_and_positions, &TestSolidTiles::test_position_changes_when_state_changes, &TestSolidTiles::test_quadrant_switching, &TestSolidTiles::test_geom_changes_with_quadrant, &TestSolidTiles::test_ground_state}),
+        {"TestSolidTiles::test_character_ray_lengths_and_positions", "TestSolidTiles::test_position_changes_when_state_changes", "TestSolidTiles::test_quadrant_switching", "TestSolidTiles::test_geom_changes_with_quadrant", "TestSolidTiles::test_ground_state"}
     );
 
 
@@ -37,7 +42,7 @@ int main(int argc, char* argv[]) {
     );
 
     
-    return runner->run();
+    return runner->run(test_case);
 }
 
 

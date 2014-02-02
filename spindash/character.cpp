@@ -47,21 +47,54 @@ Character::Character(World* world, SDdouble width, SDdouble height):
     enable_skill(SD_SKILL_ROLL);
     enable_skill(SD_SKILL_SPINDASH);
 
-    standing_shape_ = std::make_shared<RayBox>(
-        this,
-        width,
-        height + (Character::setting("VERTICAL_SENSOR_EXTENSION_LENGTH") * 2)
 
-    );
+    for(int i = 0; i < QUADRANT_MAX; ++i) {
+        auto base_standing = std::make_shared<RayBox>(
+            this,
+            width,
+            height + (Character::setting("VERTICAL_SENSOR_EXTENSION_LENGTH") * 2)
 
-    crouching_shape_ = std::make_shared<RayBox>(
-        this,
-        (width * 0.75),
-        (height * 0.75) + (Character::setting("VERTICAL_SENSOR_EXTENSION_LENGTH") * 2)
-    );
+        );
+
+        auto base_crouching = std::make_shared<RayBox>(
+            this,
+            (width * 0.75),
+            (height * 0.75) + (Character::setting("VERTICAL_SENSOR_EXTENSION_LENGTH") * 2)
+        );
+
+        //TODO: Transform all the rays...
+
+        kmMat3 rotation;
+        kmMat3RotationZ(&rotation, kmDegreesToRadians(90));
+
+
+        if(Quadrant(i) == QUADRANT_RIGHT_WALL) {
+            base_standing->set_rotation(90);
+            base_crouching->set_rotation(90);
+        } else if(Quadrant(i) == QUADRANT_CEILING) {
+            base_standing->set_rotation(180);
+            base_crouching->set_rotation(180);
+        } else if(Quadrant(i) == QUADRANT_LEFT_WALL) {
+            base_standing->set_rotation(-90);
+            base_crouching->set_rotation(-90);
+        }
+
+        standing_shape_[(Quadrant)i] = base_standing;
+        crouching_shape_[(Quadrant)i] = base_crouching;
+    }
 
     //Copy the standing shape to set the geom to default
-    set_geom(standing_shape_);
+    set_geom(standing_shape_[quadrant_]);
+}
+
+void Character::set_quadrant(Quadrant quadrant) {
+    quadrant_ = quadrant;
+
+    if(size_ == CHARACTER_SIZE_CROUCHING) {
+        set_geom(crouching_shape_[quadrant_]);
+    } else {
+        set_geom(standing_shape_[quadrant_]);
+    }
 }
 
 void Character::set_size(CharacterSize size) {
@@ -71,11 +104,11 @@ void Character::set_size(CharacterSize size) {
 
     if(size_ == CHARACTER_SIZE_CROUCHING) {
         //Copy the crouching shape to set the geom to default
-        set_geom(crouching_shape_);
+        set_geom(crouching_shape_[quadrant_]);
         set_position(position().x, position().y - (quarter_height / 2));
     } else {
         //Copy the standing shape to set the geom to default
-        set_geom(standing_shape_);
+        set_geom(standing_shape_[quadrant_]);
         set_position(position().x, position().y + (quarter_height / 2));
     }
 }
@@ -220,41 +253,21 @@ std::pair<Collision, bool> find_nearest_collision_with_ray(
 		}
 	}
 	
-	if(found) {
-		RayBox* ray_box = dynamic_cast<RayBox*>(final.object_a);
-		
-		//Ignore collisions with rays when the angle is too steep for the ray
-		double angle_diff = kmVec2DegreesBetween(&final.b_normal, &ray_box->ray(ray).dir);
-        if(angle_diff < 180.0 - 45.0) {
-			return std::make_pair(final, false);
-		}
-
-		if(speed_length && ignore_based_on_speed) {
-			kmScalar angle_between_speed_and_normal = kmVec2DegreesBetween(&final.b_normal, &normalized_speed);			
-			
-			if(angle_between_speed_and_normal < 90.0) {
-                //L_DEBUG((boost::format("Ignoring collision with ray: %s because angle is: %f") % ray % angle_between_speed_and_normal).str());
-				return std::make_pair(final, false);
-            }
-		}
-	}
-	
-	
 	return std::make_pair(final, found);
 }
 
-double calc_angle_from_up(const kmVec2& vec) {
+float calc_angle_from_up(const kmVec2& vec) {
 	kmVec2 up, n;
 	kmVec2Fill(&up, 0.0, 1.0);
 	kmVec2Normalize(&n, &vec);
-		
-	double angle = kmVec2DegreesBetween(&up, &n);
 
-	if(vec.x * up.y - vec.y * up.x <= 0) {
-		angle = -angle;
-	}
-	
-	return (angle < 0.0) ? 360.0 + angle : angle;
+    float angle = kmRadiansToDegrees(atan2(vec.x * up.y - vec.y * up.x, vec.x * up.x + vec.y * up.y));
+
+    if(angle < 0) {
+        angle = 360 + angle;
+    }
+
+    return angle;
 }
 
 bool Character::respond_to(const std::vector<Collision>& collisions) {
@@ -324,24 +337,36 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
             }
         } 
 
+        if(a_dist != std::numeric_limits<float>::max() && b_dist != std::numeric_limits<float>::max()) {
+            ground_state_ = GROUND_STATE_ON_THE_GROUND;
+        }
+
         if(a_dist != std::numeric_limits<float>::max() || b_dist != std::numeric_limits<float>::max()) {
             kmVec2 diff;
             diff.x = 0;
             diff.y = height_ / 2.0;
 
-            kmVec2 up;
-            up.x = 0;
-            up.y = 1;
-
             kmVec2 new_location;
             float new_angle;
             if(a_dist <= b_dist) {
                 kmVec2Add(&new_location, &a.first.point, &diff);
-                new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &a.first.b_normal)));
+                new_angle = calc_angle_from_up(a.first.b_normal);
             } else {
                 kmVec2Add(&new_location, &b.first.point, &diff);
-                new_angle = kmRadiansToDegrees(acos(kmVec2Dot(&up, &b.first.b_normal)));
+                new_angle = calc_angle_from_up(b.first.b_normal);
             }
+
+            //Handle quadrant switching
+            if(new_angle < 45 || new_angle > 315) {
+                set_quadrant(QUADRANT_FLOOR);
+            } else if(new_angle > 45 && new_angle < 135) {
+                set_quadrant(QUADRANT_LEFT_WALL);
+            } else if(new_angle > 135 && new_angle < 225) {
+                set_quadrant(QUADRANT_CEILING);
+            } else if(new_angle > 225 && new_angle < 315) {
+                set_quadrant(QUADRANT_RIGHT_WALL);
+            }
+
 
             set_position(new_location.x, new_location.y);
             set_rotation(new_angle);
