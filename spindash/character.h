@@ -141,7 +141,7 @@ public:
         jump_pressed_ = false;       
     }
     
-    bool is_grounded() { return is_grounded_; }
+    bool is_grounded() { return ground_state_ != GROUND_STATE_IN_THE_AIR; }
     bool jumping() const { return jumping_; }
     bool rolling() const { return rolling_; }
     
@@ -188,29 +188,29 @@ private:
     Collision find_nearest_collision(const std::vector<Collision>& collisions);
     std::pair<Collision, bool> find_collision_with_ray(const std::vector<Collision>& collisions, char ray);
     
-    SDdouble original_height_;
-    SDdouble original_width_;
-    SDdouble height_;
-    SDdouble width_;
+    SDdouble original_height_ = 0;
+    SDdouble original_width_ = 0;
+    SDdouble height_ = 0;
+    SDdouble width_ = 0;
     
-    bool moving_left_;
-    bool moving_right_;
-    bool looking_down_;
-    bool jump_pressed_;
-    bool waiting_for_jump_release_;
+    bool moving_left_ = false;
+    bool moving_right_ = false;
+    bool looking_down_ = false;
+    bool jump_pressed_ = false;
+    bool waiting_for_jump_release_ = false;
     
-    bool rolling_;
-    bool jumping_;
-    bool is_grounded_;
-    bool grounded_last_frame_;
+    bool rolling_ = false;
+    bool jumping_ = false;
+    bool grounded_last_frame_ = false;
+    uint32_t enabled_skills_ = 0;
+
+    double horizontal_control_lock_ = 0.0;
     
-    double horizontal_control_lock_;
+    Direction facing = DIRECTION_RIGHT;
     
-    Direction facing_;
-    
-    double spindash_charge_;
-    
-    double gsp_;
+    double spindash_charge_ = 0.0;
+
+    double gsp_ = 0.0;
     
     //override
     void pre_prepare(float dt);
@@ -218,10 +218,6 @@ private:
     void post_prepare(float dt);
     void update_finished(float dt);
     void prepare(float dt);
-    
-    bool acc_applied_this_frame_;     
-    
-    uint32_t enabled_skills_;
 };
 
 #endif
