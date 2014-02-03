@@ -219,31 +219,37 @@ public:
 
         //Simulate collisions on both A and B rays
         character.set_position(0, 0);
+        character.update(0);
         character.respond_to({a_collision, b_collision});
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
 
         //Simulate a collision on the A ray and the central (extra) E-ray
         character.set_position(0, 0);
+        character.update(0);
         character.respond_to({a_collision, e_collision});
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
 
         //Simulate a collision on the A ray only
         character.set_position(0, 0);
+        character.update(0);
         character.respond_to({a_collision});
         assert_equal(GROUND_STATE_BALANCING_RIGHT, character.ground_state());
 
         //Simulate a collision on the B ray and the central (extra) E-ray
         character.set_position(0, 0);
+        character.update(0);
         character.respond_to({e_collision, b_collision});
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
 
         //Simulate a collision on the B ray only
         character.set_position(0, 0);
+        character.update(0);
         character.respond_to({b_collision});
         assert_equal(GROUND_STATE_BALANCING_LEFT, character.ground_state());
 
         //Call respond_to without any collisions
         character.set_position(0, 0);
+        character.update(0);
         character.respond_to(std::vector<Collision>());
         assert_equal(GROUND_STATE_IN_THE_AIR, character.ground_state());
     }
@@ -273,6 +279,16 @@ public:
         assert_equal(QUADRANT_FLOOR, character.quadrant());
         assert_false(character.is_grounded());
     }
+
+    void test_a_b_sensors_only_work_with_negative_y_velocity() {
+        //They only detect hits when y is <= 0 (e.g. not moving up)
+        assert_false(true); //TODO
+    }
+
+    void test_requisition_with_ground() {
+        //GSP is reset from xsp and ysp
+    }
+
 };
 
 #endif // TEST_SOLID_TILES_H

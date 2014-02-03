@@ -1,6 +1,7 @@
 #include <kglt/kglt.h>
 
 #include "spindash/spindash.h"
+#include "spindash/character.h"
 
 class KGLTGeometryRenderer {
 public:
@@ -125,6 +126,13 @@ private:
     SDuint spring2 = 0;
 
     std::shared_ptr<KGLTGeometryRenderer> renderer_;
+
+    bool on_key_press(SDL_Keysym key) {
+        if(key.scancode == SDL_SCANCODE_SPACE) {
+            debug_break = true;
+        }
+        return false;
+    }
 
     bool while_key_pressed(SDL_Keysym key, double) {
         switch(key.scancode) {

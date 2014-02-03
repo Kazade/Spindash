@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
 
 
     runner->register_case<TestSolidTiles>(
-        std::vector<void (TestSolidTiles::*)()>({&TestSolidTiles::test_character_ray_lengths_and_positions, &TestSolidTiles::test_position_changes_when_state_changes, &TestSolidTiles::test_quadrant_switching, &TestSolidTiles::test_geom_changes_with_quadrant, &TestSolidTiles::test_ground_state, &TestSolidTiles::test_low_gsp_and_non_floor_quadrant_results_in_falling}),
-        {"TestSolidTiles::test_character_ray_lengths_and_positions", "TestSolidTiles::test_position_changes_when_state_changes", "TestSolidTiles::test_quadrant_switching", "TestSolidTiles::test_geom_changes_with_quadrant", "TestSolidTiles::test_ground_state", "TestSolidTiles::test_low_gsp_and_non_floor_quadrant_results_in_falling"}
+        std::vector<void (TestSolidTiles::*)()>({&TestSolidTiles::test_character_ray_lengths_and_positions, &TestSolidTiles::test_position_changes_when_state_changes, &TestSolidTiles::test_quadrant_switching, &TestSolidTiles::test_geom_changes_with_quadrant, &TestSolidTiles::test_ground_state, &TestSolidTiles::test_low_gsp_and_non_floor_quadrant_results_in_falling, &TestSolidTiles::test_a_b_sensors_only_work_with_negative_y_velocity, &TestSolidTiles::test_requisition_with_ground}),
+        {"TestSolidTiles::test_character_ray_lengths_and_positions", "TestSolidTiles::test_position_changes_when_state_changes", "TestSolidTiles::test_quadrant_switching", "TestSolidTiles::test_geom_changes_with_quadrant", "TestSolidTiles::test_ground_state", "TestSolidTiles::test_low_gsp_and_non_floor_quadrant_results_in_falling", "TestSolidTiles::test_a_b_sensors_only_work_with_negative_y_velocity", "TestSolidTiles::test_requisition_with_ground"}
     );
 
 

@@ -9,6 +9,8 @@
 
 const float MIN_SPEED_TO_AVOID_FAILING_IN_MPS = (2.5 / 40.0) * 60.0;
 
+bool debug_break = false;
+
 static std::map<std::string, float> CHARACTER_SETTINGS = {
     { "VERTICAL_SENSOR_EXTENSION_LENGTH", 16.0 }
 };
@@ -201,6 +203,10 @@ float calc_angle_from_up(const kmVec2& vec) {
 }
 
 void Character::pre_prepare(float dt) {
+    if(debug_break) {
+        std::cout << "Breaking..." << std::endl;
+    }
+
     if(x_axis_state_ == AXIS_STATE_NEGATIVE) {
         if(gsp_ > 0) {
             gsp_ -= deceleration_rate_;
@@ -256,8 +262,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
-	
-    ground_state_ = GROUND_STATE_IN_THE_AIR;
 	if(a.second || b.second) {
         RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
         const float FLOAT_MAX = std::numeric_limits<float>::max();
@@ -312,13 +316,18 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
             float new_angle;
             if(a_dist <= b_dist) {
                 float new_y = a.first.point.y + (height_ / 2.0);
-                if(new_location.y < new_y) {
+                if(is_grounded()) {
+                    new_location.y = new_y;
+                } else if(new_location.y < new_y) {
+                    //If we are in the air, only set the new height if we are less than it
                     new_location.y = new_y;
                 }
                 new_angle = calc_angle_from_up(a.first.b_normal);
             } else {
                 float new_y = b.first.point.y + (height_ / 2.0);
-                if(new_location.y < new_y) {
+                if(is_grounded()) {
+                    new_location.y = new_y;
+                } else if(new_location.y < new_y) {
                     new_location.y = new_y;
                 }
                 new_angle = calc_angle_from_up(b.first.b_normal);

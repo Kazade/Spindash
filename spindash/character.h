@@ -157,6 +157,10 @@ private:
     double gsp_ = 0.0;
 
     void pre_prepare(float dt);
+    void post_update(float dt) {
+        ground_state_ = GROUND_STATE_IN_THE_AIR;
+    }
+
     void update_finished(float dt);
 
     float acceleration_rate_ = DEFAULT_ACCELERATION_IN_MPS;
@@ -165,5 +169,7 @@ private:
     float top_speed_ = DEFAULT_TOP_SPEED_IN_MPS;
     float slope_rate_ = DEFAULT_SLOPE_IN_MPS;
 };
+
+extern bool debug_break;
 
 #endif
