@@ -232,14 +232,6 @@ void Character::pre_prepare(float dt) {
         }
     }
 
-
-    if(gsp_ < MIN_SPEED_TO_AVOID_FAILING_IN_MPS && quadrant_ != QUADRANT_FLOOR) {
-        set_quadrant(QUADRANT_FLOOR);
-        set_ground_state(GROUND_STATE_IN_THE_AIR);
-        gsp_ = 0.0;
-    }
-
-
     velocity_.x = gsp_ * cos(rotation_);
     velocity_.y = gsp_ * sin(rotation_);
 
@@ -358,6 +350,15 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 
 void Character::update_finished(float dt) {
     //After collisions have been processed
+
+    //If we are going to slow, set the state to in the air, even if there were floor
+    //collisions
+    if(gsp_ < MIN_SPEED_TO_AVOID_FAILING_IN_MPS && quadrant_ != QUADRANT_FLOOR) {
+        set_quadrant(QUADRANT_FLOOR);
+        set_ground_state(GROUND_STATE_IN_THE_AIR);
+        gsp_ = 0.0;
+    }
+
 
     last_x_axis_state_ = x_axis_state_;
     last_y_axis_state_ = y_axis_state_;

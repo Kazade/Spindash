@@ -109,7 +109,10 @@ public:
     double spindash_charge() const { return spindash_charge_; }
     
     bool horizontal_control_lock_active() const { return horizontal_control_lock_ > 0.0; }
-    
+
+
+    void update_finished(float dt);
+
 private:
 
     // ============== NEW STUFF ================
@@ -160,8 +163,6 @@ private:
     void post_update(float dt) {
         ground_state_ = GROUND_STATE_IN_THE_AIR;
     }
-
-    void update_finished(float dt);
 
     float acceleration_rate_ = DEFAULT_ACCELERATION_IN_MPS;
     float deceleration_rate_ = DEFAULT_DECELERATION_IN_MPS;

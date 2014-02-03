@@ -266,15 +266,13 @@ public:
         character.set_ground_state(GROUND_STATE_ON_THE_GROUND);
         character.set_gsp(10);
 
-        character.prepare(1);
-        character.update(1);
+        character.update_finished(0);
 
         assert_equal(QUADRANT_CEILING, character.quadrant());
         assert_true(character.is_grounded());
 
         character.set_gsp(0.01);
-        character.prepare(1);
-        character.update(1);
+        character.update_finished(0);
 
         assert_equal(QUADRANT_FLOOR, character.quadrant());
         assert_false(character.is_grounded());

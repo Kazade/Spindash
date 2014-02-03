@@ -83,8 +83,7 @@ public:
 
     virtual void prepare(float dt);
     virtual void update(float dt);
-    virtual void update_finished(float dt) {}
-    
+    virtual void update_finished(float dt) {}    
     virtual bool respond_to(const std::vector<Collision>& collisions) { return true; }
     
     SDuint id() const { return id_; }
