@@ -126,39 +126,19 @@ private:
 
     std::shared_ptr<KGLTGeometryRenderer> renderer_;
 
-    bool on_key_release(SDL_Keysym key) override {
+    bool while_key_pressed(SDL_Keysym key, double) {
         switch(key.scancode) {
             case SDL_SCANCODE_RIGHT:
-                sdCharacterStopMovingRight(sonic);
+                sdCharacterRightPressed(sonic);
             break;
             case SDL_SCANCODE_LEFT:
-                sdCharacterStopMovingLeft(sonic);
+                sdCharacterLeftPressed(sonic);
             break;
             case SDL_SCANCODE_DOWN:
-                sdCharacterStopLookingDown(sonic);
+                sdCharacterDownPressed(sonic);
             break;
             case SDL_SCANCODE_D:
-                sdCharacterStopPressingJump(sonic);
-            break;
-            default:break;
-        }
-
-        return false;
-    }
-
-    bool on_key_press(SDL_Keysym key) override {
-        switch(key.scancode) {
-            case SDL_SCANCODE_RIGHT:
-                sdCharacterStartMovingRight(sonic);
-            break;
-            case SDL_SCANCODE_LEFT:
-                sdCharacterStartMovingLeft(sonic);
-            break;
-            case SDL_SCANCODE_DOWN:
-                sdCharacterStartLookingDown(sonic);
-            break;
-            case SDL_SCANCODE_D:
-                sdCharacterStartPressingJump(sonic);
+                //sdCharacterStartPressingJump(sonic);
             break;
             default:break;
         }

@@ -17,7 +17,7 @@ Object::Object(World* world):
     register_object(this);
     
     kmVec2Fill(&position_, 0.0f, 0.0f);
-    kmVec2Fill(&speed_, 0.0f, 0.0f);
+    kmVec2Fill(&velocity_, 0.0f, 0.0f);
     kmVec2Fill(&acceleration_, 0.0f, 0.0f);
     kmVec2Assign(&last_safe_position_, &position_);
 }
@@ -29,16 +29,19 @@ Object::~Object() {
 void Object::prepare(float dt) {
     pre_prepare(dt);
     
-    speed_.x += acceleration_.x * dt;
-    speed_.y += acceleration_.y * dt;
+    velocity_.x += acceleration_.x;
+    velocity_.y += acceleration_.y;
     
     post_prepare(dt);
 }
 
 void Object::update(float dt) {
-    if(pre_update(dt)) {
-        set_position(position().x + speed_.x, position().y + speed_.y);
-    }
+    pre_update(dt);
+
+    set_position(
+        position().x + velocity_.x * dt,
+        position().y + velocity_.y * dt
+    );
 
     post_update(dt);
 }
@@ -84,9 +87,9 @@ void Object::set_rotation(kmScalar angle) {
     geom().set_rotation(angle);
 }
 
-void Object::set_speed(kmScalar x, kmScalar y) {
-    speed_.x = x;
-    speed_.y = y;
+void Object::set_velocity(kmScalar x, kmScalar y) {
+    velocity_.x = x;
+    velocity_.y = y;
 }
 
 void Object::set_acceleration(kmScalar x, kmScalar y) {
@@ -144,24 +147,24 @@ SDdouble sdObjectGetPositionY(SDuint object) {
 
 SDdouble sdObjectGetSpeedX(SDuint object) {
     Object* obj = Object::by_id(object);
-    return obj->speed().x;
+    return obj->velocity().x;
 }
 
 SDdouble sdObjectGetSpeedY(SDuint object) {
     Object* obj = Object::by_id(object);
-    return obj->speed().y;
+    return obj->velocity().y;
 }
 
 void sdObjectSetSpeedX(SDuint object, SDdouble x) {
     Object* obj = Object::by_id(object);
     
-    obj->set_speed(x, obj->speed().y);
+    obj->set_velocity(x, obj->velocity().y);
 }
 
 void sdObjectSetSpeedY(SDuint object, SDdouble y) {
     Object* obj = Object::by_id(object);
     
-    obj->set_speed(obj->speed().x, y);
+    obj->set_velocity(obj->velocity().x, y);
 }
 
 SDdouble sdObjectGetRotation(SDuint object) {

@@ -19,10 +19,6 @@ bool Spring::respond_to(const std::vector<Collision>& collisions) {
     sdObjectSetSpeedX(other->id(), sinf(kmDegreesToRadians(angle_)) * power_);
     sdObjectSetSpeedY(other->id(), cosf(kmDegreesToRadians(angle_)) * power_);
     
-    if(sdObjectIsCharacter(other->id())) {
-        sdCharacterStopRolling(other->id());
-        sdCharacterStopJumping(other->id());
-    }
     
     return false;
 }

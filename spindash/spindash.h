@@ -58,16 +58,10 @@ SDbool sdCharacterIsGrounded(SDuint character);
 SDbool sdCharacterIsJumping(SDuint character);
 SDbool sdCharacterIsRolling(SDuint character);
 
-void sdCharacterStartMovingLeft(SDuint character);
-void sdCharacterStopMovingLeft(SDuint character);
-void sdCharacterStartMovingRight(SDuint character);
-void sdCharacterStopMovingRight(SDuint character);
-void sdCharacterStartPressingJump(SDuint character);
-void sdCharacterStopPressingJump(SDuint character);
-void sdCharacterStartLookingDown(SDuint character);
-void sdCharacterStopLookingDown(SDuint character);
-void sdCharacterStopRolling(SDuint character);
-void sdCharacterStopJumping(SDuint character);
+void sdCharacterLeftPressed(SDuint character);
+void sdCharacterRightPressed(SDuint character);
+void sdCharacterUpPressed(SDuint character);
+void sdCharacterDownPressed(SDuint character);
 
 SDdouble sdCharacterGetWidth(SDuint character);
 void sdCharacterSetGroundSpeed(SDuint character, SDdouble value);

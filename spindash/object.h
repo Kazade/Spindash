@@ -24,7 +24,7 @@ protected:
     SDuint id_;
     
     kmVec2 position_;
-    kmVec2 speed_;
+    kmVec2 velocity_;
     kmVec2 acceleration_;
     kmScalar rotation_;
 
@@ -71,15 +71,16 @@ public:
     }
     
     void set_position(kmScalar x, kmScalar y);
-    virtual void set_speed(kmScalar x, kmScalar y);
+    virtual void set_velocity(kmScalar x, kmScalar y);
     void set_acceleration(kmScalar x, kmScalar y);
     void set_rotation(kmScalar degrees);
 
-    const kmVec2& speed() const { return speed_; }
     const kmVec2& position() const { return position_; }
+    const kmVec2& velocity() const { return velocity_; }
     const kmVec2& acceleration() const { return acceleration_; }
-    double rotation() const { return rotation_; }
-    
+
+    float rotation() const { return rotation_; }
+
     virtual void prepare(float dt);
     virtual void update(float dt);
     virtual void update_finished(float dt) {}
@@ -103,7 +104,7 @@ public:
 };
 
 template <typename T> int sgn(T val) {
-    return (T(0) < val) - (val < T(0)) || 1;
+    return (val >= 0) ? 1 : -1;
 }
 
 #endif

@@ -15,6 +15,8 @@
 
 #include "spindash.h"
 
+const kmVec2 GRAVITY_IN_MPS = { 0, (-0.21875 / 40.0) * 60.0};
+
 SDuint World::world_id_counter_ = 0;
 
 World::World(SDuint id):
@@ -29,9 +31,8 @@ void World::set_gravity(float x, float y) {
     kmVec2Fill(&gravity_, x, y);
 }
 
-void World::get_gravity(float& x, float& y) {
-    x = gravity_.x;
-    y = gravity_.y;
+kmVec2 World::gravity() const {
+    return gravity_;
 }
 
 void World::render() {

@@ -18,7 +18,7 @@ public:
     World(SDuint id);
     
     void set_gravity(float x, float y);
-    void get_gravity(float& x, float& y);
+    kmVec2 gravity() const;
 
     void add_triangle(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3);
     void add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const kmVec2& v4);

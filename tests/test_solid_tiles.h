@@ -247,6 +247,32 @@ public:
         character.respond_to(std::vector<Collision>());
         assert_equal(GROUND_STATE_IN_THE_AIR, character.ground_state());
     }
+
+    void test_low_gsp_and_non_floor_quadrant_results_in_falling() {
+        /*
+         *  When the character is in any quadrant aside from QUADRANT_FLOOR, and gsp
+         *  falls below 2.5, the ground_state should be set to IN_THE_AIR and gsp
+         *  should be set to zero
+         */
+
+        Character character(nullptr, 40, 20);
+        character.set_quadrant(QUADRANT_CEILING);
+        character.set_ground_state(GROUND_STATE_ON_THE_GROUND);
+        character.set_gsp(10);
+
+        character.prepare(1);
+        character.update(1);
+
+        assert_equal(QUADRANT_CEILING, character.quadrant());
+        assert_true(character.is_grounded());
+
+        character.set_gsp(0.01);
+        character.prepare(1);
+        character.update(1);
+
+        assert_equal(QUADRANT_FLOOR, character.quadrant());
+        assert_false(character.is_grounded());
+    }
 };
 
 #endif // TEST_SOLID_TILES_H

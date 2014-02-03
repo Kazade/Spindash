@@ -7,6 +7,7 @@
 #include "character.h"
 #include "world.h"
 
+const float MIN_SPEED_TO_AVOID_FAILING_IN_MPS = (2.5 / 40.0) * 60.0;
 
 static std::map<std::string, float> CHARACTER_SETTINGS = {
     { "VERTICAL_SENSOR_EXTENSION_LENGTH", 16.0 }
@@ -106,15 +107,6 @@ SDuint sdCharacterCreate(SDuint world_id) {
     return world->new_character();
 }
 
-void Character::pre_prepare(float dt) {
-
-//    gsp = gsp * 60.0f;
-}
-
-void Character::prepare(float dt) {
-    pre_prepare(dt);
-    post_prepare(dt);
-}
 
 Collision Character::find_nearest_collision(const std::vector<Collision>& collisions) {
     float closest = 1000000.0f;
@@ -208,12 +200,56 @@ float calc_angle_from_up(const kmVec2& vec) {
     return angle;
 }
 
+void Character::pre_prepare(float dt) {
+    if(x_axis_state_ == AXIS_STATE_NEGATIVE) {
+        if(gsp_ > 0) {
+            gsp_ -= deceleration_rate_;
+        } else  if(gsp_ > -top_speed_) {
+            gsp_ -= acceleration_rate_;
+            if(fabs(gsp_) > top_speed_) {
+                gsp_ = -top_speed_;
+            }
+        }
+    } else if(x_axis_state_ == AXIS_STATE_POSITIVE) {
+        if(gsp_ < 0) {
+            gsp_ += deceleration_rate_;
+        } else if(gsp_ < top_speed_) {
+            gsp_ += acceleration_rate_;
+            if(fabs(gsp_) > top_speed_) {
+                gsp_ = top_speed_;
+            }
+        }
+    } else if(x_axis_state_ == AXIS_STATE_NEUTRAL){
+        if(is_grounded()) {
+            gsp_ -= std::min<float>(fabs(gsp_), friction_rate_) * sgn(gsp_);
+            gsp_ += slope_rate_ * sin(rotation_);
+        }
+    }
+
+
+    if(gsp_ < MIN_SPEED_TO_AVOID_FAILING_IN_MPS && quadrant_ != QUADRANT_FLOOR) {
+        set_quadrant(QUADRANT_FLOOR);
+        set_ground_state(GROUND_STATE_IN_THE_AIR);
+        gsp_ = 0.0;
+    }
+
+
+    velocity_.x = gsp_ * cos(rotation_);
+    velocity_.y = gsp_ * sin(rotation_);
+
+    //Apply gravity if the character is attached to a world
+    if(!is_grounded() && world()) {
+        kmVec2 grv = world()->gravity();
+        kmVec2Add(&velocity_, &velocity_, &grv);
+    }
+}
+
 bool Character::respond_to(const std::vector<Collision>& collisions) {
-	std::pair<Collision, bool> a = find_nearest_collision_with_ray(collisions, 'A', speed(), !grounded_last_frame_);
-	std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', speed(), !grounded_last_frame_);
-	std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', speed(), !grounded_last_frame_);
-	std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', speed(), !grounded_last_frame_);
-    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', speed(), !grounded_last_frame_);
+    std::pair<Collision, bool> a = find_nearest_collision_with_ray(collisions, 'A', velocity(), !grounded_last_frame_);
+    std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', velocity(), !grounded_last_frame_);
+    std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', velocity(), !grounded_last_frame_);
+    std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', velocity(), !grounded_last_frame_);
+    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', velocity(), !grounded_last_frame_);
 
 	//Store the original position, we need this to work out
 	//if anything changed
@@ -271,17 +307,20 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
         }
 
         if(a_dist != std::numeric_limits<float>::max() || b_dist != std::numeric_limits<float>::max()) {
-            kmVec2 diff;
-            diff.x = 0;
-            diff.y = height_ / 2.0;
-
             kmVec2 new_location;
+            kmVec2Assign(&new_location, &original_position);
             float new_angle;
             if(a_dist <= b_dist) {
-                kmVec2Add(&new_location, &a.first.point, &diff);
+                float new_y = a.first.point.y + (height_ / 2.0);
+                if(new_location.y < new_y) {
+                    new_location.y = new_y;
+                }
                 new_angle = calc_angle_from_up(a.first.b_normal);
             } else {
-                kmVec2Add(&new_location, &b.first.point, &diff);
+                float new_y = b.first.point.y + (height_ / 2.0);
+                if(new_location.y < new_y) {
+                    new_location.y = new_y;
+                }
                 new_angle = calc_angle_from_up(b.first.b_normal);
             }
 
@@ -309,25 +348,15 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 }
 
 void Character::update_finished(float dt) {
+    //After collisions have been processed
 
+    last_x_axis_state_ = x_axis_state_;
+    last_y_axis_state_ = y_axis_state_;
+
+    x_axis_state_ = AXIS_STATE_NEUTRAL;
+    y_axis_state_ = AXIS_STATE_NEUTRAL;
 }
 
-void Character::set_speed(float x, float y) {
-    /*
-        Characters ignore the speed when on the ground
-        and in-fact override it each frame. The best thing
-        we can do here is, if someone sets the speed manually,
-        to make the character not on the ground
-    */
-    ground_state_ = GROUND_STATE_IN_THE_AIR;
-    speed_.x = x;
-    speed_.y = y;
-}
-
-void Character::post_prepare(float dt) {
-    
-}
-    
 //================================================
 
 static Character* get_character(SDuint object_id) {
@@ -336,59 +365,24 @@ static Character* get_character(SDuint object_id) {
     return c;
 }
 
-void sdCharacterStartMovingLeft(SDuint character) {
+void sdCharacterLeftPressed(SDuint character) {
     Character* c = get_character(character);
-    c->start_moving_left();
+    c->move_left();
 }
 
-void sdCharacterStopMovingLeft(SDuint character) {
+void sdCharacterRightPressed(SDuint character) {
     Character* c = get_character(character);
-    c->stop_moving_left();
+    c->move_right();
 }
 
-void sdCharacterStartMovingRight(SDuint character) {
+void sdCharacterDownPressed(SDuint character) {
     Character* c = get_character(character);
-    c->start_moving_right();
-}
-
-void sdCharacterStopMovingRight(SDuint character) {
-    Character* c = get_character(character);
-    c->stop_moving_right();
-}
-
-void sdCharacterStartLookingDown(SDuint character) {
-    Character* c = get_character(character);
-    c->start_looking_down();
+    c->move_down();
 }
 
 SDdouble sdCharacterGetWidth(SDuint character) {
     Character* c = get_character(character);
     return c->width();	
-}
-
-void sdCharacterStopLookingDown(SDuint character) {
-    Character* c = get_character(character);
-    c->stop_looking_down();
-}
-
-void sdCharacterStartPressingJump(SDuint character) {
-    Character* c = get_character(character);
-    c->start_pressing_jump();
-}
-
-void sdCharacterStopPressingJump(SDuint character) {
-    Character* c = get_character(character);
-    c->stop_pressing_jump();
-}
-
-void sdCharacterStopRolling(SDuint character) {
-    Character* c = get_character(character);
-    c->stop_rolling();
-}
-
-void sdCharacterStopJumping(SDuint character) {
-    Character* c = get_character(character);
-    c->stop_jumping();    
 }
 
 SDbool sdCharacterIsGrounded(SDuint character) {
@@ -429,16 +423,6 @@ SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill) {
 SDdouble sdCharacterGetSpindashCharge(SDuint character) {
 	Character* c = get_character(character);
 	return c->spindash_charge();
-}
-
-SDbool sdCharacterIsJumping(SDuint character) {
-	Character* c = get_character(character);
-	return c->jumping();
-}
-
-SDbool sdCharacterIsRolling(SDuint character) {
-	Character* c = get_character(character);
-	return c->rolling();
 }
 
 void sdCharacterOverrideSetting(const char* setting, float value) {

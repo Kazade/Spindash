@@ -10,9 +10,14 @@
 
 enum Direction {
 	DIRECTION_LEFT,
-	DIRECTION_RIGHT
+    DIRECTION_RIGHT
 };
 
+enum AxisState {
+    AXIS_STATE_NEGATIVE = -1,
+    AXIS_STATE_NEUTRAL = 0,
+    AXIS_STATE_POSITIVE = 1
+};
 
 enum CharacterSize {
     CHARACTER_SIZE_STANDING,
@@ -36,6 +41,12 @@ enum GroundState {
     GROUND_STATE_BALANCING_RIGHT_EXTREME
 };
 
+const float DEFAULT_ACCELERATION_IN_MPS = ((0.046875 / 40.0) * 60.0);
+const float DEFAULT_DECELERATION_IN_MPS = ((0.5 / 40.0) * 60.0);
+const float DEFAULT_FRICTION_IN_MPS = DEFAULT_ACCELERATION_IN_MPS;
+const float DEFAULT_TOP_SPEED_IN_MPS = ((6.0 / 40.0) * 60.0);
+const float DEFAULT_SLOPE_IN_MPS = ((0.125 / 40.0) * 60.0);
+
 class Character : public Object {
 public:
     static float setting(const std::string& setting);
@@ -55,99 +66,34 @@ public:
     void set_quadrant(Quadrant quadrant);
     Quadrant quadrant() const { return quadrant_; }
 
+    void set_ground_state(GroundState state) { ground_state_ = state; }
     GroundState ground_state() const { return ground_state_; }
+
+    void set_gsp(float gsp) { gsp_ = gsp; }
+    float gsp() const { return gsp_; }
 
     //======================================
 
 
-    void start_moving_left() { 
-		moving_left_ = true; 
+    void move_left() {
+        x_axis_state_ = AXIS_STATE_NEGATIVE;
 	}
-    void stop_moving_left() { moving_left_ = false; }
-    void start_moving_right() { 
-		moving_right_ = true; 
+
+    void move_right() {
+        x_axis_state_ = AXIS_STATE_POSITIVE;
 	}
-    void stop_moving_right() { moving_right_ = false; }
-    
-    void start_looking_down() { 
-        looking_down_ = true; 
-        enter_small_mode();
+
+    void move_up() {
+        y_axis_state_ = AXIS_STATE_POSITIVE;
     }
-    void stop_looking_down() { 
-        looking_down_ = false; 
-        exit_small_mode();
+
+    void move_down() {
+        y_axis_state_ = AXIS_STATE_NEGATIVE;
     }
-    
-    void enter_small_mode() {
-        float new_width = original_width_ * 0.80; //Sonic is 16, rather than 20 pixels wide when rolling or jumping
-        float new_height = original_height_  * 0.75; //Sonic is 30 rather than 40 pixels high when rolling or jumping
-        
-        width_ = new_width;
-        height_ = new_height;
-        
-        (dynamic_cast<RayBox*>(&geom()))->set_size(width_, height_ * 1.5);
-        
-        set_position(position().x, position().y - ((original_height_ - height_) / 2.0));
-    }
-    
-    void exit_small_mode() {
-        width_ = original_width_;
-        height_ = original_height_;
-        (dynamic_cast<RayBox*>(&geom()))->set_size(width_, height_ * 1.5);
-        
-        set_position(position().x, position().y + ((original_height_ - height_) / 2.0));
-    }
-        
-    void start_rolling() { 
-		if(!skill_enabled(SD_SKILL_ROLL)) return;
-        if(rolling_) return;
-        
-		rolling_ = true; 
-        enter_small_mode();
-	}
-    
-    void stop_rolling() { 
-        if(!rolling_) return;
-        
-        rolling_ = false; 
-        exit_small_mode();
-    }
-    
-    void start_jumping() {        
-        if(jumping_) return;
-                
-        stop_rolling(); //Make sure we don't maintain the rolling state while jumping
-        enter_small_mode();        
-        
-        jumping_ = true;
-    }
-    void stop_jumping() {
-        if(!jumping_) return;
-        
-        jumping_ = false;
-        exit_small_mode();
-    }  
-            
-    void start_pressing_jump() { 
-		if(skill_enabled(SD_SKILL_SPINDASH) && looking_down_ && !rolling_) {
-			spindash_charge_ += 2;
-			if(spindash_charge_ > 8) spindash_charge_ = 8;
-		} else {
-            jump_pressed_ = true; 	
-		}
-	}
-    
-    void stop_pressing_jump() {         
-        jump_pressed_ = false;       
-    }
-    
+
     bool is_grounded() { return ground_state_ != GROUND_STATE_IN_THE_AIR; }
-    bool jumping() const { return jumping_; }
-    bool rolling() const { return rolling_; }
-    
+
     bool respond_to(const std::vector<Collision>& collisions);
-    
-    void set_speed(float x, float y);
     
     SDdouble width() const { return width_; }
     
@@ -174,6 +120,7 @@ private:
     Quadrant quadrant_ = QUADRANT_FLOOR;
     GroundState ground_state_ = GROUND_STATE_IN_THE_AIR;
     bool is_grounded() const { return ground_state_ != GROUND_STATE_IN_THE_AIR; }
+
     // =========================================
 
 	void start_horizontal_control_lock(double amount) {
@@ -192,15 +139,12 @@ private:
     SDdouble original_width_ = 0;
     SDdouble height_ = 0;
     SDdouble width_ = 0;
-    
-    bool moving_left_ = false;
-    bool moving_right_ = false;
-    bool looking_down_ = false;
-    bool jump_pressed_ = false;
-    bool waiting_for_jump_release_ = false;
-    
-    bool rolling_ = false;
-    bool jumping_ = false;
+
+    AxisState x_axis_state_ = AXIS_STATE_NEUTRAL;
+    AxisState y_axis_state_ = AXIS_STATE_NEUTRAL;
+    AxisState last_x_axis_state_ = AXIS_STATE_NEUTRAL;
+    AxisState last_y_axis_state_ = AXIS_STATE_NEUTRAL;
+
     bool grounded_last_frame_ = false;
     uint32_t enabled_skills_ = 0;
 
@@ -211,13 +155,15 @@ private:
     double spindash_charge_ = 0.0;
 
     double gsp_ = 0.0;
-    
-    //override
+
     void pre_prepare(float dt);
-    //override
-    void post_prepare(float dt);
     void update_finished(float dt);
-    void prepare(float dt);
+
+    float acceleration_rate_ = DEFAULT_ACCELERATION_IN_MPS;
+    float deceleration_rate_ = DEFAULT_DECELERATION_IN_MPS;
+    float friction_rate_ = DEFAULT_FRICTION_IN_MPS;
+    float top_speed_ = DEFAULT_TOP_SPEED_IN_MPS;
+    float slope_rate_ = DEFAULT_SLOPE_IN_MPS;
 };
 
 #endif
