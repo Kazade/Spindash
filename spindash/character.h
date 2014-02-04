@@ -45,7 +45,10 @@ const float DEFAULT_ACCELERATION_IN_MPS = ((0.046875 / 40.0) * 60.0);
 const float DEFAULT_DECELERATION_IN_MPS = ((0.5 / 40.0) * 60.0);
 const float DEFAULT_FRICTION_IN_MPS = DEFAULT_ACCELERATION_IN_MPS;
 const float DEFAULT_TOP_SPEED_IN_MPS = ((6.0 / 40.0) * 60.0);
+const float DEFAULT_TOP_Y_SPEED_IN_MPS = ((16.0 / 40.0) * 60.0);
 const float DEFAULT_SLOPE_IN_MPS = ((0.125 / 40.0) * 60.0);
+const float DEFAULT_INITIAL_JUMP_IN_MPS = ((6.5 / 40.0) * 60.0);
+const float DEFAULT_JUMP_CUT_OFF_IN_MPS = ((4.0 / 40.0) * 60.0);
 
 class Character : public Object {
 public:
@@ -89,6 +92,10 @@ public:
 
     void move_down() {
         y_axis_state_ = AXIS_STATE_NEGATIVE;
+    }
+
+    void jump() {
+        action_button_state_ = true;
     }
 
     bool is_grounded() { return ground_state_ != GROUND_STATE_IN_THE_AIR; }
@@ -148,6 +155,9 @@ private:
     AxisState last_x_axis_state_ = AXIS_STATE_NEUTRAL;
     AxisState last_y_axis_state_ = AXIS_STATE_NEUTRAL;
 
+    bool action_button_state_ = false;
+    bool last_action_button_state_ = false;
+
     bool grounded_last_frame_ = false;
     uint32_t enabled_skills_ = 0;
 
@@ -168,7 +178,10 @@ private:
     float deceleration_rate_ = DEFAULT_DECELERATION_IN_MPS;
     float friction_rate_ = DEFAULT_FRICTION_IN_MPS;
     float top_speed_ = DEFAULT_TOP_SPEED_IN_MPS;
+    float top_y_speed_ = DEFAULT_TOP_Y_SPEED_IN_MPS;
     float slope_rate_ = DEFAULT_SLOPE_IN_MPS;
+    float jump_rate_ = DEFAULT_INITIAL_JUMP_IN_MPS;
+    float jump_cut_off_ = DEFAULT_JUMP_CUT_OFF_IN_MPS;
 };
 
 extern bool debug_break;

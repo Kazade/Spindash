@@ -208,21 +208,39 @@ void Character::pre_prepare(float dt) {
     }
 
     if(x_axis_state_ == AXIS_STATE_NEGATIVE) {
-        if(gsp_ > 0) {
-            gsp_ -= deceleration_rate_;
-        } else  if(gsp_ > -top_speed_) {
-            gsp_ -= acceleration_rate_;
-            if(fabs(gsp_) > top_speed_) {
-                gsp_ = -top_speed_;
+        if(is_grounded()) {
+            if(gsp_ > 0) {
+                gsp_ -= deceleration_rate_;
+            } else  if(gsp_ > -top_speed_) {
+                gsp_ -= acceleration_rate_;
+                if(fabs(gsp_) > top_speed_) {
+                    gsp_ = -top_speed_;
+                }
+            }
+        } else {
+            if(velocity_.x > -top_speed_) {
+                velocity_.x -= (acceleration_rate_ * 2.0);
+                if(fabs(velocity_.x) > top_speed_) {
+                    velocity_.x = -top_speed_;
+                }
             }
         }
     } else if(x_axis_state_ == AXIS_STATE_POSITIVE) {
-        if(gsp_ < 0) {
-            gsp_ += deceleration_rate_;
-        } else if(gsp_ < top_speed_) {
-            gsp_ += acceleration_rate_;
-            if(fabs(gsp_) > top_speed_) {
-                gsp_ = top_speed_;
+        if(is_grounded()) {
+            if(gsp_ < 0) {
+                gsp_ += deceleration_rate_;
+            } else if(gsp_ < top_speed_) {
+                gsp_ += acceleration_rate_;
+                if(fabs(gsp_) > top_speed_) {
+                    gsp_ = top_speed_;
+                }
+            }
+        } else {
+            if(velocity_.x < top_speed_) {
+                velocity_.x += (acceleration_rate_ * 2.0);
+                if(fabs(velocity_.x) > top_speed_) {
+                    velocity_.x = top_speed_;
+                }
             }
         }
     } else if(x_axis_state_ == AXIS_STATE_NEUTRAL){
@@ -232,13 +250,29 @@ void Character::pre_prepare(float dt) {
         }
     }
 
-    velocity_.x = gsp_ * cos(rotation_);
-    velocity_.y = gsp_ * sin(rotation_);
+    if(is_grounded()) {
+        velocity_.x = gsp_ * cos(rotation_);
+        velocity_.y = gsp_ * sin(rotation_);
+    }
 
     //Apply gravity if the character is attached to a world
     if(!is_grounded() && world()) {
         kmVec2 grv = world()->gravity();
         kmVec2Add(&velocity_, &velocity_, &grv);
+    }
+
+    if(action_button_state_) {
+        if(!last_action_button_state_ && ground_state_ == GROUND_STATE_ON_THE_GROUND) {
+            velocity_.y = jump_rate_;
+        }
+    } else {
+        if(last_action_button_state_) {
+            velocity_.y = jump_cut_off_;
+        }
+    }
+
+    if(fabs(velocity_.y) > top_y_speed_) {
+        velocity_.y = top_y_speed_ * sgn(velocity_.y);
     }
 }
 
@@ -362,9 +396,11 @@ void Character::update_finished(float dt) {
 
     last_x_axis_state_ = x_axis_state_;
     last_y_axis_state_ = y_axis_state_;
+    last_action_button_state_ = action_button_state_;
 
     x_axis_state_ = AXIS_STATE_NEUTRAL;
     y_axis_state_ = AXIS_STATE_NEUTRAL;
+    action_button_state_ = false;
 }
 
 //================================================
