@@ -44,11 +44,14 @@ enum GroundState {
 const float DEFAULT_ACCELERATION_IN_MPS = ((0.046875 / 40.0) * 60.0);
 const float DEFAULT_DECELERATION_IN_MPS = ((0.5 / 40.0) * 60.0);
 const float DEFAULT_FRICTION_IN_MPS = DEFAULT_ACCELERATION_IN_MPS;
-const float DEFAULT_TOP_SPEED_IN_MPS = ((6.0 / 40.0) * 60.0);
-const float DEFAULT_TOP_Y_SPEED_IN_MPS = ((16.0 / 40.0) * 60.0);
+const float DEFAULT_TOP_SPEED_IN_M = ((6.0 / 40.0));
+const float DEFAULT_TOP_Y_SPEED_IN_M = ((16.0 / 40.0));
 const float DEFAULT_SLOPE_IN_MPS = ((0.125 / 40.0) * 60.0);
-const float DEFAULT_INITIAL_JUMP_IN_MPS = ((6.5 / 40.0) * 60.0);
-const float DEFAULT_JUMP_CUT_OFF_IN_MPS = ((4.0 / 40.0) * 60.0);
+const float DEFAULT_INITIAL_JUMP_IN_M = ((6.5 / 40.0));
+const float DEFAULT_JUMP_CUT_OFF_IN_M = ((4.0 / 40.0));
+const float DEFAULT_AIR_DRAG_IN_MPS = ((0.96875 / 40.0) * 60.0);
+const float DEFAULT_AIR_DRAG_MIN_X_SPEED = ((0.125 / 40.0));
+const float DEFAULT_AIR_DRAG_MAX_Y_SPEED = DEFAULT_JUMP_CUT_OFF_IN_M;
 
 class Character : public Object {
 public:
@@ -177,11 +180,14 @@ private:
     float acceleration_rate_ = DEFAULT_ACCELERATION_IN_MPS;
     float deceleration_rate_ = DEFAULT_DECELERATION_IN_MPS;
     float friction_rate_ = DEFAULT_FRICTION_IN_MPS;
-    float top_speed_ = DEFAULT_TOP_SPEED_IN_MPS;
-    float top_y_speed_ = DEFAULT_TOP_Y_SPEED_IN_MPS;
+    float top_speed_ = DEFAULT_TOP_SPEED_IN_M;
+    float top_y_speed_ = DEFAULT_TOP_Y_SPEED_IN_M;
     float slope_rate_ = DEFAULT_SLOPE_IN_MPS;
-    float jump_rate_ = DEFAULT_INITIAL_JUMP_IN_MPS;
-    float jump_cut_off_ = DEFAULT_JUMP_CUT_OFF_IN_MPS;
+    float jump_rate_ = DEFAULT_INITIAL_JUMP_IN_M;
+    float jump_cut_off_ = DEFAULT_JUMP_CUT_OFF_IN_M;
+    float air_drag_rate_ = DEFAULT_AIR_DRAG_IN_MPS;
+    float air_drag_min_x_ = DEFAULT_AIR_DRAG_MIN_X_SPEED;
+    float air_drag_max_y_ = DEFAULT_AIR_DRAG_MAX_Y_SPEED;
 };
 
 extern bool debug_break;

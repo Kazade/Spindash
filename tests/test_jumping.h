@@ -66,7 +66,22 @@ public:
     }
 
     void test_air_drag_applied() {
-        assert_true(false); //TODO
+        float epsilon = std::numeric_limits<float>::epsilon();
+        Character character(nullptr, 1.0, 0.5);
+        character.set_velocity(DEFAULT_AIR_DRAG_MIN_X_SPEED - 0.001, DEFAULT_AIR_DRAG_MAX_Y_SPEED + 0.001);
+        character.prepare(1);
+
+        assert_close(DEFAULT_AIR_DRAG_MIN_X_SPEED - 0.001, character.velocity().x, epsilon); //Air drag not applied
+
+        character.set_velocity(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001, DEFAULT_AIR_DRAG_MAX_Y_SPEED + 0.001);
+        character.prepare(1);
+
+        assert_close(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001, character.velocity().x, epsilon); //Still not applied
+
+        character.set_velocity(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001, DEFAULT_AIR_DRAG_MAX_Y_SPEED - 0.001);
+        character.prepare(1);
+
+        assert_close(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001 - DEFAULT_AIR_DRAG_IN_MPS, character.velocity().x, epsilon);
     }
 
     void test_y_velocity_is_limited() {
@@ -74,7 +89,7 @@ public:
         character.set_velocity(0, -100);
         character.prepare(0);
 
-        assert_equal(DEFAULT_TOP_Y_SPEED_IN_MPS, fabs(character.velocity().y));
+        assert_equal(DEFAULT_TOP_Y_SPEED_IN_M, fabs(character.velocity().y));
     }
 
     void test_jump_velocity_is_applied() {
@@ -83,11 +98,11 @@ public:
         character.set_ground_state(GROUND_STATE_ON_THE_GROUND);
         character.jump();
         character.prepare(0);
-        assert_equal(DEFAULT_INITIAL_JUMP_IN_MPS, character.velocity().y);
+        assert_equal(DEFAULT_INITIAL_JUMP_IN_M, character.velocity().y);
         character.update_finished(0);
 
         character.prepare(0);
-        assert_equal(DEFAULT_JUMP_CUT_OFF_IN_MPS, character.velocity().y);
+        assert_equal(DEFAULT_JUMP_CUT_OFF_IN_M, character.velocity().y);
     }
 };
 

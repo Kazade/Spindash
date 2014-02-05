@@ -39,8 +39,8 @@ void Object::update(float dt) {
     pre_update(dt);
 
     set_position(
-        position().x + velocity_.x * dt,
-        position().y + velocity_.y * dt
+        position().x + velocity_.x,
+        position().y + velocity_.y
     );
 
     post_update(dt);

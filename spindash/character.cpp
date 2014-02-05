@@ -210,16 +210,16 @@ void Character::pre_prepare(float dt) {
     if(x_axis_state_ == AXIS_STATE_NEGATIVE) {
         if(is_grounded()) {
             if(gsp_ > 0) {
-                gsp_ -= deceleration_rate_;
+                gsp_ -= deceleration_rate_ * dt;
             } else  if(gsp_ > -top_speed_) {
-                gsp_ -= acceleration_rate_;
+                gsp_ -= acceleration_rate_ * dt;
                 if(fabs(gsp_) > top_speed_) {
                     gsp_ = -top_speed_;
                 }
             }
         } else {
             if(velocity_.x > -top_speed_) {
-                velocity_.x -= (acceleration_rate_ * 2.0);
+                velocity_.x -= (acceleration_rate_ * 2.0 * dt);
                 if(fabs(velocity_.x) > top_speed_) {
                     velocity_.x = -top_speed_;
                 }
@@ -228,16 +228,16 @@ void Character::pre_prepare(float dt) {
     } else if(x_axis_state_ == AXIS_STATE_POSITIVE) {
         if(is_grounded()) {
             if(gsp_ < 0) {
-                gsp_ += deceleration_rate_;
+                gsp_ += deceleration_rate_ * dt;
             } else if(gsp_ < top_speed_) {
-                gsp_ += acceleration_rate_;
+                gsp_ += acceleration_rate_ * dt;
                 if(fabs(gsp_) > top_speed_) {
                     gsp_ = top_speed_;
                 }
             }
         } else {
             if(velocity_.x < top_speed_) {
-                velocity_.x += (acceleration_rate_ * 2.0);
+                velocity_.x += (acceleration_rate_ * 2.0 * dt);
                 if(fabs(velocity_.x) > top_speed_) {
                     velocity_.x = top_speed_;
                 }
@@ -245,8 +245,8 @@ void Character::pre_prepare(float dt) {
         }
     } else if(x_axis_state_ == AXIS_STATE_NEUTRAL){
         if(is_grounded()) {
-            gsp_ -= std::min<float>(fabs(gsp_), friction_rate_) * sgn(gsp_);
-            gsp_ += slope_rate_ * sin(rotation_);
+            gsp_ -= std::min<float>(fabs(gsp_), friction_rate_ * dt) * sgn(gsp_);
+            gsp_ += slope_rate_ * sin(rotation_) * dt;
         }
     }
 
@@ -258,6 +258,7 @@ void Character::pre_prepare(float dt) {
     //Apply gravity if the character is attached to a world
     if(!is_grounded() && world()) {
         kmVec2 grv = world()->gravity();
+        kmVec2Scale(&grv, &grv, dt);
         kmVec2Add(&velocity_, &velocity_, &grv);
     }
 
