@@ -68,20 +68,23 @@ public:
     void test_air_drag_applied() {
         float epsilon = std::numeric_limits<float>::epsilon();
         Character character(nullptr, 1.0, 0.5);
+        character.set_ground_state(GROUND_STATE_IN_THE_AIR);
         character.set_velocity(DEFAULT_AIR_DRAG_MIN_X_SPEED - 0.001, DEFAULT_AIR_DRAG_MAX_Y_SPEED + 0.001);
         character.prepare(1);
 
         assert_close(DEFAULT_AIR_DRAG_MIN_X_SPEED - 0.001, character.velocity().x, epsilon); //Air drag not applied
 
+        character.set_ground_state(GROUND_STATE_IN_THE_AIR);
         character.set_velocity(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001, DEFAULT_AIR_DRAG_MAX_Y_SPEED + 0.001);
         character.prepare(1);
 
         assert_close(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001, character.velocity().x, epsilon); //Still not applied
 
+        character.set_ground_state(GROUND_STATE_IN_THE_AIR);
         character.set_velocity(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001, DEFAULT_AIR_DRAG_MAX_Y_SPEED - 0.001);
         character.prepare(1);
 
-        assert_close(DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001 - DEFAULT_AIR_DRAG_IN_MPS, character.velocity().x, epsilon);
+        assert_close((DEFAULT_AIR_DRAG_MIN_X_SPEED + 0.001) * DEFAULT_AIR_DRAG_RATE, character.velocity().x, epsilon);
     }
 
     void test_y_velocity_is_limited() {

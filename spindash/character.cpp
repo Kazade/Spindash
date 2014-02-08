@@ -256,10 +256,18 @@ void Character::pre_prepare(float dt) {
     }
 
     //Apply gravity if the character is attached to a world
-    if(!is_grounded() && world()) {
-        kmVec2 grv = world()->gravity();
-        kmVec2Scale(&grv, &grv, dt);
-        kmVec2Add(&velocity_, &velocity_, &grv);
+    if(!is_grounded()) {
+        //Air drag
+        if(velocity_.y > 0 && velocity_.y < air_drag_max_y_ && fabs(velocity_.x) > air_drag_min_x_) {
+            velocity_.x *= air_drag_rate_ * dt;
+        }
+
+        if(world()) {
+            //Gravity
+            kmVec2 grv = world()->gravity();
+            kmVec2Scale(&grv, &grv, dt);
+            kmVec2Add(&velocity_, &velocity_, &grv);
+        }
     }
 
     if(action_button_state_) {
