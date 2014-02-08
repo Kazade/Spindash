@@ -279,12 +279,43 @@ public:
     }
 
     void test_a_b_sensors_only_work_with_negative_y_velocity() {
-        //They only detect hits when y is <= 0 (e.g. not moving up)
-        assert_false(true); //TODO
+        //They only detect hits when y is <= 0 (e.g. not moving up)        
+        Character character(nullptr, 20, 40);
+
+        Triangle triangle;
+        Collision a_collision;
+        Collision b_collision;
+
+        kmVec2Fill(&a_collision.point, 0, 0);
+        kmVec2Fill(&a_collision.a_normal, 1, 0);
+        kmVec2Fill(&a_collision.b_normal, -1, 0);
+        a_collision.a_ray = 'A';
+        a_collision.object_a = &character.geom();
+        a_collision.object_b = &triangle;
+
+        kmVec2Fill(&b_collision.point, 0, 0);
+        kmVec2Fill(&b_collision.a_normal, 1, 0);
+        kmVec2Fill(&b_collision.b_normal, -1, 0);
+        b_collision.a_ray = 'B';
+        b_collision.object_a = &character.geom();
+        b_collision.object_b = &triangle;
+
+        assert_equal(GROUND_STATE_IN_THE_AIR, character.ground_state());
+
+        character.set_velocity(0, 4); //Moving upwards
+        character.respond_to({a_collision, b_collision});
+
+        assert_equal(GROUND_STATE_IN_THE_AIR, character.ground_state());
+
+        character.set_velocity(0, -1); //Moving downards
+        character.respond_to({a_collision, b_collision});
+
+        assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
     }
 
     void test_requisition_with_ground() {
         //GSP is reset from xsp and ysp
+        not_implemented();
     }
 
 };

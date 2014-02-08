@@ -108,6 +108,10 @@ public:
         character.prepare(0);
         assert_equal(DEFAULT_JUMP_CUT_OFF_IN_M, character.velocity().y);
     }
+
+    void test_character_cant_jump_with_a_ceiling() {
+        not_implemented();
+    }
 };
 
 #endif // TEST_JUMPING_H

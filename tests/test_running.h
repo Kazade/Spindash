@@ -32,12 +32,16 @@ static void create_floor_plane(SDuint world) {
 class TestRunning : public TestCase {
 public:
     void test_acceleration() {
+        not_implemented(); //Try again once requisition with the ground is done
+
         SDuint world = sdWorldCreate();
         SDuint character = sdCharacterCreate(world);
 
         //Character by default should be 1.0f units high
         sdObjectSetPosition(character, 0.0f, 0.51f);
         create_floor_plane(world);
+
+        sdWorldStep(world, TR::frame_time);
 
         //Check that the X and Y speed are zero
         assert_close(0.0f, sdObjectGetSpeedX(character), TR::EPSILON);

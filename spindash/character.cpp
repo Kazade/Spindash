@@ -297,7 +297,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
-	if(a.second || b.second) {
+    if((a.second || b.second) && velocity_.y <= 0) {
         RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
         const float FLOAT_MAX = std::numeric_limits<float>::max();
         float a_dist = FLOAT_MAX;

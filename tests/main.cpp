@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
 
 
     runner->register_case<TestJumping>(
-        std::vector<void (TestJumping::*)()>({&TestJumping::test_gravity_is_applied_when_in_the_air, &TestJumping::test_acceleration_is_doubled_when_in_the_air, &TestJumping::test_deceleration_matches_acceleration_in_the_air, &TestJumping::test_air_drag_applied, &TestJumping::test_y_velocity_is_limited, &TestJumping::test_jump_velocity_is_applied}),
-        {"TestJumping::test_gravity_is_applied_when_in_the_air", "TestJumping::test_acceleration_is_doubled_when_in_the_air", "TestJumping::test_deceleration_matches_acceleration_in_the_air", "TestJumping::test_air_drag_applied", "TestJumping::test_y_velocity_is_limited", "TestJumping::test_jump_velocity_is_applied"}
+        std::vector<void (TestJumping::*)()>({&TestJumping::test_gravity_is_applied_when_in_the_air, &TestJumping::test_acceleration_is_doubled_when_in_the_air, &TestJumping::test_deceleration_matches_acceleration_in_the_air, &TestJumping::test_air_drag_applied, &TestJumping::test_y_velocity_is_limited, &TestJumping::test_jump_velocity_is_applied, &TestJumping::test_character_cant_jump_with_a_ceiling}),
+        {"TestJumping::test_gravity_is_applied_when_in_the_air", "TestJumping::test_acceleration_is_doubled_when_in_the_air", "TestJumping::test_deceleration_matches_acceleration_in_the_air", "TestJumping::test_air_drag_applied", "TestJumping::test_y_velocity_is_limited", "TestJumping::test_jump_velocity_is_applied", "TestJumping::test_character_cant_jump_with_a_ceiling"}
     );
 
 
