@@ -9,11 +9,8 @@ ADD_CUSTOM_COMMAND(
     DEPENDS ${TEST_FILES}
 )
 
-
-
 ADD_EXECUTABLE(spindash_tests ${TEST_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 TARGET_LINK_LIBRARIES(spindash_tests spindash)
 
 ADD_TEST(suite spindash_tests)
-
 
