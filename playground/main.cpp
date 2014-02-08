@@ -146,7 +146,7 @@ private:
                 sdCharacterDownPressed(sonic);
             break;
             case SDL_SCANCODE_D:
-                //sdCharacterStartPressingJump(sonic);
+                sdCharacterJumpPressed(sonic);
             break;
             default:break;
         }

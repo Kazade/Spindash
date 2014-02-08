@@ -62,6 +62,7 @@ void sdCharacterLeftPressed(SDuint character);
 void sdCharacterRightPressed(SDuint character);
 void sdCharacterUpPressed(SDuint character);
 void sdCharacterDownPressed(SDuint character);
+void sdCharacterJumpPressed(SDuint character);
 
 SDdouble sdCharacterGetWidth(SDuint character);
 void sdCharacterSetGroundSpeed(SDuint character, SDdouble value);

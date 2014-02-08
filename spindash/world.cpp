@@ -23,7 +23,7 @@ World::World(SDuint id):
     id_(id),
 	step_counter_(0),
 	step_mode_enabled_(false) {
-    set_gravity(0.0f, -7.0f);
+    set_gravity(0.0f, GRAVITY_IN_MPS.y);
     
 }
 

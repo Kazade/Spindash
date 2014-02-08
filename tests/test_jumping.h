@@ -104,6 +104,7 @@ public:
         assert_equal(DEFAULT_INITIAL_JUMP_IN_M, character.velocity().y);
         character.update_finished(0);
 
+        character.set_ground_state(GROUND_STATE_IN_THE_AIR);
         character.prepare(0);
         assert_equal(DEFAULT_JUMP_CUT_OFF_IN_M, character.velocity().y);
     }

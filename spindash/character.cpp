@@ -259,7 +259,7 @@ void Character::pre_prepare(float dt) {
     if(!is_grounded()) {
         //Air drag
         if(velocity_.y > 0 && velocity_.y < air_drag_max_y_ && fabs(velocity_.x) > air_drag_min_x_) {
-            velocity_.x *= air_drag_rate_ * dt;
+            velocity_.x *= (air_drag_rate_ * dt);
         }
 
         if(world()) {
@@ -271,11 +271,11 @@ void Character::pre_prepare(float dt) {
     }
 
     if(action_button_state_) {
-        if(!last_action_button_state_ && ground_state_ == GROUND_STATE_ON_THE_GROUND) {
+        if(!last_action_button_state_ && is_grounded()) {
             velocity_.y = jump_rate_;
         }
     } else {
-        if(last_action_button_state_) {
+        if(last_action_button_state_ && velocity_.y > jump_cut_off_ && !is_grounded()) {
             velocity_.y = jump_cut_off_;
         }
     }
@@ -433,6 +433,11 @@ void sdCharacterRightPressed(SDuint character) {
 void sdCharacterDownPressed(SDuint character) {
     Character* c = get_character(character);
     c->move_down();
+}
+
+void sdCharacterJumpPressed(SDuint character) {
+    Character* c = get_character(character);
+    c->jump();
 }
 
 SDdouble sdCharacterGetWidth(SDuint character) {

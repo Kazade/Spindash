@@ -49,7 +49,7 @@ const float DEFAULT_TOP_Y_SPEED_IN_M = ((16.0 / 40.0));
 const float DEFAULT_SLOPE_IN_MPS = ((0.125 / 40.0) * 60.0);
 const float DEFAULT_INITIAL_JUMP_IN_M = ((6.5 / 40.0));
 const float DEFAULT_JUMP_CUT_OFF_IN_M = ((4.0 / 40.0));
-const float DEFAULT_AIR_DRAG_RATE = 0.14883426629188665; //This is the fraction left after a second
+const float DEFAULT_AIR_DRAG_RATE = 0.96875 * 60.0; //This is the fraction left after a second
 const float DEFAULT_AIR_DRAG_MIN_X_SPEED = ((0.125 / 40.0));
 const float DEFAULT_AIR_DRAG_MAX_Y_SPEED = DEFAULT_JUMP_CUT_OFF_IN_M;
 
