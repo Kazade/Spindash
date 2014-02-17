@@ -273,6 +273,7 @@ void Character::pre_prepare(float dt) {
     if(action_button_state_) {
         if(!last_action_button_state_ && is_grounded()) {
             velocity_.y = jump_rate_;
+            animation_state_ = ANIMATION_STATE_JUMPING;
         }
     } else {
         if(last_action_button_state_ && velocity_.y > jump_cut_off_ && !is_grounded()) {
@@ -412,8 +413,12 @@ void Character::update_finished(float dt) {
     action_button_state_ = false;
 
     if(is_grounded()) {
-        if(fabs(gsp_) < kmEpsilon) {
-            animation_state_ = ANIMATION_STATE_STANDING;
+        if(fabs(gsp_) < 0.0000001) {
+            if(ground_state_ == GROUND_STATE_BALANCING_LEFT || ground_state_ == GROUND_STATE_BALANCING_RIGHT) {
+                animation_state_ = ANIMATION_STATE_BALANCING;
+            } else {
+                animation_state_ = ANIMATION_STATE_STANDING;
+            }
         } else if(fabs(gsp_) < ANIMATION_RUNNING_MIN_X_SPEED) {
             animation_state_ = ANIMATION_STATE_WALKING;
         } else if(fabs(gsp_) < ANIMATION_DASHING_MIN_X_SPEED) {
