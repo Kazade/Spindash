@@ -2,3 +2,4 @@ codeblocks/bin/*
 *.depend
 codeblocks/obj*
 *~
+tests/main.cpp
