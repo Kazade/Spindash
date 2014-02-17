@@ -52,6 +52,8 @@ const float DEFAULT_JUMP_CUT_OFF_IN_M = ((4.0 / 40.0));
 const float DEFAULT_AIR_DRAG_RATE = 0.96875 * 60.0; //This is the fraction left after a second
 const float DEFAULT_AIR_DRAG_MIN_X_SPEED = ((0.125 / 40.0));
 const float DEFAULT_AIR_DRAG_MAX_Y_SPEED = DEFAULT_JUMP_CUT_OFF_IN_M;
+const float ANIMATION_RUNNING_MIN_X_SPEED = (6.0 / 40.0);
+const float ANIMATION_DASHING_MIN_X_SPEED = (10.0 / 40.0);
 
 class Character : public Object {
 public:
@@ -123,6 +125,7 @@ public:
 
     void update_finished(float dt);
 
+    AnimationState animation_state() const { return animation_state_; }
 private:
 
     // ============== NEW STUFF ================
@@ -157,6 +160,8 @@ private:
     AxisState y_axis_state_ = AXIS_STATE_NEUTRAL;
     AxisState last_x_axis_state_ = AXIS_STATE_NEUTRAL;
     AxisState last_y_axis_state_ = AXIS_STATE_NEUTRAL;
+
+    AnimationState animation_state_ = ANIMATION_STATE_STANDING;
 
     bool action_button_state_ = false;
     bool last_action_button_state_ = false;

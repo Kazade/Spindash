@@ -9,6 +9,7 @@
 #include "/home/lukeb/Git/spindash/tests/test_jumping.h"
 #include "/home/lukeb/Git/spindash/tests/test_running.h"
 #include "/home/lukeb/Git/spindash/tests/test_solid_tiles.h"
+#include "/home/lukeb/Git/spindash/tests/test_animations.h"
 
 int main(int argc, char* argv[]) {
     std::shared_ptr<TestRunner> runner(new TestRunner());
@@ -19,18 +20,6 @@ int main(int argc, char* argv[]) {
     }
 
     
-    runner->register_case<CollisionTest>(
-        std::vector<void (CollisionTest::*)()>({&CollisionTest::test_ray_collisions_on_a_flat_plane}),
-        {"CollisionTest::test_ray_collisions_on_a_flat_plane"}
-    );
-
-
-    runner->register_case<TestRunning>(
-        std::vector<void (TestRunning::*)()>({&TestRunning::test_acceleration, &TestRunning::test_deceleration, &TestRunning::test_friction, &TestRunning::test_top_speed}),
-        {"TestRunning::test_acceleration", "TestRunning::test_deceleration", "TestRunning::test_friction", "TestRunning::test_top_speed"}
-    );
-
-
     runner->register_case<TestJumping>(
         std::vector<void (TestJumping::*)()>({&TestJumping::test_gravity_is_applied_when_in_the_air, &TestJumping::test_acceleration_is_doubled_when_in_the_air, &TestJumping::test_deceleration_matches_acceleration_in_the_air, &TestJumping::test_air_drag_applied, &TestJumping::test_y_velocity_is_limited, &TestJumping::test_jump_velocity_is_applied, &TestJumping::test_character_cant_jump_with_a_ceiling}),
         {"TestJumping::test_gravity_is_applied_when_in_the_air", "TestJumping::test_acceleration_is_doubled_when_in_the_air", "TestJumping::test_deceleration_matches_acceleration_in_the_air", "TestJumping::test_air_drag_applied", "TestJumping::test_y_velocity_is_limited", "TestJumping::test_jump_velocity_is_applied", "TestJumping::test_character_cant_jump_with_a_ceiling"}
@@ -46,6 +35,24 @@ int main(int argc, char* argv[]) {
     runner->register_case<CollisionGeomTest>(
         std::vector<void (CollisionGeomTest::*)()>({&CollisionGeomTest::test_ray_box_floor_sensors}),
         {"CollisionGeomTest::test_ray_box_floor_sensors"}
+    );
+
+
+    runner->register_case<CollisionTest>(
+        std::vector<void (CollisionTest::*)()>({&CollisionTest::test_ray_collisions_on_a_flat_plane}),
+        {"CollisionTest::test_ray_collisions_on_a_flat_plane"}
+    );
+
+
+    runner->register_case<TestRunning>(
+        std::vector<void (TestRunning::*)()>({&TestRunning::test_acceleration, &TestRunning::test_deceleration, &TestRunning::test_friction, &TestRunning::test_top_speed}),
+        {"TestRunning::test_acceleration", "TestRunning::test_deceleration", "TestRunning::test_friction", "TestRunning::test_top_speed"}
+    );
+
+
+    runner->register_case<TestAnimations>(
+        std::vector<void (TestAnimations::*)()>({&TestAnimations::test_running_animation_states, &TestAnimations::test_jumping_animation_state, &TestAnimations::test_rolling_animation_state, &TestAnimations::test_looking_up_or_down, &TestAnimations::test_braking}),
+        {"TestAnimations::test_running_animation_states", "TestAnimations::test_jumping_animation_state", "TestAnimations::test_rolling_animation_state", "TestAnimations::test_looking_up_or_down", "TestAnimations::test_braking"}
     );
 
     

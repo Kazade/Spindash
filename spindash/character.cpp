@@ -410,6 +410,16 @@ void Character::update_finished(float dt) {
     x_axis_state_ = AXIS_STATE_NEUTRAL;
     y_axis_state_ = AXIS_STATE_NEUTRAL;
     action_button_state_ = false;
+
+    if(is_grounded()) {
+        if(fabs(gsp_) < kmEpsilon) {
+            animation_state_ = ANIMATION_STATE_STANDING;
+        } else if(fabs(gsp_) < ANIMATION_RUNNING_MIN_X_SPEED) {
+            animation_state_ = ANIMATION_STATE_WALKING;
+        } else if(fabs(gsp_) < ANIMATION_DASHING_MIN_X_SPEED) {
+            animation_state_ = ANIMATION_STATE_DASHING;
+        }
+    }
 }
 
 //================================================
@@ -438,6 +448,11 @@ void sdCharacterDownPressed(SDuint character) {
 void sdCharacterJumpPressed(SDuint character) {
     Character* c = get_character(character);
     c->jump();
+}
+
+AnimationState sdCharacterAnimationState(SDuint character) {
+    Character* c = get_character(character);
+    return c->animation_state();
 }
 
 SDdouble sdCharacterGetWidth(SDuint character) {
