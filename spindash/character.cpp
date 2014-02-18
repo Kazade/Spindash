@@ -426,9 +426,9 @@ void Character::update_finished(float dt) {
         }
     }
 
-    if(gsp_ > 0.0) {
+    if(gsp_ > 0.0 && facing_ == DIRECTION_LEFT) {
         facing_ = DIRECTION_RIGHT;
-    } else {
+    } else if(gsp_ < 0.0 && facing_ == DIRECTION_RIGHT) {
         facing_ = DIRECTION_LEFT;
     }
 
