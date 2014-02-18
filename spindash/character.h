@@ -8,11 +8,6 @@
 #include "kazmath/ray2.h"
 #include "collision/ray_box.h"
 
-enum Direction {
-	DIRECTION_LEFT,
-    DIRECTION_RIGHT
-};
-
 enum AxisState {
     AXIS_STATE_NEGATIVE = -1,
     AXIS_STATE_NEUTRAL = 0,
@@ -127,6 +122,8 @@ public:
     void update_finished(float dt);
 
     AnimationState animation_state() const { return animation_state_; }
+
+    Direction facing() const { return facing_; }
 private:
 
     // ============== NEW STUFF ================
@@ -172,7 +169,7 @@ private:
 
     double horizontal_control_lock_ = 0.0;
     
-    Direction facing = DIRECTION_RIGHT;
+    Direction facing_ = DIRECTION_RIGHT;
     
     double spindash_charge_ = 0.0;
 

@@ -63,6 +63,7 @@ void sdCharacterRightPressed(SDuint character);
 void sdCharacterUpPressed(SDuint character);
 void sdCharacterDownPressed(SDuint character);
 void sdCharacterJumpPressed(SDuint character);
+Direction sdCharacterFacingDirection(SDuint character);
 
 AnimationState sdCharacterAnimationState(SDuint character);
 

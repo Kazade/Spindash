@@ -426,6 +426,12 @@ void Character::update_finished(float dt) {
         }
     }
 
+    if(gsp_ > 0.0) {
+        facing_ = DIRECTION_RIGHT;
+    } else {
+        facing_ = DIRECTION_LEFT;
+    }
+
     //Reset everything
     last_x_axis_state_ = x_axis_state_;
     last_y_axis_state_ = y_axis_state_;
@@ -468,6 +474,11 @@ void sdCharacterDownPressed(SDuint character) {
 void sdCharacterJumpPressed(SDuint character) {
     Character* c = get_character(character);
     c->jump();
+}
+
+Direction sdCharacterFacingDirection(SDuint character) {
+    Character* c = get_character(character);
+    return c->facing();
 }
 
 AnimationState sdCharacterAnimationState(SDuint character) {

@@ -29,6 +29,12 @@ typedef void (*SDRenderGeometryCallback)(
     SDGeometryHandle handle, const SDVec2* translation, const SDfloat angle, void* userData
 );
 
+
+enum Direction {
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT
+};
+
 typedef enum AnimationState {
     ANIMATION_STATE_STANDING,
     ANIMATION_STATE_WALKING,
