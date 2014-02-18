@@ -54,6 +54,7 @@ const float DEFAULT_AIR_DRAG_MIN_X_SPEED = ((0.125 / 40.0));
 const float DEFAULT_AIR_DRAG_MAX_Y_SPEED = DEFAULT_JUMP_CUT_OFF_IN_M;
 const float ANIMATION_RUNNING_MIN_X_SPEED = (6.0 / 40.0);
 const float ANIMATION_DASHING_MIN_X_SPEED = (10.0 / 40.0);
+const float MIN_ROLLING_SPEED = (1.03125 / 40.0);
 
 class Character : public Object {
 public:

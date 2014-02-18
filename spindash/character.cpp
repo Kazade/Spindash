@@ -395,7 +395,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 void Character::update_finished(float dt) {
     //After collisions have been processed
 
-    //If we are going to slow, set the state to in the air, even if there were floor
+    //If we are going too slow, set the state to in the air, even if there were floor
     //collisions
     if(gsp_ < MIN_SPEED_TO_AVOID_FAILING_IN_MPS && quadrant_ != QUADRANT_FLOOR) {
         set_quadrant(QUADRANT_FLOOR);
@@ -403,14 +403,6 @@ void Character::update_finished(float dt) {
         gsp_ = 0.0;
     }
 
-
-    last_x_axis_state_ = x_axis_state_;
-    last_y_axis_state_ = y_axis_state_;
-    last_action_button_state_ = action_button_state_;
-
-    x_axis_state_ = AXIS_STATE_NEUTRAL;
-    y_axis_state_ = AXIS_STATE_NEUTRAL;
-    action_button_state_ = false;
 
     if(is_grounded()) {
         if(fabs(gsp_) < 0.0000001) {
@@ -425,6 +417,24 @@ void Character::update_finished(float dt) {
             animation_state_ = ANIMATION_STATE_DASHING;
         }
     }
+
+    if(ground_state_ == GROUND_STATE_ON_THE_GROUND && gsp_ < MIN_ROLLING_SPEED && quadrant_ == QUADRANT_FLOOR) {
+        if(y_axis_state_ == AXIS_STATE_NEGATIVE) {
+            animation_state_ = ANIMATION_STATE_LOOKING_DOWN;
+        } else if(y_axis_state_ == AXIS_STATE_POSITIVE) {
+            animation_state_ = ANIMATION_STATE_LOOKING_UP;
+        }
+    }
+
+    //Reset everything
+    last_x_axis_state_ = x_axis_state_;
+    last_y_axis_state_ = y_axis_state_;
+    last_action_button_state_ = action_button_state_;
+
+    x_axis_state_ = AXIS_STATE_NEUTRAL;
+    y_axis_state_ = AXIS_STATE_NEUTRAL;
+    action_button_state_ = false;
+
 }
 
 //================================================
@@ -443,6 +453,11 @@ void sdCharacterLeftPressed(SDuint character) {
 void sdCharacterRightPressed(SDuint character) {
     Character* c = get_character(character);
     c->move_right();
+}
+
+void sdCharacterUpPressed(SDuint character) {
+    Character* c = get_character(character);
+    c->move_up();
 }
 
 void sdCharacterDownPressed(SDuint character) {
