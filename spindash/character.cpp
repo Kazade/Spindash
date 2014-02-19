@@ -426,10 +426,14 @@ void Character::update_finished(float dt) {
         }
     }
 
-    if(gsp_ > 0.0 && facing_ == DIRECTION_LEFT) {
-        facing_ = DIRECTION_RIGHT;
-    } else if(gsp_ < 0.0 && facing_ == DIRECTION_RIGHT) {
-        facing_ = DIRECTION_LEFT;
+    if(facing_ == DIRECTION_LEFT) {
+        if((gsp_ > 0.0 && x_axis_state_ == AXIS_STATE_POSITIVE) || ground_state_ == GROUND_STATE_BALANCING_RIGHT) {
+            facing_ = DIRECTION_RIGHT;
+        }
+    } else {
+        if((gsp_ < 0.0 && x_axis_state_ == AXIS_STATE_NEGATIVE) || ground_state_ == GROUND_STATE_BALANCING_LEFT) {
+            facing_ = DIRECTION_LEFT;
+        }
     }
 
     //Reset everything
