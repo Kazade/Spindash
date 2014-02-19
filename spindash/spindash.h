@@ -20,36 +20,33 @@ SDuint sdWorldCreate();
 void sdWorldAddTriangle(SDuint world, kmVec2* points);
 void sdWorldAddBox(SDuint world, kmVec2* points);
 void sdWorldAddMesh(SDuint world, SDuint num_triangles, kmVec2* points);
-void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
-	SDdouble width);
+void sdWorldConstructLoop(SDuint world, SDfloat left, SDfloat top,
+    SDfloat width);
 void sdWorldRemoveTriangles(SDuint world);
-void sdWorldStep(SDuint world, SDdouble dt);
+void sdWorldStep(SDuint world, SDfloat dt);
 void sdWorldDestroy(SDuint world);
 SDuint64 sdWorldGetStepCounter(SDuint world);
-
 void sdWorldSetCompileGeometryCallback(SDuint world_id, SDCompileGeometryCallback callback, void* userData);
 void sdWorldSetRenderGeometryCallback(SDuint world_id, SDRenderGeometryCallback callback, void* userData);
 void sdWorldRender(SDuint world_id);
-
 void sdWorldDebugEnable(SDuint world);
-void sdWorldDebugStep(SDuint world, SDdouble step);
+void sdWorldDebugStep(SDuint world, SDfloat step);
 SDbool sdWorldDebugIsEnabled(SDuint world);
 void sdWorldDebugDisable(SDuint world);
 
 void sdObjectDestroy(SDuint object);
-
-void sdObjectSetPosition(SDuint object, SDdouble x, SDdouble y);
+void sdObjectSetPosition(SDuint object, SDfloat x, SDfloat y);
 kmVec2 sdObjectGetPosition(SDuint object);
-SDdouble sdObjectGetPositionX(SDuint object);
-SDdouble sdObjectGetPositionY(SDuint object);
-SDdouble sdObjectGetSpeedX(SDuint object);
-SDdouble sdObjectGetSpeedY(SDuint object);
-void sdObjectSetSpeedX(SDuint object, SDdouble x);
-void sdObjectSetSpeedY(SDuint object, SDdouble y);
-SDdouble sdObjectGetRotation(SDuint object);
+SDfloat sdObjectGetPositionX(SDuint object);
+SDfloat sdObjectGetPositionY(SDuint object);
+SDfloat sdObjectGetSpeedX(SDuint object);
+SDfloat sdObjectGetSpeedY(SDuint object);
+void sdObjectSetSpeedX(SDuint object, SDfloat x);
+void sdObjectSetSpeedY(SDuint object, SDfloat y);
+SDfloat sdObjectGetRotation(SDuint object);
 
-void sdObjectSetBounciness(SDuint object, SDdouble v);
-void sdObjectSetFriction(SDuint object, SDdouble friction);
+void sdObjectSetBounciness(SDuint object, SDfloat v);
+void sdObjectSetFriction(SDuint object, SDfloat friction);
 
 SDuint sdCharacterCreate(SDuint world);
 void sdCharacterOverrideSetting(const char* setting, float value);
@@ -67,10 +64,10 @@ Direction sdCharacterFacingDirection(SDuint character);
 
 AnimationState sdCharacterAnimationState(SDuint character);
 
-SDdouble sdCharacterGetWidth(SDuint character);
-void sdCharacterSetGroundSpeed(SDuint character, SDdouble value);
-SDdouble sdCharacterGetGroundSpeed(SDuint character);
-SDdouble sdCharacterGetSpindashCharge(SDuint character);
+SDfloat sdCharacterGetWidth(SDuint character);
+void sdCharacterSetGroundSpeed(SDuint character, SDfloat value);
+SDfloat sdCharacterGetGroundSpeed(SDuint character);
+SDfloat sdCharacterGetSpindashCharge(SDuint character);
 
 void sdCharacterEnableSkill(SDuint character, sdSkill skill);
 void sdCharacterDisableSkill(SDuint character, sdSkill skill);
@@ -79,7 +76,7 @@ SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill);
 SDbool sdObjectIsCharacter(SDuint object);
 
 
-SDuint sdSpringCreate(SDuint world, SDdouble angle, SDdouble power);
+SDuint sdSpringCreate(SDuint world, SDfloat angle, SDfloat power);
 
 SDuint sdBoxCreate(SDuint world);
 SDuint sdCircleCreate(SDuint world);

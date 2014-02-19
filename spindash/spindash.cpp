@@ -38,7 +38,7 @@ AnimationState sdCharacterAnimationState(SDuint character) {
     return c->animation_state();
 }
 
-SDdouble sdCharacterGetWidth(SDuint character) {
+SDfloat sdCharacterGetWidth(SDuint character) {
     Character* c = Character::get(character);
     return c->width();
 }
@@ -53,12 +53,12 @@ SDbool sdObjectIsCharacter(SDuint object) {
     return (c) ? true: false;
 }
 
-void sdCharacterSetGroundSpeed(SDuint character, SDdouble value) {
+void sdCharacterSetGroundSpeed(SDuint character, SDfloat value) {
     Character* c = Character::get(character);
     c->set_ground_speed(value);
 }
 
-SDdouble sdCharacterGetGroundSpeed(SDuint character) {
+SDfloat sdCharacterGetGroundSpeed(SDuint character) {
     Character* c = Character::get(character);
     return c->ground_speed();
 }
@@ -78,7 +78,7 @@ SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill) {
     return c->skill_enabled(skill);
 }
 
-SDdouble sdCharacterGetSpindashCharge(SDuint character) {
+SDfloat sdCharacterGetSpindashCharge(SDuint character) {
     Character* c = Character::get(character);
     return c->spindash_charge();
 }
@@ -97,7 +97,7 @@ void sdObjectDestroy(SDuint entity) {
     obj->world()->destroy_object(entity);
 }
 
-void sdObjectSetPosition(SDuint object, SDdouble x, SDdouble y) {
+void sdObjectSetPosition(SDuint object, SDfloat x, SDfloat y) {
     Object* obj = Object::get(object);
     obj->set_position(x, y);
 }
@@ -107,44 +107,44 @@ kmVec2 sdObjectGetPosition(SDuint object) {
     return obj->position();
 }
 
-SDdouble sdObjectGetPositionX(SDuint object) {
+SDfloat sdObjectGetPositionX(SDuint object) {
     Object* obj = Object::get(object);
     return obj->position().x;
 }
 
-SDdouble sdObjectGetPositionY(SDuint object) {
+SDfloat sdObjectGetPositionY(SDuint object) {
     Object* obj = Object::get(object);
     return obj->position().y;
 }
 
-SDdouble sdObjectGetSpeedX(SDuint object) {
+SDfloat sdObjectGetSpeedX(SDuint object) {
     Object* obj = Object::get(object);
     return obj->velocity().x;
 }
 
-SDdouble sdObjectGetSpeedY(SDuint object) {
+SDfloat sdObjectGetSpeedY(SDuint object) {
     Object* obj = Object::get(object);
     return obj->velocity().y;
 }
 
-void sdObjectSetSpeedX(SDuint object, SDdouble x) {
+void sdObjectSetSpeedX(SDuint object, SDfloat x) {
     Object* obj = Object::get(object);
 
     obj->set_velocity(x, obj->velocity().y);
 }
 
-void sdObjectSetSpeedY(SDuint object, SDdouble y) {
+void sdObjectSetSpeedY(SDuint object, SDfloat y) {
     Object* obj = Object::get(object);
 
     obj->set_velocity(obj->velocity().x, y);
 }
 
-SDdouble sdObjectGetRotation(SDuint object) {
+SDfloat sdObjectGetRotation(SDuint object) {
     Object* obj = Object::get(object);
     return obj->rotation();
 }
 
-SDuint sdSpringCreate(SDuint world_id, SDdouble angle, SDdouble power) {
+SDuint sdSpringCreate(SDuint world_id, SDfloat angle, SDfloat power) {
     World* world = World::get(world_id);
     return world->new_spring(power, angle);
 }
@@ -207,7 +207,7 @@ void sdWorldRemoveTriangles(SDuint world_id) {
     world->remove_all_triangles();
 }
 
-void sdWorldStep(SDuint world_id, SDdouble dt) {
+void sdWorldStep(SDuint world_id, SDfloat dt) {
     World* world = World::get(world_id);
     if(!world) {
         //Log error
@@ -225,12 +225,12 @@ SDuint64 sdWorldGetStepCounter(SDuint world_id) {
 /**
  * Mainly for testing, constructs a loop out of triangles
  */
-void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
-    SDdouble width) {
+void sdWorldConstructLoop(SDuint world, SDfloat left, SDfloat top,
+    SDfloat width) {
 
-    SDdouble thickness = width * 0.1;
-    SDdouble height = width;
-    SDdouble radius = (width - (thickness * 2)) / 2.0;
+    SDfloat thickness = width * 0.1;
+    SDfloat height = width;
+    SDfloat radius = (width - (thickness * 2)) / 2.0;
 
 
     kmVec2 tmp;
@@ -240,7 +240,7 @@ void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
     //Generate the points of a circle
     std::vector<kmVec2> circle_points;
     for(SDuint i = 0; i < slices; ++i) {
-        SDdouble a = kmDegreesToRadians((360.0 / SDdouble(slices)) * (SDdouble)i);
+        SDfloat a = kmDegreesToRadians((360.0 / SDfloat(slices)) * (SDfloat)i);
 
         kmVec2Fill(&tmp, radius * cos(a), radius * sin(a));
 
