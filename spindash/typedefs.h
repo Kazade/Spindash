@@ -30,12 +30,12 @@ typedef void (*SDRenderGeometryCallback)(
 );
 
 
-enum Direction {
+typedef enum SDDirection {
     DIRECTION_LEFT,
     DIRECTION_RIGHT
-};
+} SDDirection;
 
-typedef enum AnimationState {
+typedef enum SDAnimationState {
     ANIMATION_STATE_STANDING,
     ANIMATION_STATE_WALKING,
     ANIMATION_STATE_RUNNING,
@@ -47,6 +47,6 @@ typedef enum AnimationState {
     ANIMATION_STATE_LOOKING_UP,
     ANIMATION_STATE_BRAKING,
     ANIMATION_STATE_BALANCING
-} AnimationState;
+} SDAnimationState;
 
 #endif

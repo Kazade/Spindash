@@ -28,12 +28,12 @@ void sdCharacterJumpPressed(SDuint character) {
     c->jump();
 }
 
-Direction sdCharacterFacingDirection(SDuint character) {
+SDDirection sdCharacterFacingDirection(SDuint character) {
     Character* c = Character::get(character);
     return c->facing();
 }
 
-AnimationState sdCharacterAnimationState(SDuint character) {
+SDAnimationState sdCharacterAnimationState(SDuint character) {
     Character* c = Character::get(character);
     return c->animation_state();
 }

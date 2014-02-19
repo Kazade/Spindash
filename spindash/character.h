@@ -58,7 +58,7 @@ public:
     static float setting(const std::string& setting);
     static void override_setting(const std::string& setting, float value);
 
-    Character(World* world, SDdouble width, SDdouble height);
+    Character(World* world, SDfloat width, SDfloat height);
     
     //============ NEW STUFF ===============
 
@@ -105,7 +105,7 @@ public:
 
     bool respond_to(const std::vector<Collision>& collisions);
     
-    SDdouble width() const { return width_; }
+    SDfloat width() const { return width_; }
     
     void set_ground_speed(double speed) { gsp_ = speed; }
     double ground_speed() const { return gsp_; }
@@ -123,9 +123,9 @@ public:
 
     void update_finished(float dt);
 
-    AnimationState animation_state() const { return animation_state_; }
+    SDAnimationState animation_state() const { return animation_state_; }
 
-    Direction facing() const { return facing_; }
+    SDDirection facing() const { return facing_; }
 private:
 
     // ============== NEW STUFF ================
@@ -151,17 +151,17 @@ private:
     Collision find_nearest_collision(const std::vector<Collision>& collisions);
     std::pair<Collision, bool> find_collision_with_ray(const std::vector<Collision>& collisions, char ray);
     
-    SDdouble original_height_ = 0;
-    SDdouble original_width_ = 0;
-    SDdouble height_ = 0;
-    SDdouble width_ = 0;
+    SDfloat original_height_ = 0;
+    SDfloat original_width_ = 0;
+    SDfloat height_ = 0;
+    SDfloat width_ = 0;
 
     AxisState x_axis_state_ = AXIS_STATE_NEUTRAL;
     AxisState y_axis_state_ = AXIS_STATE_NEUTRAL;
     AxisState last_x_axis_state_ = AXIS_STATE_NEUTRAL;
     AxisState last_y_axis_state_ = AXIS_STATE_NEUTRAL;
 
-    AnimationState animation_state_ = ANIMATION_STATE_STANDING;
+    SDAnimationState animation_state_ = ANIMATION_STATE_STANDING;
 
     bool action_button_state_ = false;
     bool last_action_button_state_ = false;
@@ -171,7 +171,7 @@ private:
 
     double horizontal_control_lock_ = 0.0;
     
-    Direction facing_ = DIRECTION_RIGHT;
+    SDDirection facing_ = DIRECTION_RIGHT;
     
     double spindash_charge_ = 0.0;
 

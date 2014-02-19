@@ -27,7 +27,7 @@ void Character::override_setting(const std::string &setting, float value) {
 
 const float WORLD_SCALE = 1.0f / 40.0f;
 
-Character::Character(World* world, SDdouble width, SDdouble height):
+Character::Character(World* world, SDfloat width, SDfloat height):
     Object(world),
     original_height_(height),
     original_width_(width),

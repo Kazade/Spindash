@@ -60,9 +60,9 @@ void sdCharacterRightPressed(SDuint character);
 void sdCharacterUpPressed(SDuint character);
 void sdCharacterDownPressed(SDuint character);
 void sdCharacterJumpPressed(SDuint character);
-Direction sdCharacterFacingDirection(SDuint character);
+SDDirection sdCharacterFacingDirection(SDuint character);
 
-AnimationState sdCharacterAnimationState(SDuint character);
+SDAnimationState sdCharacterAnimationState(SDuint character);
 
 SDfloat sdCharacterGetWidth(SDuint character);
 void sdCharacterSetGroundSpeed(SDuint character, SDfloat value);
