@@ -34,6 +34,9 @@ void sdWorldDebugStep(SDuint world, SDfloat step);
 SDbool sdWorldDebugIsEnabled(SDuint world);
 void sdWorldDebugDisable(SDuint world);
 
+void sdWorldCameraTarget(SDuint world, SDuint object);
+void sdWorldCameraGetPosition(SDuint world, SDfloat* x, SDfloat* y);
+
 void sdObjectDestroy(SDuint object);
 void sdObjectSetPosition(SDuint object, SDfloat x, SDfloat y);
 kmVec2 sdObjectGetPosition(SDuint object);

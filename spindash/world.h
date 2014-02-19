@@ -20,6 +20,9 @@ public:
     static SDuint world_id_counter_;
 
     World(SDuint id);
+    ~World() {
+        objects_.clear();
+    }
     
     void set_gravity(float x, float y);
     kmVec2 gravity() const;
@@ -63,6 +66,15 @@ public:
     }
 
     void render();
+
+    void set_camera_target(SDuint object_id);
+    const kmVec2& camera_position() const { return camera_position_; }
+
+    static std::map<ObjectID, Object*>& all_objects() {
+        static std::map<ObjectID, Object*> objs;
+        return objs;
+    }
+
 private:
     SDuint id_;
     kmVec2 gravity_;
@@ -70,7 +82,9 @@ private:
     std::vector<Triangle> triangles_;
     std::vector<Box> boxes_;
     std::vector<Object::ptr> objects_;
-    
+
+
+
     uint64_t step_counter_;
     
     bool step_mode_enabled_;
@@ -87,6 +101,11 @@ private:
 
     std::shared_ptr<CompileCallback> compile_callback_;
     std::shared_ptr<RenderCallback> render_callback_;
+
+    kmVec2 camera_position_;
+    SDuint camera_target_ = 0;
+
+    friend class Object;
 };
 
 #endif

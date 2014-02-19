@@ -324,4 +324,15 @@ SDbool sdWorldDebugIsEnabled(SDuint world_id) {
     return world->debug_mode_enabled();
 }
 
+void sdWorldCameraTarget(SDuint world_id, SDuint object) {
+    World* world = World::get(world_id);
+    world->set_camera_target(object);
+}
+
+void sdWorldCameraGetPosition(SDuint world_id, SDfloat* x, SDfloat* y) {
+    World* world = World::get(world_id);
+    const kmVec2& pos = world->camera_position();
+    *x = pos.x;
+    *y = pos.y;
+}
 

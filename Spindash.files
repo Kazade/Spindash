@@ -34,3 +34,4 @@ tests/test_jumping.h
 SPINDASHConfig.cmake
 tests/test_animations.h
 spindash/spindash.cpp
+tests/test_camera.h

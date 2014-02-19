@@ -2,8 +2,6 @@
 #include "object.h"
 #include "world.h"
 
-static std::map<ObjectID, Object*> objects_;
-
 static SDuint generate_id() {
     static SDuint id = 0;    
     return ++id;
@@ -14,16 +12,16 @@ Object::Object(World* world):
     world_(world),
     rotation_(0.0f) {
     
-    register_object(this);
-    
     kmVec2Fill(&position_, 0.0f, 0.0f);
     kmVec2Fill(&velocity_, 0.0f, 0.0f);
     kmVec2Fill(&acceleration_, 0.0f, 0.0f);
     kmVec2Assign(&last_safe_position_, &position_);
+
+    World::all_objects()[id()] = this; //Register this object globally
 }
 
 Object::~Object() {
-    unregister_object(this);
+
 }
 
 void Object::prepare(float dt) {
@@ -47,30 +45,17 @@ void Object::update(float dt) {
 }
 
 Object* Object::get(SDuint object_id) {
-    std::map<ObjectID, Object*>::iterator it = objects_.find(object_id);
+    auto it = World::all_objects().find(object_id);
     
-    if(it == objects_.end()) throw std::logic_error("Invalid object");
+    if(it == World::all_objects().end()) {
+        throw std::logic_error("Invalid object");
+    }
     
     return (*it).second;
 }
 
-void Object::register_object(Object* obj) {
-    if(!obj) return;
-    
-    objects_[obj->id()] = obj;
-}
-
-void Object::unregister_object(Object* obj) {
-    if(!obj) return;
-    
-    std::map<uint32_t, Object*>::iterator it = objects_.find(obj->id());
-    if(it != objects_.end()) {
-        objects_.erase(it);
-    }
-}
-
 bool Object::exists(SDuint object_id) {
-    return objects_.find(object_id) != objects_.end();
+    return World::all_objects().find(object_id) != World::all_objects().end();
 }
 
 void Object::set_position(kmScalar x, kmScalar y) {

@@ -26,6 +26,7 @@ World::World(SDuint id):
 	step_mode_enabled_(false) {
     set_gravity(0.0f, GRAVITY_IN_MPS.y);
     
+    kmVec2Fill(&camera_position_, 0, 0);
 }
 
 void World::set_gravity(float x, float y) {
@@ -257,6 +258,12 @@ void World::destroy_object(ObjectID object_id) {
     assert(Object::exists(object_id));
     Object* obj = Object::get(object_id);
     objects_.erase(std::remove_if(objects_.begin(), objects_.end(), PointerCompare(obj)), objects_.end());
+
+    auto it = all_objects().find(obj->id());
+    if(it != all_objects().end()) {
+        all_objects().erase(it);
+    }
+
     assert(!Object::exists(object_id));
 }
     
@@ -349,8 +356,17 @@ ObjectID World::new_character() {
 
 ObjectID World::new_spring(float angle, float power) {
     Spring::ptr new_spring(new Spring(this, angle, power));    
+
     objects_.push_back(new_spring);
     return new_spring->id();
+}
+
+void World::set_camera_target(SDuint object_id) {
+    Object* obj = Object::get(object_id);
+    assert(obj);
+
+    camera_target_ = object_id;
+    camera_position_ = obj->position();
 }
 
 //=============================================================
