@@ -53,6 +53,8 @@ const float MIN_ROLLING_SPEED = (1.03125 / 40.0);
 
 class Character : public Object {
 public:
+    static Character* get(SDuint object_id);
+
     static float setting(const std::string& setting);
     static void override_setting(const std::string& setting, float value);
 

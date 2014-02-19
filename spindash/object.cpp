@@ -46,7 +46,7 @@ void Object::update(float dt) {
     post_update(dt);
 }
 
-Object* Object::by_id(SDuint object_id) {
+Object* Object::get(SDuint object_id) {
     std::map<ObjectID, Object*>::iterator it = objects_.find(object_id);
     
     if(it == objects_.end()) throw std::logic_error("Invalid object");
@@ -114,61 +114,3 @@ Object* Object::get_other_object_from_collision(Collision& c) {
 }
 
 //========================================================
-
-void sdObjectDestroy(SDuint entity) {
-    Object* obj = Object::by_id(entity);
-    if(!obj) {
-        L_WARN("sdObjectDestroy: No such object");
-        return;
-    }
-    
-    obj->world()->destroy_object(entity);
-}
-
-void sdObjectSetPosition(SDuint object, SDdouble x, SDdouble y) {
-    Object* obj = Object::by_id(object);        
-    obj->set_position(x, y);        
-}
-
-kmVec2 sdObjectGetPosition(SDuint object) {
-    Object* obj = Object::by_id(object);        
-    return obj->position();
-}
-
-SDdouble sdObjectGetPositionX(SDuint object) {
-    Object* obj = Object::by_id(object);        
-    return obj->position().x;
-}
-
-SDdouble sdObjectGetPositionY(SDuint object) {
-    Object* obj = Object::by_id(object);        
-    return obj->position().y;
-}
-
-SDdouble sdObjectGetSpeedX(SDuint object) {
-    Object* obj = Object::by_id(object);
-    return obj->velocity().x;
-}
-
-SDdouble sdObjectGetSpeedY(SDuint object) {
-    Object* obj = Object::by_id(object);
-    return obj->velocity().y;
-}
-
-void sdObjectSetSpeedX(SDuint object, SDdouble x) {
-    Object* obj = Object::by_id(object);
-    
-    obj->set_velocity(x, obj->velocity().y);
-}
-
-void sdObjectSetSpeedY(SDuint object, SDdouble y) {
-    Object* obj = Object::by_id(object);
-    
-    obj->set_velocity(obj->velocity().x, y);
-}
-
-SDdouble sdObjectGetRotation(SDuint object) {
-    Object* obj = Object::by_id(object);
-    return obj->rotation();
-}
-

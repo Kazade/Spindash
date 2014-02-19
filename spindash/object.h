@@ -60,7 +60,7 @@ public:
 
     static void register_object(Object* obj);
     static void unregister_object(Object* obj);
-    static Object* by_id(SDuint object_id);
+    static Object* get(SDuint object_id);
     static bool exists(SDuint object_id);
     
     void store_safe_position() {

@@ -6,6 +6,7 @@
 #include <tr1/functional>
 #include <tr1/memory>
 
+#include "kazbase/logging.h"
 #include "collision/collide.h"
 #include "kazmath/vec2.h"
 #include "world.h"
@@ -254,7 +255,7 @@ void World::destroy_object(ObjectID object_id) {
     };
 
     assert(Object::exists(object_id));
-    Object* obj = Object::by_id(object_id);
+    Object* obj = Object::get(object_id);
     objects_.erase(std::remove_if(objects_.begin(), objects_.end(), PointerCompare(obj)), objects_.end());
     assert(!Object::exists(object_id));
 }
@@ -356,191 +357,25 @@ ObjectID World::new_spring(float angle, float power) {
 
 static std::map<SDuint, std::tr1::shared_ptr<World> > worlds_;
 
-World* get_world_by_id(SDuint world) {
+SDuint World::create() {
+    SDuint new_id = ++world_id_counter_;
+    worlds_[new_id].reset(new World(new_id));
+    return new_id;
+}
+
+void World::destroy(SDuint world_id) {
+    if(worlds_.find(world_id) == worlds_.end()) {
+        L_WARN("Tried to destroy a non-existent world");
+        return;
+    }
+
+    worlds_.erase(world_id);
+}
+
+World* World::get(SDuint world) {
     if(worlds_.find(world) == worlds_.end()) {
         return NULL;
     }
 
     return worlds_[world].get();
-}
-
-/**
-    @brief Creates a new physical world
-
-    This function creates an empty world ready to start accepting
-    new entities and polygons.
-*/
-SDuint sdWorldCreate() {
-    SDuint new_id = ++World::world_id_counter_;
-    worlds_[new_id].reset(new World(new_id));
-    return new_id;
-}
-
-/** \brief Destroys a world
- *
- * \param world - The world to destroy
- *
- * Destroys a world and its contents (polygons, entities etc.)
- */
-
-void sdWorldDestroy(SDuint world) {
-    if(worlds_.find(world) == worlds_.end()) {
-        //TODO: log error
-        return;
-    }
-
-    worlds_.erase(world);
-}
-
-void sdWorldAddTriangle(SDuint world_id, kmVec2* points) {
-    World* world = get_world_by_id(world_id);
-    if(!world) {
-        //Log error
-        return;
-    }
-
-    world->add_triangle(points[0], points[1], points[2]);
-}
-
-void sdWorldAddBox(SDuint world_id, kmVec2* points) {
-    World* world = get_world_by_id(world_id);
-    if(!world) {
-        //Log error
-        return;
-    }
-
-    world->add_box(points[0], points[1], points[2], points[3]);
-}
-
-void sdWorldAddMesh(SDuint world_id, SDuint num_triangles, kmVec2* points) {
-    for(SDuint i = 0; i < num_triangles; ++i) {
-        kmVec2 tri[3];
-        kmVec2Assign(&tri[0], &points[i * 3]);
-        kmVec2Assign(&tri[1], &points[(i * 3) + 1]);        
-        kmVec2Assign(&tri[2], &points[(i * 3) + 2]);
-        sdWorldAddTriangle(world_id, tri);
-    }
-}
-
-void sdWorldRemoveTriangles(SDuint world_id) {
-    World* world = get_world_by_id(world_id);
-    assert(world);
-    world->remove_all_triangles();
-}
-
-void sdWorldStep(SDuint world_id, SDdouble dt) {
-    World* world = get_world_by_id(world_id);
-    if(!world) {
-        //Log error
-        return;
-    }
-
-    world->update(dt);
-}
-
-SDuint64 sdWorldGetStepCounter(SDuint world_id) {
-	World* world = get_world_by_id(world_id);
-	return world->step_counter();
-}
-
-/**
- * Mainly for testing, constructs a loop out of triangles
- */
-void sdWorldConstructLoop(SDuint world, SDdouble left, SDdouble top,
-	SDdouble width) {
-
-	SDdouble thickness = width * 0.1;
-	SDdouble height = width;
-	SDdouble radius = (width - (thickness * 2)) / 2.0;
-		
-	
-	kmVec2 tmp;
-
-	const SDuint slices = 40;
-
-	//Generate the points of a circle
-	std::vector<kmVec2> circle_points;	
-	for(SDuint i = 0; i < slices; ++i) {
-		SDdouble a = kmDegreesToRadians((360.0 / SDdouble(slices)) * (SDdouble)i);
-		
-		kmVec2Fill(&tmp, radius * cos(a), radius * sin(a));
-		
-		tmp.x += (left + radius) + thickness;
-		tmp.y += (top - radius) - thickness;		
-		circle_points.push_back(tmp);
-	}
-	
-	//Now, build the surrounding triangles
-	kmVec2 points[3];
-	/*kmVec2Fill(&points[0], left, top - height); //Bottom left of loop
-	kmVec2Fill(&points[1], left + width, top - height); //Bottom right of loop
-	kmVec2Fill(&points[2], circle_points[0].x, circle_points[0].y);
-	sdWorldAddTriangle(world, points);*/
-		
-	for(SDuint i = 0; i < slices / 4; ++i) {
-		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
-		kmVec2Fill(&points[1], left + width, top); //Top right of loop		
-		kmVec2Fill(&points[2], circle_points[i + 1].x, circle_points[i + 1].y);
-		sdWorldAddTriangle(world, points);
-	}
-	
-	for(SDuint i = slices / 4; i < ((slices / 4) * 2); ++i) {
-		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
-		kmVec2Fill(&points[1], left, top); //Top left of loop		
-		kmVec2Fill(&points[2], circle_points[i+1].x, circle_points[i+1].y);
-		sdWorldAddTriangle(world, points);
-	}	
-	/*
-	for(SDuint i = (slices / 4) * 2; i < ((slices / 4) * 3); ++i) {
-		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
-		kmVec2Fill(&points[1], left, top - height); //Bottom right of the loop
-		kmVec2Fill(&points[2], circle_points[i+1].x, circle_points[i+1].y);
-		sdWorldAddTriangle(world, points);
-	}*/		
-
-	for(SDuint i = (slices / 4) * 3; i < slices ; ++i) {
-		kmVec2Fill(&points[0], circle_points[i].x, circle_points[i].y);
-		kmVec2Fill(&points[1], left + width, top - height); //Bottom right of the loop
-		if(i < slices -1 ) {
-			kmVec2Fill(&points[2], circle_points[i+1].x, circle_points[i+1].y);
-		} else {
-			kmVec2Fill(&points[2], circle_points[0].x, circle_points[0].y);
-		}
-		sdWorldAddTriangle(world, points);
-	}			
-}
-
-void sdWorldSetCompileGeometryCallback(SDuint world_id, SDCompileGeometryCallback callback, void* data) {
-    World* world = get_world_by_id(world_id);
-    world->set_compile_callback(callback, data);
-}
-
-void sdWorldSetRenderGeometryCallback(SDuint world_id, SDRenderGeometryCallback callback, void* data) {
-    World* world = get_world_by_id(world_id);
-    world->set_render_callback(callback, data);
-}
-
-void sdWorldRender(SDuint world_id) {
-    World* world = get_world_by_id(world_id);
-    return world->render();
-}
-
-void sdWorldDebugEnable(SDuint world_id) {
-	World* world = get_world_by_id(world_id);
-	return world->enable_debug_mode();	
-}
-
-void sdWorldDebugStep(SDuint world_id, double step) {
-	World* world = get_world_by_id(world_id);
-	return world->debug_step(step);
-}
-
-void sdWorldDebugDisable(SDuint world_id) {
-	World* world = get_world_by_id(world_id);
-	return world->disable_debug_mode();		
-}
-
-SDbool sdWorldDebugIsEnabled(SDuint world_id) {
-	World* world = get_world_by_id(world_id);
-	return world->debug_mode_enabled();			
 }

@@ -13,6 +13,10 @@
 
 class World {
 public:
+    static World* get(SDuint world_id);
+    static SDuint create();
+    static void destroy(SDuint world_id);
+
     static SDuint world_id_counter_;
 
     World(SDuint id);
@@ -84,7 +88,5 @@ private:
     std::shared_ptr<CompileCallback> compile_callback_;
     std::shared_ptr<RenderCallback> render_callback_;
 };
-
-extern World* get_world_by_id(SDuint world);
 
 #endif

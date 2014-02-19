@@ -16,7 +16,7 @@ class CollisionTest : public TestCase {
 public:
     void test_ray_collisions_on_a_flat_plane() {
         SDuint world = sdWorldCreate();
-        Character ch(get_world_by_id(world), 0.5, 1.0);
+        Character ch(World::get(world), 0.5, 1.0);
 
         ch.set_position(0.0f, 0.45f);
 

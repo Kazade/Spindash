@@ -37,7 +37,6 @@ Character::Character(World* world, SDdouble width, SDdouble height):
     enable_skill(SD_SKILL_ROLL);
     enable_skill(SD_SKILL_SPINDASH);
 
-
     for(int i = 0; i < QUADRANT_MAX; ++i) {
         auto base_standing = std::make_shared<RayBox>(
             this,
@@ -105,7 +104,7 @@ void Character::set_size(CharacterSize size) {
 
 
 SDuint sdCharacterCreate(SDuint world_id) {
-    World* world = get_world_by_id(world_id);
+    World* world = World::get(world_id);
     return world->new_character();
 }
 
@@ -449,92 +448,9 @@ void Character::update_finished(float dt) {
 
 //================================================
 
-static Character* get_character(SDuint object_id) {
-    Object* obj = Object::by_id(object_id);
+Character* Character::get(SDuint object_id) {
+    Object* obj = Object::get(object_id);
     Character* c = dynamic_cast<Character*>(obj);
     return c;
 }
 
-void sdCharacterLeftPressed(SDuint character) {
-    Character* c = get_character(character);
-    c->move_left();
-}
-
-void sdCharacterRightPressed(SDuint character) {
-    Character* c = get_character(character);
-    c->move_right();
-}
-
-void sdCharacterUpPressed(SDuint character) {
-    Character* c = get_character(character);
-    c->move_up();
-}
-
-void sdCharacterDownPressed(SDuint character) {
-    Character* c = get_character(character);
-    c->move_down();
-}
-
-void sdCharacterJumpPressed(SDuint character) {
-    Character* c = get_character(character);
-    c->jump();
-}
-
-Direction sdCharacterFacingDirection(SDuint character) {
-    Character* c = get_character(character);
-    return c->facing();
-}
-
-AnimationState sdCharacterAnimationState(SDuint character) {
-    Character* c = get_character(character);
-    return c->animation_state();
-}
-
-SDdouble sdCharacterGetWidth(SDuint character) {
-    Character* c = get_character(character);
-    return c->width();	
-}
-
-SDbool sdCharacterIsGrounded(SDuint character) {
-    Character* c = get_character(character);
-    return c->is_grounded();
-}
-
-SDbool sdObjectIsCharacter(SDuint object) {
-    Character* c = get_character(object);
-    return (c) ? true: false;
-}
-
-void sdCharacterSetGroundSpeed(SDuint character, SDdouble value) {
-	Character* c = get_character(character);
-	c->set_ground_speed(value);
-}
-
-SDdouble sdCharacterGetGroundSpeed(SDuint character) {
-	Character* c = get_character(character);
-	return c->ground_speed();	
-}
-
-void sdCharacterEnableSkill(SDuint character, sdSkill skill) {
-	Character* c = get_character(character);
-	c->enable_skill(skill);	
-}
-
-void sdCharacterDisableSkill(SDuint character, sdSkill skill) {
-	Character* c = get_character(character);
-	c->disable_skill(skill);		
-}
-
-SDbool sdCharacterSkillEnabled(SDuint character, sdSkill skill) {
-	Character* c = get_character(character);
-	return c->skill_enabled(skill);
-}
-
-SDdouble sdCharacterGetSpindashCharge(SDuint character) {
-	Character* c = get_character(character);
-	return c->spindash_charge();
-}
-
-void sdCharacterOverrideSetting(const char* setting, float value) {
-    Character::override_setting(setting, value);
-}
