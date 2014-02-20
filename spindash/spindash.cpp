@@ -102,9 +102,11 @@ void sdObjectSetPosition(SDuint object, SDfloat x, SDfloat y) {
     obj->set_position(x, y);
 }
 
-kmVec2 sdObjectGetPosition(SDuint object) {
+void sdObjectGetPosition(SDuint object, SDfloat* x, SDfloat* y) {
     Object* obj = Object::get(object);
-    return obj->position();
+
+    *x = obj->position().x;
+    *y = obj->position().y;
 }
 
 SDfloat sdObjectGetPositionX(SDuint object) {

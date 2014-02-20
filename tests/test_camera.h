@@ -38,7 +38,28 @@ public:
 
     void test_horizontal_freedom_of_movement() {
         //Camera should not move if the player moves inside this area
-        not_implemented();
+        const float DEFAULT_FREEDOM = (8.0 / 40.0);
+        float x, y;
+
+        sdWorldCameraTarget(world_, character_);
+        sdWorldCameraGetPosition(world_, &x, &y);
+
+        assert_equal(0, x);
+
+
+        //Move the character a little, the camera shouldn't change
+        sdObjectSetPosition(character_, DEFAULT_FREEDOM - 0.025, 0);
+        sdWorldStep(world_, 1.0);
+
+        sdWorldCameraGetPosition(world_, &x, &y);
+        assert_equal(0, x);
+
+        sdObjectSetPosition(character_, DEFAULT_FREEDOM + 0.025, 0);
+        sdWorldStep(world_, 1.0);
+
+        sdWorldCameraGetPosition(world_, &x, &y);
+
+        assert_close(DEFAULT_FREEDOM + 0.025, x, 0.0001);
     }
 
     void test_vertical_freedom_of_movement() {

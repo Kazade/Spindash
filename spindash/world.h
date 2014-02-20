@@ -11,6 +11,9 @@
 #include "collision/triangle.h"
 #include "collision/box.h"
 
+const float DEFAULT_HORIZONTAL_FREEDOM_OF_MOVEMENT = (8.0 / 40.0);
+const float DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED = ((16.0 / 40.0) * 60.0);
+
 class World {
 public:
     static World* get(SDuint world_id);
@@ -104,6 +107,8 @@ private:
 
     kmVec2 camera_position_;
     SDuint camera_target_ = 0;
+    float camera_horizontal_fom_ = DEFAULT_HORIZONTAL_FREEDOM_OF_MOVEMENT;
+    float camera_horizontal_max_speed_ = DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED;
 
     friend class Object;
 };

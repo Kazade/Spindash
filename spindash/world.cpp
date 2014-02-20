@@ -243,7 +243,24 @@ void World::update(double step, bool override_step_mode) {
             lhs.store_safe_position();
         }
     }
-    
+        
+    //Update the camera
+    if(camera_target_) {
+        kmVec2 target_position;
+        sdObjectGetPosition(camera_target_, &target_position.x, &target_position.y);
+
+        float x_movement = target_position.x - camera_position_.x;
+
+        if(fabs(x_movement) > camera_horizontal_fom_) {
+            if(fabs(x_movement) > camera_horizontal_max_speed_) {
+                x_movement = camera_horizontal_max_speed_ * sgn(x_movement);
+            }
+
+            camera_position_.x += x_movement * step;
+        }
+    }
+
+
     ++step_counter_;
 }
 

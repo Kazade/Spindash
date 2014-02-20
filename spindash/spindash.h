@@ -39,7 +39,7 @@ void sdWorldCameraGetPosition(SDuint world, SDfloat* x, SDfloat* y);
 
 void sdObjectDestroy(SDuint object);
 void sdObjectSetPosition(SDuint object, SDfloat x, SDfloat y);
-kmVec2 sdObjectGetPosition(SDuint object);
+void sdObjectGetPosition(SDuint object, SDfloat *x, SDfloat *y);
 SDfloat sdObjectGetPositionX(SDuint object);
 SDfloat sdObjectGetPositionY(SDuint object);
 SDfloat sdObjectGetSpeedX(SDuint object);
