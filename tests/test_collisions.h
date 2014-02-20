@@ -6,6 +6,7 @@
 #include "spindash/spindash.h"
 #include "spindash/collision/collide.h"
 #include "spindash/collision/ray_box.h"
+#include "spindash/collision/box.h"
 
 const SDVec2 box_points[] = {
     { -5, -5 },
