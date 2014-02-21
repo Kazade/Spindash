@@ -12,6 +12,7 @@
 #include "collision/box.h"
 
 const float DEFAULT_HORIZONTAL_FREEDOM_OF_MOVEMENT = (8.0 / 40.0);
+
 const float DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED = ((16.0 / 40.0) * 60.0);
 
 class World {

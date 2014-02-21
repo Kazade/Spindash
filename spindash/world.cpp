@@ -249,15 +249,25 @@ void World::update(double step, bool override_step_mode) {
         kmVec2 target_position;
         sdObjectGetPosition(camera_target_, &target_position.x, &target_position.y);
 
-        float x_movement = target_position.x - camera_position_.x;
+        float x_movement = 0;
+        float y_movement = 0;
 
-        if(fabs(x_movement) > camera_horizontal_fom_) {
-            if(fabs(x_movement) > camera_horizontal_max_speed_) {
-                x_movement = camera_horizontal_max_speed_ * sgn(x_movement);
-            }
-
-            camera_position_.x += x_movement * step;
+        if(target_position.x > camera_position_.x) {
+            x_movement = target_position.x - (camera_position_.x + camera_horizontal_fom_);
+            if(x_movement < 0) x_movement = 0;
+        } else if(target_position.x < camera_position_.x) {
+            x_movement = target_position.x - (camera_position_.x - camera_horizontal_fom_);
+            if(x_movement > 0) x_movement = 0;
         }
+
+        float max_movement = camera_horizontal_max_speed_ * step;
+
+        if(fabs(x_movement) > max_movement) {
+            x_movement = max_movement * sgn(x_movement);
+        }
+
+        camera_position_.x += x_movement;
+
     }
 
 
