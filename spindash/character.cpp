@@ -404,7 +404,7 @@ void Character::update_finished(float dt) {
 
 
     if(is_grounded()) {
-        if(fabs(gsp_) < 0.0000001) {
+        if(fabs(gsp_) == 0) {
             if(ground_state_ == GROUND_STATE_BALANCING_LEFT || ground_state_ == GROUND_STATE_BALANCING_RIGHT) {
                 animation_state_ = ANIMATION_STATE_BALANCING;
             } else {
@@ -413,6 +413,8 @@ void Character::update_finished(float dt) {
         } else if(fabs(gsp_) < ANIMATION_RUNNING_MIN_X_SPEED) {
             animation_state_ = ANIMATION_STATE_WALKING;
         } else if(fabs(gsp_) < ANIMATION_DASHING_MIN_X_SPEED) {
+            animation_state_ = ANIMATION_STATE_RUNNING;
+        } else if(fabs(gsp_) >= ANIMATION_DASHING_MIN_X_SPEED) {
             animation_state_ = ANIMATION_STATE_DASHING;
         }
     }
