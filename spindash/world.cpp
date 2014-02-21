@@ -260,14 +260,28 @@ void World::update(double step, bool override_step_mode) {
             if(x_movement > 0) x_movement = 0;
         }
 
-        float max_movement = camera_horizontal_max_speed_ * step;
+        if(target_position.y > camera_position_.y) {
+            y_movement = target_position.y - (camera_position_.y + camera_vertical_fom_);
+            if(y_movement < 0) y_movement = 0;
+        } else if(target_position.y < camera_position_.y) {
+            y_movement = target_position.y - (camera_position_.y - camera_vertical_fom_);
+            if(y_movement > 0) y_movement = 0;
+        }
 
-        if(fabs(x_movement) > max_movement) {
-            x_movement = max_movement * sgn(x_movement);
+
+        float max_x_movement = camera_horizontal_max_speed_ * step;
+        float max_y_movement = camera_vertical_max_speed_ * step;
+
+        if(fabs(x_movement) > max_x_movement) {
+            x_movement = max_x_movement * sgn(x_movement);
+        }
+
+        if(fabs(y_movement) > max_y_movement) {
+            y_movement = max_y_movement * sgn(y_movement);
         }
 
         camera_position_.x += x_movement;
-
+        camera_position_.y += y_movement;
     }
 
 

@@ -65,7 +65,7 @@ public:
     void test_vertical_freedom_of_movement() {
         //Camera should not move if the player moves inside this area
         //Camera should not move if the player moves inside this area
-        const float DEFAULT_FREEDOM = (8.0 / 40.0);
+        const float DEFAULT_FREEDOM = DEFAULT_VERTICAL_FREEDOM_OF_MOVEMENT;
         float x, y;
 
         sdWorldCameraTarget(world_, character_);

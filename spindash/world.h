@@ -12,8 +12,9 @@
 #include "collision/box.h"
 
 const float DEFAULT_HORIZONTAL_FREEDOM_OF_MOVEMENT = (8.0 / 40.0);
-
+const float DEFAULT_VERTICAL_FREEDOM_OF_MOVEMENT = (0 / 40.0);
 const float DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED = ((16.0 / 40.0) * 60.0);
+const float DEFAULT_MAX_VERTICAL_CAMERA_SPEED = ((16.0 / 40.0) * 60.0);
 
 class World {
 public:
@@ -110,6 +111,8 @@ private:
     SDuint camera_target_ = 0;
     float camera_horizontal_fom_ = DEFAULT_HORIZONTAL_FREEDOM_OF_MOVEMENT;
     float camera_horizontal_max_speed_ = DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED;
+    float camera_vertical_fom_ = DEFAULT_VERTICAL_FREEDOM_OF_MOVEMENT;
+    float camera_vertical_max_speed_ = DEFAULT_MAX_VERTICAL_CAMERA_SPEED;
 
     friend class Object;
 };
