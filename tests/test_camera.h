@@ -59,7 +59,7 @@ public:
 
         sdWorldCameraGetPosition(world_, &x, &y);
 
-        assert_close(DEFAULT_FREEDOM + 0.025, x, 0.0001);
+        assert_close(0.025, x, 0.0001);
     }
 
     void test_vertical_freedom_of_movement() {
@@ -86,7 +86,7 @@ public:
 
         sdWorldCameraGetPosition(world_, &x, &y);
 
-        assert_close(DEFAULT_FREEDOM + 0.025, y, 0.0001);
+        assert_close(0.025, y, 0.0001);
     }
 
     void test_maximum_speed() {
