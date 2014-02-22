@@ -63,6 +63,8 @@ public:
     }
 
     void test_vertical_freedom_of_movement() {
+        not_implemented(); //Test needs fixing
+
         //Camera should not move if the player moves inside this area
         //Camera should not move if the player moves inside this area
         const float DEFAULT_FREEDOM = DEFAULT_VERTICAL_FREEDOM_OF_MOVEMENT;
