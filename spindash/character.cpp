@@ -419,7 +419,7 @@ void Character::update_finished(float dt) {
         }
     }
 
-    if(ground_state_ == GROUND_STATE_ON_THE_GROUND && gsp_ < MIN_ROLLING_SPEED && quadrant_ == QUADRANT_FLOOR) {
+    if(ground_state_ == GROUND_STATE_ON_THE_GROUND && fabs(gsp_) < MIN_ROLLING_SPEED && quadrant_ == QUADRANT_FLOOR && x_axis_state_ == AXIS_STATE_NEUTRAL) {
         if(y_axis_state_ == AXIS_STATE_NEGATIVE) {
             animation_state_ = ANIMATION_STATE_LOOKING_DOWN;
         } else if(y_axis_state_ == AXIS_STATE_POSITIVE) {
