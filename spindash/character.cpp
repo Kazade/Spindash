@@ -297,6 +297,8 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
+    bool was_grounded = is_grounded();
+
     if((a.second || b.second) && velocity_.y <= 0) {
         RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
         const float FLOAT_MAX = std::numeric_limits<float>::max();
@@ -382,6 +384,26 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 
             set_position(new_location.x, new_location.y);
             set_rotation(new_angle);
+
+            if(!was_grounded && is_grounded()) {
+                //We just hit the ground
+                float test_angle = (new_angle > 90) ? fabs(new_angle - 360.0) : new_angle;
+                if(test_angle < 22.5) {
+                    gsp_ = velocity().x;
+                } else if(test_angle < 45.0) {
+                    if(velocity().x > velocity().y) {
+                        gsp_ = velocity().x;
+                    } else {
+                        gsp_ = velocity().y * 0.5 * -sgn(cos(kmDegreesToRadians(test_angle)));
+                    }
+                } else {
+                    if(velocity().x > velocity().y) {
+                        gsp_ = velocity().x;
+                    } else {
+                        gsp_ = velocity().y * -sgn(cos(kmDegreesToRadians(test_angle)));
+                    }
+                }
+            }
 
             return !kmVec2AreEqual(&original_position, &position());
         }

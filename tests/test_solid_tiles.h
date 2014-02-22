@@ -313,9 +313,64 @@ public:
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
     }
 
-    void test_reacquisition_with_ground() {
-        //GSP is reset from xsp and ysp
+    void test_reacquisition_with_ground_under_22_point_5() {
         not_implemented();
+    }
+
+    void test_reacquisition_with_ground_under_45() {
+        Character ch(nullptr, 0.5, 1.0);
+        ch.set_position(-5, 5);
+        ch.set_velocity(5, 0);
+
+        Triangle floor;
+        kmVec2Fill(&floor.points()[0], 0, 0);
+        kmVec2Fill(&floor.points()[1], -10, 0);
+        kmVec2Fill(&floor.points()[2], -10, 9);
+
+        std::vector<Collision> collisions = collide(&ch.geom(), &floor);
+
+        assert_false(collisions.empty());
+        assert_equal(QUADRANT_FLOOR, ch.quadrant());
+
+        ch.respond_to(collisions);
+
+        assert_true(ch.rotation() < 45.0);
+        assert_true(ch.rotation() >= 22.5);
+
+        assert_equal(ch.velocity().x, ch.gsp());
+
+        ch.set_velocity(0, 5);
+        ch.respond_to(collisions);
+
+        assert_equal(5 * 0.5 * -sgn(cos(kmDegreesToRadians(ch.rotation()))), ch.gsp());
+    }
+
+    void test_reacquisition_with_ground_at_45_plus() {
+        //GSP is reset from xsp and ysp
+
+        Character ch(nullptr, 0.5, 1.0);
+        ch.set_position(-5, 5);
+        ch.set_velocity(5, 0);
+
+        Triangle floor;
+        kmVec2Fill(&floor.points()[0], 0, 0);
+        kmVec2Fill(&floor.points()[1], -10, 0);
+        kmVec2Fill(&floor.points()[2], -10, 10);
+
+        std::vector<Collision> collisions = collide(&ch.geom(), &floor);
+
+        assert_false(collisions.empty());
+        assert_equal(QUADRANT_FLOOR, ch.quadrant());
+
+        ch.respond_to(collisions);
+
+        assert_close(45.0f, ch.rotation(), 0.01);
+        assert_equal(ch.velocity().x, ch.gsp());
+
+        ch.set_velocity(0, 5);
+        ch.respond_to(collisions);
+
+        assert_equal(5 * -sgn(cos(kmDegreesToRadians(45.0))), ch.gsp());
 
         /*
          * When moving downward -
