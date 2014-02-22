@@ -53,20 +53,22 @@ public:
 
     void test_positive_angle_calculations() {
         Character ch(nullptr, 0.5, 1.0);
-        ch.set_position(-5, 5);
+        ch.set_position(-5, 3);
 
         Triangle floor;
-        kmVec2Fill(&floor.points()[0], 0, 0);
+        kmVec2Fill(&floor.points()[0], -3, 0);
         kmVec2Fill(&floor.points()[1], -10, 0);
         kmVec2Fill(&floor.points()[2], -10, 10);
 
         std::vector<Collision> collisions = collide(&ch.geom(), &floor);
 
         assert_false(collisions.empty());
+        assert_equal(QUADRANT_FLOOR, ch.quadrant());
 
         ch.respond_to(collisions);
 
-        assert_equal(45.0f, ch.rotation());
+        assert_close(55.0f, ch.rotation(), 0.01);
+        assert_equal(QUADRANT_LEFT_WALL, ch.quadrant());
     }
 private:
 

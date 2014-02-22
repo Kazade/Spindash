@@ -313,9 +313,36 @@ public:
         assert_equal(GROUND_STATE_ON_THE_GROUND, character.ground_state());
     }
 
-    void test_requisition_with_ground() {
+    void test_reacquisition_with_ground() {
         //GSP is reset from xsp and ysp
         not_implemented();
+
+        /*
+         * When moving downward -
+         *  if angle < 22.5: gsp = xsp;
+         *  elif angle < 45.0:
+         *     if xsp > ysp:
+         *         gsp = xsp
+         *     else:
+         *         gsp = ysp * 0.5 * -sign(cos(angle))
+         * else:
+         *    if xsp > ysp:
+         *         gsp = xsp
+         *    else:
+         *         gsp = ysp * -sign(cos(angle))
+         */
+    }
+
+    void test_reacquisition_with_ceiling() {
+        not_implemented();
+
+        /*
+         * if angle > 90 and angle < 135:
+         *     set_ground_state(GROUND_STATE_ON_THE_CEILING)
+         *     gsp = ysp * -sign(cos(angle))
+         * else:
+         *     ysp = 0
+         */
     }
 
 };
