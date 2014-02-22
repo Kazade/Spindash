@@ -321,6 +321,7 @@ public:
         Character ch(nullptr, 0.5, 1.0);
         ch.set_position(-5, 5);
         ch.set_velocity(5, 0);
+        ch.set_ground_state(GROUND_STATE_IN_THE_AIR);
 
         Triangle floor;
         kmVec2Fill(&floor.points()[0], 0, 0);
@@ -339,10 +340,12 @@ public:
 
         assert_equal(ch.velocity().x, ch.gsp());
 
-        ch.set_velocity(0, 5);
+        ch.set_ground_state(GROUND_STATE_IN_THE_AIR);
+        ch.set_position(-5, 5);
+        ch.set_velocity(0, -5);
         ch.respond_to(collisions);
 
-        assert_equal(5 * 0.5 * -sgn(cos(kmDegreesToRadians(ch.rotation()))), ch.gsp());
+        assert_equal(-5 * 0.5 * -sgn(cos(kmDegreesToRadians(ch.rotation()))), ch.gsp());
     }
 
     void test_reacquisition_with_ground_at_45_plus() {
@@ -351,6 +354,7 @@ public:
         Character ch(nullptr, 0.5, 1.0);
         ch.set_position(-5, 5);
         ch.set_velocity(5, 0);
+        ch.set_ground_state(GROUND_STATE_IN_THE_AIR);
 
         Triangle floor;
         kmVec2Fill(&floor.points()[0], 0, 0);
@@ -367,10 +371,12 @@ public:
         assert_close(45.0f, ch.rotation(), 0.01);
         assert_equal(ch.velocity().x, ch.gsp());
 
-        ch.set_velocity(0, 5);
+        ch.set_ground_state(GROUND_STATE_IN_THE_AIR);
+        ch.set_position(-5, 5);
+        ch.set_velocity(0, -5);
         ch.respond_to(collisions);
 
-        assert_equal(5 * -sgn(cos(kmDegreesToRadians(45.0))), ch.gsp());
+        assert_equal(-5 * -sgn(cos(kmDegreesToRadians(ch.rotation()))), ch.gsp());
 
         /*
          * When moving downward -

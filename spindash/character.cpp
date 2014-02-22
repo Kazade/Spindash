@@ -391,16 +391,16 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
                 if(test_angle < 22.5) {
                     gsp_ = velocity().x;
                 } else if(test_angle < 45.0) {
-                    if(velocity().x > velocity().y) {
+                    if(velocity().x > fabs(velocity().y)) {
                         gsp_ = velocity().x;
                     } else {
-                        gsp_ = velocity().y * 0.5 * -sgn(cos(kmDegreesToRadians(test_angle)));
+                        gsp_ = velocity().y * 0.5 * -sgn(cos(kmDegreesToRadians(new_angle)));
                     }
                 } else {
-                    if(velocity().x > velocity().y) {
+                    if(velocity().x > fabs(velocity().y)) {
                         gsp_ = velocity().x;
                     } else {
-                        gsp_ = velocity().y * -sgn(cos(kmDegreesToRadians(test_angle)));
+                        gsp_ = velocity().y * -sgn(cos(kmDegreesToRadians(new_angle)));
                     }
                 }
             }
