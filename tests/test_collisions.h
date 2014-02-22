@@ -33,6 +33,41 @@ public:
         assert_equal(0.0, collisions[1].point.y);
     }
 
+    void test_negative_angle_calculations() {
+        Character ch(nullptr, 0.5, 1.0);
+        ch.set_position(5, 5);
+
+        Triangle floor;
+        kmVec2Fill(&floor.points()[0], 0, 0);
+        kmVec2Fill(&floor.points()[1], 10, 0);
+        kmVec2Fill(&floor.points()[2], 10, 10);
+
+        std::vector<Collision> collisions = collide(&ch.geom(), &floor);
+
+        assert_false(collisions.empty());
+
+        ch.respond_to(collisions);
+
+        assert_equal(315.0f, ch.rotation());
+    }
+
+    void test_positive_angle_calculations() {
+        Character ch(nullptr, 0.5, 1.0);
+        ch.set_position(-5, 5);
+
+        Triangle floor;
+        kmVec2Fill(&floor.points()[0], 0, 0);
+        kmVec2Fill(&floor.points()[1], -10, 0);
+        kmVec2Fill(&floor.points()[2], -10, 10);
+
+        std::vector<Collision> collisions = collide(&ch.geom(), &floor);
+
+        assert_false(collisions.empty());
+
+        ch.respond_to(collisions);
+
+        assert_equal(45.0f, ch.rotation());
+    }
 private:
 
 };
