@@ -201,7 +201,13 @@ private:
      /*   spring2 = sdSpringCreate(world, -45.0f, 10.0f/40.0f);
         sdObjectSetPosition(spring2, 2.0f, 2.25f);*/
 
-        sdWorldConstructLoop(world, 4.0f, 8.0f, 8.0f);
+        kmVec2 triangle[3];
+        kmVec2Fill(&triangle[0], 5, 0);
+        kmVec2Fill(&triangle[1], 10, 0);
+        kmVec2Fill(&triangle[2], 10, 2);
+        sdWorldAddTriangle(world, triangle);
+
+        //sdWorldConstructLoop(world, 4.0f, 8.0f, 8.0f);
     }
 };
 

@@ -76,6 +76,12 @@ Character::Character(World* world, SDfloat width, SDfloat height):
     set_geom(standing_shape_[quadrant_]);
 }
 
+///Override from Object to prevent rotating the geom
+void Character::set_rotation(kmScalar angle) {
+    //angle = (angle < 0) ? 360.0 + angle : angle;
+    rotation_ = angle;
+}
+
 void Character::set_quadrant(Quadrant quadrant) {
     quadrant_ = quadrant;
 
@@ -245,13 +251,13 @@ void Character::pre_prepare(float dt) {
     } else if(x_axis_state_ == AXIS_STATE_NEUTRAL){
         if(is_grounded()) {
             gsp_ -= std::min<float>(fabs(gsp_), friction_rate_ * dt) * sgn(gsp_);
-            gsp_ += slope_rate_ * sin(rotation_) * dt;
+            gsp_ += slope_rate_ * sin(kmDegreesToRadians(rotation_)) * dt;
         }
     }
 
     if(is_grounded()) {
-        velocity_.x = gsp_ * cos(rotation_);
-        velocity_.y = gsp_ * sin(rotation_);
+        velocity_.x = gsp_ * cos(kmDegreesToRadians(rotation_));
+        velocity_.y = gsp_ * sin(kmDegreesToRadians(rotation_));
     }
 
     //Apply gravity if the character is attached to a world
@@ -331,15 +337,15 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
         if(a_dist !=  FLOAT_MAX && b_dist != FLOAT_MAX) {
             //Both collided
             ground_state_ = GROUND_STATE_ON_THE_GROUND;
-        } else if(a_dist != FLOAT_MAX && b_dist == FLOAT_MAX) {
-            if(e_dist != FLOAT_MAX) {
+        } else if(a_dist != FLOAT_MAX) {
+            if(e_dist != FLOAT_MAX || b.second) {
                 //Both A and E have collisions
                 ground_state_ = GROUND_STATE_ON_THE_GROUND;
             } else {
                 ground_state_ = GROUND_STATE_BALANCING_RIGHT;
             }
-        } else if(b_dist != FLOAT_MAX && a_dist == FLOAT_MAX) {
-            if(e_dist != FLOAT_MAX) {
+        } else if(b_dist != FLOAT_MAX) {
+            if(e_dist != FLOAT_MAX || a.second) {
                 //Both B and E have collisions
                 ground_state_ = GROUND_STATE_ON_THE_GROUND;
             } else {

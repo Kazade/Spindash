@@ -73,7 +73,7 @@ public:
     void set_position(kmScalar x, kmScalar y);
     virtual void set_velocity(kmScalar x, kmScalar y);
     void set_acceleration(kmScalar x, kmScalar y);
-    void set_rotation(kmScalar degrees);
+    virtual void set_rotation(kmScalar degrees);
 
     const kmVec2& position() const { return position_; }
     const kmVec2& velocity() const { return velocity_; }

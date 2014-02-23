@@ -65,7 +65,7 @@ void World::render() {
         auto handle = object->geometry_handle();
         if(handle) {
             auto trans = object->position();
-            render_callback_->callback(handle, &trans, object->rotation(), render_callback_->user_data);
+            render_callback_->callback(handle, &trans, angle, render_callback_->user_data);
         }
     }
 }

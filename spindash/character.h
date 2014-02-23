@@ -78,6 +78,7 @@ public:
     void set_gsp(float gsp) { gsp_ = gsp; }
     float gsp() const { return gsp_; }
 
+    virtual void set_rotation(kmScalar degrees);
     //======================================
 
 
