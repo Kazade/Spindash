@@ -165,15 +165,8 @@ std::pair<Collision, bool> find_nearest_collision_with_ray(
 	const kmVec2& speed,
     bool ignore_based_on_speed /* normally !is_grounded() */) {
 
-	kmVec2 normalized_speed;
-	double speed_length = kmVec2Length(&speed);
-	bool ignore_speed = false;
-	if(speed_length) {
-		kmVec2Normalize(&normalized_speed, &speed);
-	}
-
 	bool found = false;
-	double closest = std::numeric_limits<double>::max();
+    kmScalar closest = std::numeric_limits<kmScalar>::max();
 	Collision final;
 	
 	for(Collision c: collisions) {						
