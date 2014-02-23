@@ -3,6 +3,7 @@
 
 #include "spindash/spindash.h"
 #include "spindash/character.h"
+#include "spindash/collision/collide.h"
 
 namespace TST{
     static const float EPSILON = 1.0f / 256.0f;
