@@ -250,7 +250,7 @@ void Character::pre_prepare(float dt) {
 
     if(is_grounded()) {
         velocity_.x = gsp_ * cos(kmDegreesToRadians(rotation_));
-        velocity_.y = gsp_ * sin(kmDegreesToRadians(rotation_));
+        velocity_.y = gsp_ * -sin(kmDegreesToRadians(rotation_));
     }
 
     //Apply gravity if the character is attached to a world
@@ -296,7 +296,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
-    bool was_grounded = is_grounded();
+    bool was_grounded = was_grounded_;
 
     if((a.second || b.second) && velocity_.y <= 0) {
         RayBox* ray_box = dynamic_cast<RayBox*>(&geom());

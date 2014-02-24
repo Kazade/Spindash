@@ -180,9 +180,11 @@ private:
 
     void pre_prepare(float dt);
     void post_update(float dt) {
+        was_grounded_ = is_grounded();
         ground_state_ = GROUND_STATE_IN_THE_AIR;
     }
 
+    bool was_grounded_= false;
     float acceleration_rate_ = DEFAULT_ACCELERATION_IN_MPS;
     float deceleration_rate_ = DEFAULT_DECELERATION_IN_MPS;
     float friction_rate_ = DEFAULT_FRICTION_IN_MPS;
