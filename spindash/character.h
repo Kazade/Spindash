@@ -149,6 +149,11 @@ private:
 		if(horizontal_control_lock_ < 0.0) horizontal_control_lock_ = 0.0;
 	}
 
+    std::pair<Collision, bool> find_nearest_collision_with_ray(
+        const std::vector<Collision>& collisions,
+        char ray,
+        float& closest_distance);
+
     Collision find_nearest_collision(const std::vector<Collision>& collisions);
     std::pair<Collision, bool> find_collision_with_ray(const std::vector<Collision>& collisions, char ray);
     
@@ -179,10 +184,6 @@ private:
     double gsp_ = 0.0;
 
     void pre_prepare(float dt);
-    void post_update(float dt) {
-        was_grounded_ = is_grounded();
-        ground_state_ = GROUND_STATE_IN_THE_AIR;
-    }
 
     bool was_grounded_= false;
     float acceleration_rate_ = DEFAULT_ACCELERATION_IN_MPS;

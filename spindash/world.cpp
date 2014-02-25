@@ -225,13 +225,9 @@ void World::update(double step, bool override_step_mode) {
                 rhs.respond_to(new_collisions);
             }   
             
-            if(!collisions.empty()) {
-                run_loop = lhs.respond_to(collisions);                
-                collisions.clear();
-            } else {
-                run_loop = false;
-            }
-            
+            run_loop = lhs.respond_to(collisions);
+            collisions.clear();
+
             if(debug_mode_enabled()) { 
 				run_loop = false;
 			}

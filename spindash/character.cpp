@@ -159,14 +159,15 @@ std::pair<Collision, bool> Character::find_collision_with_ray(const std::vector<
 }
 
 
-std::pair<Collision, bool> find_nearest_collision_with_ray(
+std::pair<Collision, bool> Character::find_nearest_collision_with_ray(
 	const std::vector<Collision>& collisions,
 	char ray,
-	const kmVec2& speed,
-    bool ignore_based_on_speed /* normally !is_grounded() */) {
+    float& closest_distance) {
+
+    const float FLOAT_MAX = std::numeric_limits<float>::max();
 
 	bool found = false;
-    kmScalar closest = std::numeric_limits<kmScalar>::max();
+    kmScalar closest = FLOAT_MAX;
 	Collision final;
 	
 	for(Collision c: collisions) {						
@@ -183,6 +184,12 @@ std::pair<Collision, bool> find_nearest_collision_with_ray(
 		}
 	}
 	
+
+    closest_distance = closest;
+    if(closest_distance > height_  / 2) {
+        closest_distance = FLOAT_MAX;
+    }
+
 	return std::make_pair(final, found);
 }
 
@@ -272,6 +279,7 @@ void Character::pre_prepare(float dt) {
         if(!last_action_button_state_ && is_grounded()) {
             velocity_.y = jump_rate_;
             animation_state_ = ANIMATION_STATE_JUMPING;
+            ground_state_ = GROUND_STATE_IN_THE_AIR;
         }
     } else {
         if(last_action_button_state_ && velocity_.y > jump_cut_off_ && !is_grounded()) {
@@ -285,129 +293,140 @@ void Character::pre_prepare(float dt) {
 }
 
 bool Character::respond_to(const std::vector<Collision>& collisions) {
-    std::pair<Collision, bool> a = find_nearest_collision_with_ray(collisions, 'A', velocity(), !grounded_last_frame_);
-    std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', velocity(), !grounded_last_frame_);
-    std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', velocity(), !grounded_last_frame_);
-    std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', velocity(), !grounded_last_frame_);
-    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', velocity(), !grounded_last_frame_);
+    float a_dist, b_dist, l_dist, r_dist, e_dist;
+    std::pair<Collision, bool> a = find_nearest_collision_with_ray(collisions, 'A', a_dist);
+    std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', b_dist);
+    std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', l_dist);
+    std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', r_dist);
+    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', e_dist);
 
 	//Store the original position, we need this to work out
 	//if anything changed
 	kmVec2 original_position;
 	kmVec2Assign(&original_position, &position());
 	
-    bool was_grounded = was_grounded_;
+    bool was_grounded = is_grounded();
 
-    if((a.second || b.second) && velocity_.y <= 0) {
-        RayBox* ray_box = dynamic_cast<RayBox*>(&geom());
-        const float FLOAT_MAX = std::numeric_limits<float>::max();
-        float a_dist = FLOAT_MAX;
-        float b_dist = FLOAT_MAX;
-        float e_dist = FLOAT_MAX;
+    const float FLOAT_MAX = std::numeric_limits<float>::max();
 
-        if(a.second) {
-            a_dist = kmVec2DistanceBetween(&a.first.point, &ray_box->ray('A').start);
-            if(a_dist > height_  / 2) {
-                a_dist = FLOAT_MAX;
-            }
-        }
+    bool a_collided_within_height = a_dist < FLOAT_MAX;
+    bool b_collided_within_height = b_dist < FLOAT_MAX;
+    bool a_collided = a.second;
+    bool b_collided = b.second;
+    bool e_collided = e.second;
 
-        if(b.second) {
-            b_dist = kmVec2DistanceBetween(&b.first.point, &ray_box->ray('B').start);
-            if(b_dist > height_ / 2) {
-                b_dist = FLOAT_MAX;
-            }
-        }
+    bool a_b_respond = false;
 
-        if(e.second) {
-            e_dist = kmVec2DistanceBetween(&e.first.point, &ray_box->ray('E').start);
-            if(e_dist > height_ / 2) {
-                e_dist = FLOAT_MAX;
-            }
-        }
-
-
-        if(a_dist !=  FLOAT_MAX && b_dist != FLOAT_MAX) {
+    if(ground_state_ == GROUND_STATE_IN_THE_AIR && velocity().y <= 0) {
+        if(a_collided_within_height && b_collided_within_height) {
             //Both collided
             ground_state_ = GROUND_STATE_ON_THE_GROUND;
-        } else if(a_dist != FLOAT_MAX) {
-            if(e_dist != FLOAT_MAX || b.second) {
+            a_b_respond = true;
+        } else if(a_collided_within_height) {
+            if(e_collided || b_collided) {
                 //Both A and E have collisions
                 ground_state_ = GROUND_STATE_ON_THE_GROUND;
             } else {
                 ground_state_ = GROUND_STATE_BALANCING_RIGHT;
             }
-        } else if(b_dist != FLOAT_MAX) {
-            if(e_dist != FLOAT_MAX || a.second) {
+            a_b_respond = true;
+        } else if(b_collided_within_height) {
+            if(e_collided || a_collided) {
                 //Both B and E have collisions
                 ground_state_ = GROUND_STATE_ON_THE_GROUND;
             } else {
                 ground_state_ = GROUND_STATE_BALANCING_LEFT;
             }
+            a_b_respond = true;
+        }
+    } else if(ground_state_ != GROUND_STATE_IN_THE_AIR) {
+        if(a_collided && b_collided) {
+            ground_state_ = GROUND_STATE_ON_THE_GROUND;
+            a_b_respond = true;
+        } else if(a_collided) {
+            if(e_collided) {
+                ground_state_ = GROUND_STATE_ON_THE_GROUND;
+            } else {
+                ground_state_ = GROUND_STATE_BALANCING_RIGHT;
+            }
+            a_b_respond = true;
+        } else if(b_collided) {
+            if(e_collided) {
+                ground_state_ = GROUND_STATE_ON_THE_GROUND;
+            } else {
+                ground_state_ = GROUND_STATE_BALANCING_LEFT;
+            }
+            a_b_respond = true;
+        } else {
+            ground_state_ = GROUND_STATE_IN_THE_AIR;
+        }
+    } else {
+        ground_state_ = GROUND_STATE_IN_THE_AIR;
+    }
+
+    if(debug_break && !is_grounded()) {
+        std::cout << "Breaking" << std::endl;
+    }
+
+    if(a_b_respond) {
+        kmVec2 new_location;
+        kmVec2Assign(&new_location, &original_position);
+        float new_angle;
+        if(a_dist <= b_dist) {
+            float new_y = a.first.point.y + (height_ / 2.0);
+            if(is_grounded()) {
+                new_location.y = new_y;
+            } else if(new_location.y < new_y) {
+                //If we are in the air, only set the new height if we are less than it
+                new_location.y = new_y;
+            }
+            new_angle = calc_angle_from_up(a.first.b_normal);
+        } else {
+            float new_y = b.first.point.y + (height_ / 2.0);
+            if(is_grounded()) {
+                new_location.y = new_y;
+            } else if(new_location.y < new_y) {
+                new_location.y = new_y;
+            }
+            new_angle = calc_angle_from_up(b.first.b_normal);
         }
 
-        if(a_dist != std::numeric_limits<float>::max() || b_dist != std::numeric_limits<float>::max()) {
-            kmVec2 new_location;
-            kmVec2Assign(&new_location, &original_position);
-            float new_angle;
-            if(a_dist <= b_dist) {
-                float new_y = a.first.point.y + (height_ / 2.0);
-                if(is_grounded()) {
-                    new_location.y = new_y;
-                } else if(new_location.y < new_y) {
-                    //If we are in the air, only set the new height if we are less than it
-                    new_location.y = new_y;
-                }
-                new_angle = calc_angle_from_up(a.first.b_normal);
-            } else {
-                float new_y = b.first.point.y + (height_ / 2.0);
-                if(is_grounded()) {
-                    new_location.y = new_y;
-                } else if(new_location.y < new_y) {
-                    new_location.y = new_y;
-                }
-                new_angle = calc_angle_from_up(b.first.b_normal);
-            }
-
-            //Handle quadrant switching
-            if(new_angle < 45 || new_angle > 315) {
-                set_quadrant(QUADRANT_FLOOR);
-            } else if(new_angle > 45 && new_angle < 135) {
-                set_quadrant(QUADRANT_LEFT_WALL);
-            } else if(new_angle > 135 && new_angle < 225) {
-                set_quadrant(QUADRANT_CEILING);
-            } else if(new_angle > 225 && new_angle < 315) {
-                set_quadrant(QUADRANT_RIGHT_WALL);
-            }
+        //Handle quadrant switching
+        if(new_angle < 45 || new_angle > 315) {
+            set_quadrant(QUADRANT_FLOOR);
+        } else if(new_angle > 45 && new_angle < 135) {
+            set_quadrant(QUADRANT_LEFT_WALL);
+        } else if(new_angle > 135 && new_angle < 225) {
+            set_quadrant(QUADRANT_CEILING);
+        } else if(new_angle > 225 && new_angle < 315) {
+            set_quadrant(QUADRANT_RIGHT_WALL);
+        }
 
 
-            set_position(new_location.x, new_location.y);
-            set_rotation(new_angle);
+        set_position(new_location.x, new_location.y);
+        set_rotation(new_angle);
 
-            if(!was_grounded && is_grounded()) {
-                //We just hit the ground
-                float test_angle = (new_angle > 90) ? fabs(new_angle - 360.0) : new_angle;
-                if(test_angle < 22.5) {
+        if(!was_grounded && is_grounded()) {
+            //We just hit the ground
+            float test_angle = (new_angle > 90) ? fabs(new_angle - 360.0) : new_angle;
+            if(test_angle < 22.5) {
+                gsp_ = velocity().x;
+            } else if(test_angle < 45.0) {
+                if(velocity().x > fabs(velocity().y)) {
                     gsp_ = velocity().x;
-                } else if(test_angle < 45.0) {
-                    if(velocity().x > fabs(velocity().y)) {
-                        gsp_ = velocity().x;
-                    } else {
-                        gsp_ = velocity().y * 0.5 * -sgn(cos(kmDegreesToRadians(new_angle)));
-                    }
                 } else {
-                    if(velocity().x > fabs(velocity().y)) {
-                        gsp_ = velocity().x;
-                    } else {
-                        gsp_ = velocity().y * -sgn(cos(kmDegreesToRadians(new_angle)));
-                    }
+                    gsp_ = velocity().y * 0.5 * -sgn(cos(kmDegreesToRadians(new_angle)));
+                }
+            } else {
+                if(velocity().x > fabs(velocity().y)) {
+                    gsp_ = velocity().x;
+                } else {
+                    gsp_ = velocity().y * -sgn(cos(kmDegreesToRadians(new_angle)));
                 }
             }
-
-            return !kmVec2AreEqual(&original_position, &position());
         }
 	} 
-	
+
 	//If the position changed, re-run the collision loop
 	return !kmVec2AreEqual(&original_position, &position());
 }
