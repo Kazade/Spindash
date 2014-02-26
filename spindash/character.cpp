@@ -426,24 +426,30 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
         }
 	} 
 
+    wall_state_ = WALL_STATE_NO_COLLISION;
     if(is_grounded()) {
         if(l_collided && gsp_ < 0.0) {
             gsp_ = 0.0;
-            set_position(position().x + ((width_ / 2) - l_dist), position().y);
+            wall_state_ = WALL_STATE_COLLIDED_LEFT;
         } else if(r_collided && gsp_ > 0.0) {
             gsp_ = 0.0;
-            set_position(position().x - ((width_ / 2) - r_dist), position().y);
+            wall_state_ = WALL_STATE_COLLIDED_RIGHT;
         }
     } else {
         if(l_collided && velocity().x < 0.0) {
             velocity_.x = 0.0;
-            set_position(position().x + ((width_ / 2) - l_dist), position().y);
+            wall_state_ = WALL_STATE_COLLIDED_LEFT;
         } else if(r_collided && velocity().x > 0.0) {
             velocity_.x = 0.0;
-            set_position(position().x - ((width_ / 2) - r_dist), position().y);
+            wall_state_ = WALL_STATE_COLLIDED_RIGHT;
         }
     }
 
+    if(wall_state_ == WALL_STATE_COLLIDED_LEFT) {
+        set_position(position().x + ((width_ / 2) - l_dist), position().y);
+    } else if(wall_state_ == WALL_STATE_COLLIDED_RIGHT) {
+        set_position(position().x - ((width_ / 2) - r_dist), position().y);
+    }
 
 	//If the position changed, re-run the collision loop
 	return !kmVec2AreEqual(&original_position, &position());

@@ -407,6 +407,19 @@ public:
          */
     }
 
+    void test_horizontal_collision_zeros_gsp() {
+        not_implemented();
+    }
+
+    void test_horizontal_collision_in_the_air_zeros_x_vel() {
+        not_implemented();
+    }
+
+    void test_horizontal_collision_repositions_character() {
+        //When a character collides with a wall, they need to be pushed out by the width - distance
+        not_implemented();
+    }
+
 };
 
 #endif // TEST_SOLID_TILES_H

@@ -36,6 +36,12 @@ enum GroundState {
     GROUND_STATE_BALANCING_RIGHT_EXTREME
 };
 
+enum WallState {
+    WALL_STATE_NO_COLLISION,
+    WALL_STATE_COLLIDED_LEFT,
+    WALL_STATE_COLLIDED_RIGHT
+};
+
 const float DEFAULT_ACCELERATION_IN_MPS = ((0.046875 / 40.0) * 60.0);
 const float DEFAULT_DECELERATION_IN_MPS = ((0.5 / 40.0) * 60.0);
 const float DEFAULT_FRICTION_IN_MPS = DEFAULT_ACCELERATION_IN_MPS;
@@ -136,6 +142,7 @@ private:
     CollisionPrimitive::ptr crouching_shape_[QUADRANT_MAX];
     Quadrant quadrant_ = QUADRANT_FLOOR;
     GroundState ground_state_ = GROUND_STATE_IN_THE_AIR;
+    WallState wall_state_ = WALL_STATE_NO_COLLISION;
     bool is_grounded() const { return ground_state_ != GROUND_STATE_IN_THE_AIR; }
 
     // =========================================
