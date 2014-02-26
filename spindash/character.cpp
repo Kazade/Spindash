@@ -315,6 +315,8 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
     bool a_collided = a.second;
     bool b_collided = b.second;
     bool e_collided = e.second;
+    bool l_collided = l.second;
+    bool r_collided = r.second;
 
     bool a_b_respond = false;
 
@@ -423,6 +425,25 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
             }
         }
 	} 
+
+    if(is_grounded()) {
+        if(l_collided && gsp_ < 0.0) {
+            gsp_ = 0.0;
+            set_position(position().x + ((width_ / 2) - l_dist), position().y);
+        } else if(r_collided && gsp_ > 0.0) {
+            gsp_ = 0.0;
+            set_position(position().x - ((width_ / 2) - r_dist), position().y);
+        }
+    } else {
+        if(l_collided && velocity().x < 0.0) {
+            velocity_.x = 0.0;
+            set_position(position().x + ((width_ / 2) - l_dist), position().y);
+        } else if(r_collided && velocity().x > 0.0) {
+            velocity_.x = 0.0;
+            set_position(position().x - ((width_ / 2) - r_dist), position().y);
+        }
+    }
+
 
 	//If the position changed, re-run the collision loop
 	return !kmVec2AreEqual(&original_position, &position());
