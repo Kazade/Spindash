@@ -426,7 +426,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
         }
 	} 
 
-    wall_state_ = WALL_STATE_NO_COLLISION;
     if(is_grounded()) {
         if(l_collided && gsp_ < 0.0) {
             gsp_ = 0.0;
@@ -452,7 +451,7 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
     }
 
 	//If the position changed, re-run the collision loop
-	return !kmVec2AreEqual(&original_position, &position());
+    return !kmVec2AreEqual(&original_position, &position());
 }
 
 void Character::update_finished(float dt) {
@@ -481,6 +480,12 @@ void Character::update_finished(float dt) {
         } else if(fabs(gsp_) >= ANIMATION_DASHING_MIN_X_SPEED) {
             animation_state_ = ANIMATION_STATE_DASHING;
         }
+
+        if(wall_state_ == WALL_STATE_COLLIDED_LEFT && x_axis_state_ == AXIS_STATE_NEGATIVE) {
+            animation_state_ = ANIMATION_STATE_PUSHING;
+        } else if(wall_state_ == WALL_STATE_COLLIDED_RIGHT && x_axis_state_ == AXIS_STATE_POSITIVE) {
+            animation_state_ = ANIMATION_STATE_PUSHING;
+        }
     }
 
     if(ground_state_ == GROUND_STATE_ON_THE_GROUND && fabs(gsp_) < MIN_ROLLING_SPEED && quadrant_ == QUADRANT_FLOOR && x_axis_state_ == AXIS_STATE_NEUTRAL) {
@@ -508,6 +513,7 @@ void Character::update_finished(float dt) {
 
     x_axis_state_ = AXIS_STATE_NEUTRAL;
     y_axis_state_ = AXIS_STATE_NEUTRAL;
+    wall_state_ = WALL_STATE_NO_COLLISION;
     action_button_state_ = false;
 
 }
