@@ -149,9 +149,8 @@ private:
 		if(horizontal_control_lock_ < 0.0) horizontal_control_lock_ = 0.0;
 	}
 
-    std::pair<Collision, bool> find_nearest_collision_with_ray(
-        const std::vector<Collision>& collisions,
-        char ray,
+    std::pair<Collision, bool> find_nearest_collision_with_ray(const std::vector<Collision>& collisions,
+        char ray, float bounds,
         float& closest_distance);
 
     Collision find_nearest_collision(const std::vector<Collision>& collisions);

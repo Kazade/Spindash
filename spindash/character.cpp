@@ -162,6 +162,7 @@ std::pair<Collision, bool> Character::find_collision_with_ray(const std::vector<
 std::pair<Collision, bool> Character::find_nearest_collision_with_ray(
 	const std::vector<Collision>& collisions,
 	char ray,
+    float bounds,
     float& closest_distance) {
 
     const float FLOAT_MAX = std::numeric_limits<float>::max();
@@ -186,7 +187,7 @@ std::pair<Collision, bool> Character::find_nearest_collision_with_ray(
 	
 
     closest_distance = closest;
-    if(closest_distance > height_  / 2) {
+    if(closest_distance > bounds) {
         closest_distance = FLOAT_MAX;
     }
 
@@ -294,11 +295,11 @@ void Character::pre_prepare(float dt) {
 
 bool Character::respond_to(const std::vector<Collision>& collisions) {
     float a_dist, b_dist, l_dist, r_dist, e_dist;
-    std::pair<Collision, bool> a = find_nearest_collision_with_ray(collisions, 'A', a_dist);
-    std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', b_dist);
-    std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', l_dist);
-    std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', r_dist);
-    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', e_dist);
+    std::pair<Collision, bool> a = find_nearest_collision_with_ray(collisions, 'A', height_ / 2, a_dist);
+    std::pair<Collision, bool> b = find_nearest_collision_with_ray(collisions, 'B', height_ / 2, b_dist);
+    std::pair<Collision, bool> l = find_nearest_collision_with_ray(collisions, 'L', width_ /2, l_dist);
+    std::pair<Collision, bool> r = find_nearest_collision_with_ray(collisions, 'R', width_ / 2, r_dist);
+    std::pair<Collision, bool> e = find_nearest_collision_with_ray(collisions, 'E', height_ / 2, e_dist);
 
 	//Store the original position, we need this to work out
 	//if anything changed
@@ -362,10 +363,6 @@ bool Character::respond_to(const std::vector<Collision>& collisions) {
         }
     } else {
         ground_state_ = GROUND_STATE_IN_THE_AIR;
-    }
-
-    if(debug_break && !is_grounded()) {
-        std::cout << "Breaking" << std::endl;
     }
 
     if(a_b_respond) {
