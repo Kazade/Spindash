@@ -420,6 +420,10 @@ public:
         not_implemented();
     }
 
+    void test_pushing_anim_state_with_horiz_collision_and_x() {
+        not_implemented();
+    }
+
 };
 
 #endif // TEST_SOLID_TILES_H
