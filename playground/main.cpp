@@ -5,24 +5,24 @@
 
 class KGLTGeometryRenderer {
 public:
-    KGLTGeometryRenderer(kglt::Scene& scene, kglt::StageID stage_id=kglt::StageID()):
-        scene_(scene),
+    KGLTGeometryRenderer(kglt::WindowBase& window, kglt::StageID stage_id=kglt::StageID()):
+        window_(window),
         stage_id_(stage_id) {
 
 
-        stage().new_material_with_name_from_file("diffuse_render", "kglt/materials/diffuse_render.kglm", false);
+        stage()->new_material_with_alias_from_file("diffuse_render", "kglt/materials/diffuse_render.kglm", false);
 
-        auto mat = stage().material(stage().get_material_with_name("diffuse_render"));
-        mat->technique().pass(0).set_polygon_mode(kglt::POLYGON_MODE_LINE);
+        auto mat = stage()->material(stage()->get_material_with_alias("diffuse_render"));
+        mat->pass(0).set_polygon_mode(kglt::POLYGON_MODE_LINE);
     }
 
     SDGeometryHandle compile_geometry(SDRenderMode mode, SDVec2* vertices, SDuint numVertices, SDuint* indices, SDuint numIndices) {
-        kglt::MeshID new_mesh = stage().new_mesh();
+        kglt::MeshID new_mesh = stage()->new_mesh();
 
         {
-            auto mesh = stage().mesh(new_mesh);
+            auto mesh = stage()->mesh(new_mesh);
             auto submesh = mesh->new_submesh(
-                stage().get_material_with_name("diffuse_render"),
+                stage()->get_material_with_alias("diffuse_render"),
                 (mode == SD_RENDER_MODE_TRIANGLES) ? kglt::MESH_ARRANGEMENT_TRIANGLES : kglt::MESH_ARRANGEMENT_LINES, true
             );
 
@@ -41,12 +41,12 @@ public:
 
         }
 
-        kglt::ActorID new_actor = stage().new_actor(new_mesh);
+        kglt::ActorID new_actor = stage()->new_actor(new_mesh);
         return new_actor.value();
     }
 
     void render_geometry(SDGeometryHandle handle, const SDVec2* translation, const SDfloat angle) {
-        auto actor = stage().actor(kglt::ActorID(handle));
+        auto actor = stage()->actor(kglt::ActorID(handle));
         actor->move_to(translation->x, translation->y);
         actor->rotate_to(kglt::Degrees(angle));
     }
@@ -76,21 +76,21 @@ public:
     }
 
 private:
-    kglt::Stage& stage() {
-        return scene_.stage(stage_id_);
+    kglt::StagePtr stage() {
+        return window_.stage(stage_id_);
     }
 
-    kglt::Scene& scene_;
+    kglt::WindowBase& window_;
     kglt::StageID stage_id_;
 
     std::map<SDGeometryHandle, kglt::MeshID> dynamic_meshes_;
     std::map<SDGeometryHandle, kglt::ActorID> dynamic_actors_;
 };
 
-class Playground : public kglt::App {
+class Playground : public kglt::Application {
 public:
     Playground() {
-        renderer_.reset(new KGLTGeometryRenderer(scene()));
+        renderer_.reset(new KGLTGeometryRenderer(window()));
     }
 
     bool do_init() {
@@ -103,7 +103,7 @@ public:
 
         build_world();
 
-        scene().camera().set_orthographic_projection(-10, 10, -10, 10);
+        window().camera()->set_orthographic_projection(-10, 10, -10, 10);
 
         return true;
     }
