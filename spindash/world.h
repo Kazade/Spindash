@@ -16,6 +16,8 @@ const float DEFAULT_VERTICAL_FREEDOM_OF_MOVEMENT = (0 / 40.0);
 const float DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED = ((16.0 / 40.0) * 60.0);
 const float DEFAULT_MAX_VERTICAL_CAMERA_SPEED = ((16.0 / 40.0) * 60.0);
 
+typedef std::function<void (SDuint, SDuint, CollisionResponse*, CollisionResponse*)> InternalObjectCollisionCallback;
+
 class World {
 public:
     static World* get(SDuint world_id);
@@ -80,6 +82,11 @@ public:
         return objs;
     }
 
+
+    void set_object_collision_callback(InternalObjectCollisionCallback callback) {
+        object_collision_callback_ = callback;
+    }
+
 private:
     SDuint id_;
     kmVec2 gravity_;
@@ -87,8 +94,6 @@ private:
     std::vector<Triangle> triangles_;
     std::vector<Box> boxes_;
     std::vector<Object::ptr> objects_;
-
-
 
     uint64_t step_counter_;
     
@@ -113,6 +118,9 @@ private:
     float camera_horizontal_max_speed_ = DEFAULT_MAX_HORIZONTAL_CAMERA_SPEED;
     float camera_vertical_fom_ = DEFAULT_VERTICAL_FREEDOM_OF_MOVEMENT;
     float camera_vertical_max_speed_ = DEFAULT_MAX_VERTICAL_CAMERA_SPEED;
+
+
+    InternalObjectCollisionCallback object_collision_callback_;
 
     friend class Object;
 };

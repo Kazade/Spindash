@@ -84,6 +84,28 @@ SDuint sdSpringCreate(SDuint world, SDfloat angle, SDfloat power);
 SDuint sdBoxCreate(SDuint world);
 SDuint sdCircleCreate(SDuint world);
 
+enum CollisionResponse {
+    COLLISION_RESPONSE_NONE,
+    COLLISION_RESPONSE_SPRING_LOW,
+    COLLISION_RESPONSE_SPRING_HIGH,
+    COLLISION_RESPONSE_SPRINGBOARD_LOW,
+    COLLISION_RESPONSE_SPRINGBOARD_HIGH,
+    COLLISION_RESPONSE_BALLOON,
+    COLLISION_RESPONSE_BUMPER,
+    COLLISION_RESPONSE_SPRING_CAP,
+    COLLISION_RESPONSE_BOUNCE_ONE,
+    COLLISION_RESPONSE_BOUNCE_TWO,
+    COLLISION_RESPONSE_BOUNCE_THREE,
+    COLLISION_RESPONSE_BREAKABLE_OBJECT,
+    COLLISION_RESPONSE_REBOUND,
+    COLLISION_RESPONSE_HAZARD,
+    COLLISION_RESPONSE_DEATH,
+    COLLISION_RESPONSE_POWER_UP
+};
+
+typedef void (*ObjectCollisionCallback)(SDuint, SDuint, CollisionResponse*, CollisionResponse*, void* data);
+void sdWorldSetObjectCollisionCallback(SDuint world, ObjectCollisionCallback callback, void* user_data);
+
 #ifdef __cplusplus
 }
 #endif

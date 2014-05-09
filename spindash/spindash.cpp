@@ -338,3 +338,16 @@ void sdWorldCameraGetPosition(SDuint world_id, SDfloat* x, SDfloat* y) {
     *y = pos.y;
 }
 
+void sdWorldSetObjectCollisionCallback(SDuint world_id, ObjectCollisionCallback callback, void* user_data) {
+    /*
+     * Sets the callback which is called when a collision is detected between two objects.
+     *
+     * We bind the user data to the callback here so we don't have to worry about it later.
+     */
+
+    World* world = World::get(world_id);
+
+    using namespace std::placeholders;
+    InternalObjectCollisionCallback cb = std::bind(callback, _1, _2, _3, _4, user_data);
+    world->set_object_collision_callback(cb);
+}
