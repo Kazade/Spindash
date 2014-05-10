@@ -47,6 +47,7 @@ SDfloat sdObjectGetSpeedY(SDuint object);
 void sdObjectSetSpeedX(SDuint object, SDfloat x);
 void sdObjectSetSpeedY(SDuint object, SDfloat y);
 SDfloat sdObjectGetRotation(SDuint object);
+void sdObjectSetFixed(SDuint object, SDbool value); //Make object unmoveable
 
 void sdObjectSetBounciness(SDuint object, SDfloat v);
 void sdObjectSetFriction(SDuint object, SDfloat friction);
@@ -81,8 +82,8 @@ SDbool sdObjectIsCharacter(SDuint object);
 
 SDuint sdSpringCreate(SDuint world, SDfloat angle, SDfloat power);
 
-SDuint sdBoxCreate(SDuint world);
-SDuint sdCircleCreate(SDuint world);
+SDuint sdBoxCreate(SDuint world, SDfloat width, SDfloat height);
+SDuint sdCircleCreate(SDuint world, SDfloat diameter);
 
 enum CollisionResponse {
     COLLISION_RESPONSE_NONE,
