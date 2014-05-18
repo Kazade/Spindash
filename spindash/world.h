@@ -39,7 +39,7 @@ public:
     void remove_all_triangles() { triangles_.clear(); }
     
     ObjectID new_sphere();
-    ObjectID new_box();
+    ObjectID new_box(float width, float height);
     ObjectID new_character();
     ObjectID new_spring(float angle, float power);
     

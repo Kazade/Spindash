@@ -122,7 +122,7 @@ public:
 private:
     SDuint world = 0;
     SDuint sonic = 0;
-    SDuint spring = 0;
+    SDuint box = 0;
     SDuint spring2 = 0;
 
     std::shared_ptr<KGLTGeometryRenderer> renderer_;
@@ -195,8 +195,9 @@ private:
         kmVec2Fill(&platform[3], 1.0f, 2.0f);
         sdWorldAddBox(world, platform);*/
 
-        spring = sdSpringCreate(world, 0, 10.0f / 40.0f);
-        sdObjectSetPosition(spring, -4.75f, 0.125f);
+        box = sdBoxCreate(world, 1.0, 1.0);
+        sdObjectSetPosition(box, -4.5f, 0.5f);
+
 
      /*   spring2 = sdSpringCreate(world, -45.0f, 10.0f/40.0f);
         sdObjectSetPosition(spring2, 2.0f, 2.25f);*/

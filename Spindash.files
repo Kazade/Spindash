@@ -36,3 +36,5 @@ tests/test_animations.h
 spindash/spindash.cpp
 tests/test_camera.h
 tests/test_response.h
+spindash/box_object.h
+spindash/box_object.cpp

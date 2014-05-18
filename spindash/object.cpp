@@ -26,20 +26,24 @@ Object::~Object() {
 
 void Object::prepare(float dt) {
     pre_prepare(dt);
-    
-    velocity_.x += acceleration_.x;
-    velocity_.y += acceleration_.y;
-    
+
+    if(!is_fixed_) {
+        velocity_.x += acceleration_.x;
+        velocity_.y += acceleration_.y;
+    }
+
     post_prepare(dt);
 }
 
 void Object::update(float dt) {
     pre_update(dt);
 
-    set_position(
-        position().x + velocity_.x,
-        position().y + velocity_.y
-    );
+    if(!is_fixed_) {
+        set_position(
+            position().x + velocity_.x,
+            position().y + velocity_.y
+        );
+    }
 
     post_update(dt);
 }
@@ -58,7 +62,7 @@ bool Object::exists(SDuint object_id) {
     return World::all_objects().find(object_id) != World::all_objects().end();
 }
 
-void Object::set_position(kmScalar x, kmScalar y) {
+void Object::set_position(kmScalar x, kmScalar y) {    
     position_.x = x;
     position_.y = y;
     
@@ -73,14 +77,27 @@ void Object::set_rotation(kmScalar angle) {
 }
 
 void Object::set_velocity(kmScalar x, kmScalar y) {
+    if(is_fixed_) {
+        return;
+    }
+
     velocity_.x = x;
     velocity_.y = y;
 }
 
 void Object::set_acceleration(kmScalar x, kmScalar y) {
+    if(is_fixed_) {
+        return;
+    }
+
     acceleration_.x = x;
     acceleration_.y = y;
 }
+
+void Object::set_fixed(kmBool value) {
+    is_fixed_ = value;
+}
+
 
 Object* Object::get_other_object_from_collision(Collision& c) {
     Object* other = nullptr;

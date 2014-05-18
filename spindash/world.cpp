@@ -13,6 +13,7 @@
 
 #include "character.h"
 #include "spring.h"
+#include "box_object.h"
 
 #include "spindash.h"
 
@@ -197,6 +198,8 @@ void World::update(double step, bool override_step_mode) {
         lhs.update(step); //Move without responding to collisions
         uint32_t tries = 10;
         while(run_loop && tries--) {
+            //FIXME: We only need to test stuff within a certain radius...
+
             for(uint32_t j = 0; j < get_triangle_count(); ++j) {
                 Triangle& triangle = triangles_.at(j);
                 
@@ -215,6 +218,7 @@ void World::update(double step, bool override_step_mode) {
                 }
             }
             
+
             for(uint32_t j = i + 1; j < objects_.size(); ++j) {
                 Object& rhs = *objects_.at(j);                
                 std::vector<Collision> new_collisions = collide(&lhs.geom(), &rhs.geom());
@@ -342,6 +346,48 @@ void World::add_box(const kmVec2& v1, const kmVec2& v2, const kmVec2& v3, const 
     }
     
     boxes_.push_back(new_box);
+}
+
+ObjectID World::new_box(float width, float height) {
+    BoxObject::ptr new_box(new BoxObject(this, width, height));
+
+    //TODO: Compile for rendering
+
+    std::vector<SDVec2> vertices;
+    SDVec2 tmp;
+    float hw = width * 0.5;
+    float hh = height * 0.5;
+
+    kmVec2Fill(&tmp, -hw, -hh);
+    vertices.push_back(tmp);
+
+    kmVec2Fill(&tmp, hw, -hh);
+    vertices.push_back(tmp);
+
+    kmVec2Fill(&tmp, hw, hh);
+    vertices.push_back(tmp);
+
+    kmVec2Fill(&tmp, -hw, hh);
+    vertices.push_back(tmp);
+
+
+    std::vector<SDuint> indices = { 0, 1, 1, 2, 2, 3, 3, 0 };
+
+    if(compile_callback_) {
+        SDGeometryHandle new_handle = compile_callback_->callback(
+            SD_RENDER_MODE_LINES,
+            &vertices[0],
+            vertices.size(),
+            &indices[0],
+            indices.size(),
+            compile_callback_->user_data
+        );
+
+        new_box->set_geometry_handle(new_handle);
+    }
+
+    objects_.push_back(new_box);
+    return new_box->id();
 }
 
 ObjectID World::new_character() {

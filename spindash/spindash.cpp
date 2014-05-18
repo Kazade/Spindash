@@ -141,9 +141,19 @@ void sdObjectSetSpeedY(SDuint object, SDfloat y) {
     obj->set_velocity(obj->velocity().x, y);
 }
 
+void sdObjectSetFixed(SDuint object, SDbool value) {
+    Object* obj = Object::get(object);
+    obj->set_fixed(value);
+}
+
 SDfloat sdObjectGetRotation(SDuint object) {
     Object* obj = Object::get(object);
     return obj->rotation();
+}
+
+SDuint sdBoxCreate(SDuint world_id, SDfloat width, SDfloat height) {
+    World* world = World::get(world_id);
+    return world->new_box(width, height);
 }
 
 SDuint sdSpringCreate(SDuint world_id, SDfloat angle, SDfloat power) {

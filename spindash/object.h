@@ -30,6 +30,8 @@ protected:
 
     kmVec2 last_safe_position_;
 
+    bool is_fixed_ = false;
+
 private:
     World* world_;       
     
@@ -74,6 +76,7 @@ public:
     virtual void set_velocity(kmScalar x, kmScalar y);
     void set_acceleration(kmScalar x, kmScalar y);
     virtual void set_rotation(kmScalar degrees);
+    void set_fixed(kmBool value);
 
     const kmVec2& position() const { return position_; }
     const kmVec2& velocity() const { return velocity_; }
