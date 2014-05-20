@@ -122,6 +122,8 @@ private:
 
     InternalObjectCollisionCallback object_collision_callback_;
 
+    void handle_collision_response(Object& obj, Object& other, CollisionResponse response_type, const std::vector<Collision>& collisions);
+
     friend class Object;
 };
 

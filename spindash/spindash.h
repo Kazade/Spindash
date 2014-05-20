@@ -86,9 +86,10 @@ SDuint sdBoxCreate(SDuint world, SDfloat width, SDfloat height);
 SDuint sdCircleCreate(SDuint world, SDfloat diameter);
 
 enum CollisionResponse {
-    COLLISION_RESPONSE_NONE,
-    COLLISION_RESPONSE_SPRING_LOW,
-    COLLISION_RESPONSE_SPRING_HIGH,
+    COLLISION_RESPONSE_NONE,  //Collision is ignored
+    COLLISION_RESPONSE_DEFAULT, //Standard collision detection is applied
+    COLLISION_RESPONSE_SPRING_LOW, //Object is sprung with low power based on the other objects rotation
+    COLLISION_RESPONSE_SPRING_HIGH, //Same, with higher power
     COLLISION_RESPONSE_SPRINGBOARD_LOW,
     COLLISION_RESPONSE_SPRINGBOARD_HIGH,
     COLLISION_RESPONSE_BALLOON,
@@ -100,8 +101,9 @@ enum CollisionResponse {
     COLLISION_RESPONSE_BREAKABLE_OBJECT,
     COLLISION_RESPONSE_REBOUND,
     COLLISION_RESPONSE_HAZARD,
-    COLLISION_RESPONSE_DEATH,
-    COLLISION_RESPONSE_POWER_UP
+    COLLISION_RESPONSE_DEATH, //Collisions disabled on object, it's thrown into the air then falls
+    COLLISION_RESPONSE_POWER_UP,
+    COLLISION_RESPONSE_UNFIX //bumps the object a little bit upwards, and calls sdObjectSetFixed(false)
 };
 
 typedef void (*ObjectCollisionCallback)(SDuint, SDuint, CollisionResponse*, CollisionResponse*, void* data);

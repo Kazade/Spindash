@@ -157,6 +157,63 @@ void World::debug_render() {
     glPopAttrib();
 }*/
 
+
+void World::handle_collision_response(Object& obj, Object& other, CollisionResponse response_type, const std::vector<Collision>& collisions) {
+    switch(response_type) {
+    case COLLISION_RESPONSE_NONE: return;
+    case COLLISION_RESPONSE_DEFAULT: return; //Handled elsewhere
+    case COLLISION_RESPONSE_SPRING_LOW:
+    case COLLISION_RESPONSE_SPRING_HIGH:
+    case COLLISION_RESPONSE_SPRINGBOARD_LOW:
+    case COLLISION_RESPONSE_SPRINGBOARD_HIGH:
+    case COLLISION_RESPONSE_BALLOON: {
+        float x = obj.velocity().x;
+        float y = 7.0 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_BUMPER: {
+
+    }
+    case COLLISION_RESPONSE_SPRING_CAP: {
+
+    } break;
+    case COLLISION_RESPONSE_BOUNCE_ONE: {
+        float x = obj.velocity().x;
+        float y = 6.5 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_BOUNCE_TWO: {
+        float x = obj.velocity().x;
+        float y = 7.5 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_BOUNCE_THREE: {
+        float x = obj.velocity().x;
+        float y = 8.5 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_BREAKABLE_OBJECT: {
+        float x = obj.velocity().x;
+        float y = 3.0 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_REBOUND:
+    case COLLISION_RESPONSE_HAZARD: {
+        float x = float(sgn(obj.position().x - other.position().x)) / 40.0;
+        float y = 4.0 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_DEATH: {
+        float x = 0;
+        float y = 7.0 / 40.0;
+        obj.set_velocity(x, y);
+    } break;
+    case COLLISION_RESPONSE_POWER_UP:
+    case COLLISION_RESPONSE_UNFIX:
+        break;
+    }
+}
+
 void World::update(double step, bool override_step_mode) {
 	if(!override_step_mode && step_mode_enabled_) return;
 	
@@ -190,12 +247,43 @@ void World::update(double step, bool override_step_mode) {
     //Call update on each object, this shouldn't change the objects position, but just velocity etc.
     std::for_each(objects_.begin(), objects_.end(), std::tr1::bind(&Object::prepare, std::tr1::placeholders::_1, step));
 
+
     for(uint32_t i = 0; i < objects_.size(); ++i) {
         Object& lhs = *objects_.at(i);
         bool run_loop = true;
-        std::vector<Collision> collisions;
-        
+
         lhs.update(step); //Move without responding to collisions
+
+        //Now, process any Object vs Object collisions, these don't have to be recursive
+
+        std::vector<uint32_t> objects_to_collide_with;
+
+        for(uint32_t j = i + 1; j < objects_.size(); ++j) {
+            Object& rhs = *objects_.at(j);
+            std::vector<Collision> new_collisions = collide(&lhs.geom(), &rhs.geom());
+            if(!new_collisions.empty()) {
+                CollisionResponse cr1 = COLLISION_RESPONSE_DEFAULT;
+                CollisionResponse cr2 = COLLISION_RESPONSE_DEFAULT;
+                if(object_collision_callback_) {
+                    object_collision_callback_(lhs.id(), rhs.id(), &cr1, &cr2);
+                }
+
+                if(cr1 != COLLISION_RESPONSE_DEFAULT) {
+                    handle_collision_response(lhs, rhs, cr1, new_collisions);
+                } else {
+                    objects_to_collide_with.push_back(j);
+                }
+
+                if(cr2 == COLLISION_RESPONSE_DEFAULT) {
+
+                } else {
+                    handle_collision_response(rhs, lhs, cr2, new_collisions);
+                }
+            }
+        }
+
+        std::vector<Collision> collisions;
+
         uint32_t tries = 10;
         while(run_loop && tries--) {
             //FIXME: We only need to test stuff within a certain radius...
@@ -217,18 +305,19 @@ void World::update(double step, bool override_step_mode) {
                     collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
                 }
             }
-            
 
-            for(uint32_t j = i + 1; j < objects_.size(); ++j) {
-                Object& rhs = *objects_.at(j);                
+            //FIXME: this doesn't seem right :/ not sure how to handle object collisions really...
+            //Here we collide with all things that above we hit and decided to deal with as a normal collision
+            //The problem is that this only works for one side of the collision.. what about when the other side returns
+            //that it wants a default response?
+            for(uint32_t j: objects_to_collide_with) {
+                Object& rhs = *objects_.at(j);
                 std::vector<Collision> new_collisions = collide(&lhs.geom(), &rhs.geom());
                 if(!new_collisions.empty()) {
                     collisions.insert(collisions.end(), new_collisions.begin(), new_collisions.end());
-                }                
-                
-                rhs.respond_to(new_collisions);
-            }   
-            
+                }
+            }
+                        
             run_loop = lhs.respond_to(collisions);
             collisions.clear();
 

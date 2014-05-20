@@ -87,6 +87,8 @@ private:
     std::map<SDGeometryHandle, kglt::ActorID> dynamic_actors_;
 };
 
+void collision_response_thunk(SDuint lhs, SDuint rhs, CollisionResponse* cr1, CollisionResponse* cr2, void* user_data);
+
 class Playground : public kglt::Application {
 public:
     Playground() {
@@ -209,8 +211,31 @@ private:
         sdWorldAddTriangle(world, triangle);
 
         //sdWorldConstructLoop(world, 4.0f, 8.0f, 8.0f);
+
+        sdWorldSetObjectCollisionCallback(world, &collision_response_thunk, this);
+    }
+
+public:
+    void collision_callback(SDuint lhs, SDuint rhs, CollisionResponse* cr1, CollisionResponse* cr2) {
+        static int bounce_count = 0;
+        if(rhs == box && lhs == sonic) {
+            if(bounce_count == 0) {
+                *cr1 = COLLISION_RESPONSE_BOUNCE_ONE;
+            } else if(bounce_count == 1) {
+                *cr1 = COLLISION_RESPONSE_BOUNCE_TWO;
+            } else {
+                *cr1 = COLLISION_RESPONSE_BOUNCE_THREE;
+            }
+
+            bounce_count++;
+        }
     }
 };
+
+void collision_response_thunk(SDuint lhs, SDuint rhs, CollisionResponse* cr1, CollisionResponse* cr2, void* user_data) {
+    Playground* _this = (Playground*) user_data;
+    _this->collision_callback(lhs, rhs, cr1, cr2);
+}
 
 int main(int argc, char* argv[]) {
     Playground app;
