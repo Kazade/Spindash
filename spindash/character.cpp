@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cassert>
 #include <limits>
-#include <boost/format.hpp>
 #include <kazbase/logging.h>
 
 #include "character.h"
