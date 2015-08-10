@@ -5,6 +5,7 @@
 
 #include "spindash/spindash.h"
 #include "spindash/character.h"
+#include "spindash/world.h"
 
 class TestCamera : public TestCase {
 private:

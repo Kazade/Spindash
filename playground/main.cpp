@@ -92,7 +92,7 @@ void collision_response_thunk(SDuint lhs, SDuint rhs, CollisionResponse* cr1, Co
 class Playground : public kglt::Application {
 public:
     Playground() {
-        renderer_.reset(new KGLTGeometryRenderer(window()));
+        renderer_.reset(new KGLTGeometryRenderer(window ));
     }
 
     bool do_init() {
@@ -105,7 +105,7 @@ public:
 
         build_world();
 
-        window().camera()->set_orthographic_projection(-10, 10, -10, 10);
+        window->camera->set_orthographic_projection(-10, 10, -10, 10);
 
         return true;
     }
